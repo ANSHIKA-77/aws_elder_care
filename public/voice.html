@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Voice Assistant</title>
+
+<style>
+body{
+    font-family: "Segoe UI";
+    background: linear-gradient(135deg,#eef2ff,#fcf6ff);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    width:350px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+select, textarea, button{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+button{
+    background:#7d8cff;
+    color:white;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>🎤 Voice Assistant</h2>
+
+    <select id="lang">
+        <option value="en-US">English</option>
+        <option value="hi-IN">Hindi</option>
+        <option value="ta-IN">Tamil</option>
+    </select>
+
+    <textarea id="text" rows="4" placeholder="Speak something..."></textarea>
+
+    <button onclick="startListening()">🎙️ Speak</button>
+
+    <button style="background:linear-gradient(135deg,#f09bbb,#ee6d85); margin-top:15px;" onclick="goBack()">
+        ← Back to Dashboard
+    </button>
+</div>
+
+<script>
+
+// 🎙️ SPEECH TO TEXT
+function startListening(){
+
+    let lang = document.getElementById("lang").value;
+
+    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if(!SpeechRecognition){
+        alert("Speech Recognition not supported in this browser");
+        return;
+    }
+
+    let recognition = new SpeechRecognition();
+    recognition.lang = lang;
+
+    recognition.start();
+
+    recognition.onresult = function(event){
+        let transcript = event.results[0][0].transcript.toLowerCase();
+
+        console.log("VOICE:", transcript);
+
+        document.getElementById("text").value = transcript;
+
+        processCommand(transcript, lang);
+    };
+
+    recognition.onerror = function(){
+        alert("Error recognizing speech");
+    };
+}
+
+
+// 🧠 MAIN COMMAND PROCESSOR
+function processCommand(command, lang){
+    console.log("PROCESSING:", command);
+    command = command.toLowerCase().trim();
+
+    // Medication keywords — check FIRST before appointments
+    let medKeywords = ["taken", "tablet", "tablets", "medicine", "medication", "दवा", "bp", "diabetes", "vitamin"];
+    let isMedCommand = medKeywords.some(k => command.includes(k));
+
+    // Appointment keywords
+    let isApptCommand = (command.includes("appointment") || command.includes("अपॉइंटमेंट"))
+                        && !isMedCommand; // never treat med command as appointment
+
+    // =========================
+    // 💊 MEDICATION — check FIRST
+    // =========================
+    if(isMedCommand){
+    let stored = localStorage.getItem("meds");
+    let meds = (stored && JSON.parse(stored).length > 0) 
+        ? JSON.parse(stored) 
+        : [
+            {name:"BP Tablet (Morning)", done:false},
+            {name:"Diabetes Tablet", done:false},
+            {name:"BP Tablet (Evening)", done:false},
+            {name:"Vitamin D Supplement", done:false}
+        ];
+
+    console.log("MEDS LOADED:", meds); // check this in console
+
+    let updated = false;
+
+    meds.forEach(m => {
+        let medName = m.name.toLowerCase();
+        let matchFound = false;
+
+        console.log("CHECKING MED:", medName, "| COMMAND:", command); // ADD THIS
+
+        if(medName.includes("bp")){
+            if(command.includes("bp") || command.includes("b p") || 
+               command.includes("blood pressure")) matchFound = true;
+        }
+        if(medName.includes("diabetes")){
+            if(command.includes("diabetes") || command.includes("diabetic") ||
+               command.includes("sugar") || command.includes("diabet")) matchFound = true;
+        }
+        if(medName.includes("vitamin")){
+            if(command.includes("vitamin") || command.includes("vitamins") ||
+               command.includes("vit ")) matchFound = true;
+        }
+
+        if(command.includes("morning") && medName.includes("morning")) matchFound = true;
+        if(command.includes("evening") && medName.includes("evening")) matchFound = true;
+        if(command.includes("all") || command.includes("every")) matchFound = true;
+
+        console.log("MATCH RESULT for", m.name, ":", matchFound); // ADD THIS
+
+        if(matchFound){
+            m.done = true;
+            updated = true;
+        }
+    });
+
+    localStorage.setItem("meds", JSON.stringify(meds));
+
+    if(updated){
+        speakResponse("Medication marked as taken", lang);
+    } else {
+        speakResponse("Please say bp tablet, diabetes tablet, or vitamin", lang);
+    }
+}
+
+    // =========================
+    // 📅 APPOINTMENT
+    // =========================
+    else if(isApptCommand){
+
+        let title = extractTitle(command);
+        let time = extractTime(command);
+        let date = extractDate(command);
+
+        if(!title || !time || !date){
+            speakResponse("Could not understand appointment details", lang);
+            return;
+        }
+
+        let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+
+        appointments.push({
+            title: title,
+            date: date,
+            time: time,
+            location: "Voice Added",
+            notes: "Added via voice",
+            status: "upcoming"
+        });
+
+        localStorage.setItem("appointments", JSON.stringify(appointments));
+        speakResponse("Appointment added successfully", lang);
+    }
+
+    // =========================
+    // 🏃 EXERCISE
+    // =========================
+    else if(
+        command.includes("exercise") ||
+        command.includes("workout") ||
+        command.includes("व्यायाम")
+    ){
+        let today = new Date().toISOString().split("T")[0];
+        let exerciseLog = JSON.parse(localStorage.getItem("exerciseLog")) || {
+            date: today,
+            completed: {}
+        };
+
+        let category = "Morning Stretching";
+        let exercises = [
+            "Raise arms slowly 10 times",
+            "Neck rotation clockwise 5 times",
+            "Neck rotation anti-clockwise 5 times",
+            "Shoulder rolls 10 times",
+            "Side bending 10 seconds"
+        ];
+
+        exerciseLog.completed[category] = exercises;
+        exerciseLog.date = today;
+        localStorage.setItem("exerciseLog", JSON.stringify(exerciseLog));
+
+        speakResponse("Exercise marked as completed for today", lang);
+    }
+
+    // =========================
+    // ❌ UNKNOWN
+    // =========================
+    else{
+        speakResponse("Command not recognized. Try saying bp tablet taken or diabetes tablet taken.", lang);
+    }
+}
+// 🔍 HELPERS
+function extractTitle(cmd){
+    let words = cmd.split("for");
+    if(words.length > 1){
+        return words[1].split("at")[0].trim();
+    }
+    return null;
+}
+
+function extractTime(cmd){
+    let match = cmd.match(/(\d{1,2})/);
+    if(match){
+        return match[0].padStart(2,'0') + ":00";
+    }
+    return null;
+}
+
+function extractDate(cmd){
+    let today = new Date();
+
+    if(cmd.includes("tomorrow") || cmd.includes("कल")){
+        today.setDate(today.getDate() + 1);
+    }
+
+    return today.toISOString().split("T")[0];
+}
+
+
+// 🔊 RESPONSE
+function speakResponse(text, lang){
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = lang;
+    window.speechSynthesis.speak(speech);
+}
+
+
+// 🔙 BACK
+function goBack(){
+    window.location.href = "dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
