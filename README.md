@@ -8,19 +8,19 @@ A full-stack web application designed to assist elderly individuals and caregive
 
 *  **Role-based Authentication**
 
-  * Secure login with OTP verification
+   Secure login with OTP verification
 *  **Medication Tracking**
 
-  * Add, update, and manage medicines dynamically
+   Add, update, and manage medicines dynamically
 *  **Voice Assistant**
 
-  * Speech-to-text commands for accessibility
+   Speech-to-text commands for accessibility
 *  **Emergency Fall Detection**
 
-  * Detects sudden falls using device motion sensors
+   Detects sudden falls using device motion sensors
 *  **Live Location Tracking**
 
-  * Real-time location sharing using Google Maps API
+   Real-time location sharing using Google Maps API
 *  **Multi-language Support**
 
 ---
