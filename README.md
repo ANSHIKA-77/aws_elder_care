@@ -82,11 +82,10 @@ npm install
 Create a `.env` file and add:
 
 ```env
-PORT=5000
-MONGO_URI=your_mongodb_uri
-TWILIO_SID=your_twilio_sid
+GOOGLE_MAPS_KEY=your_api_key
+TWILIO_ACCOUNT_SID=your_twilio_sid
 TWILIO_AUTH_TOKEN=your_token
-FRONTEND_URL=http://localhost:5173
+TWILIO_PHONE=your_phone_number
 ```
 
 Run backend:
@@ -107,9 +106,9 @@ npm run dev
 
 ---
 
-## 🌐 Usage
+##  Usage
 
-* Open: http://localhost:5173
+* Open: http://localhost:3000
 * Register/Login
 * Explore features like medication tracking and emergency support
 
