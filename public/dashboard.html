@@ -698,8 +698,6 @@
          style="padding:10px;border-radius:8px;border:1px solid #ccc;">
   
   <button class="btn btn-primary" onclick="addMedication()">➕ Add</button>
-
-  <button class="btn btn-primary" id="saveMedBtn" onclick="saveMeds()">💾 Save Changes</button>
 </div>
       </div>
     </div>
@@ -858,6 +856,56 @@
 
 <script>
 /* ══════════════════════════════
+   API HELPER FUNCTIONS
+══════════════════════════════ */
+const API_BASE = '/api/v1';
+
+// Get JWT token from localStorage
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+// Generic API call function with authentication
+async function apiCall(endpoint, options = {}) {
+  const token = getToken();
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const config = {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers
+    }
+  };
+
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, config);
+    
+    // Token expired or invalid
+    if (response.status === 401) {
+      localStorage.clear();
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'API request failed');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+}
+
+/* ══════════════════════════════
    INIT
 ══════════════════════════════ */
 const userName = localStorage.getItem('userName') || 'User';
@@ -889,7 +937,7 @@ function showPage(id, navEl) {
 
   closeSidebar();
 
-  // Lazy loads
+  // Lazy loads with async support
   if (id === 'meds')         loadMeds();
   if (id === 'appointments') { updateStatuses(); loadAppointments(); initApptForm(); }
   if (id === 'exercise')     initExercise();
@@ -909,204 +957,257 @@ function closeSidebar() {
 /* ══════════════════════════════
    STATS
 ══════════════════════════════ */
-function loadStats() {
-  const meds = JSON.parse(localStorage.getItem('meds')) || defaultMeds();
-  const doneMeds = meds.filter(m => m.done).length;
+async function loadStats() {
+  try {
+    // Fetch all stats in parallel
+    const [medStats, apptStats, exStats] = await Promise.all([
+      apiCall('/medications/stats/today'),
+      apiCall('/appointments/stats/summary'),
+      apiCall('/exercises/summary')
+    ]);
 
-  const appts = JSON.parse(localStorage.getItem('appointments')) || [];
-  const todayStr = new Date().toISOString().split('T')[0];
-  const todayAppts = appts.filter(a => a.date === todayStr && a.status === 'upcoming').length;
+    const doneMeds = medStats.data.taken || 0;
+    const totalMeds = medStats.data.total || 0;
+    const todayAppts = apptStats.data.today || 0;
+    const exDone = exStats.data.totalStepsCompleted || 0;
+    const totalAppts = apptStats.data.total || 0;
 
-  const exLog = JSON.parse(localStorage.getItem('exerciseLog')) || { completed: {} };
-  const exDone = Object.values(exLog.completed || {}).reduce((s, arr) => s + arr.length, 0);
-
-  document.getElementById('statsRow').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-card-icon">💊</div>
-      <div class="stat-card-value">${doneMeds}/${meds.length}</div>
-      <div class="stat-card-label">Meds taken today</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-icon">📅</div>
-      <div class="stat-card-value">${todayAppts}</div>
-      <div class="stat-card-label">Appointments today</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-icon">🏃</div>
-      <div class="stat-card-value">${exDone}</div>
-      <div class="stat-card-label">Exercises done today</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-icon">📋</div>
-      <div class="stat-card-value">${appts.length}</div>
-      <div class="stat-card-label">Total appointments</div>
-    </div>
-  `;
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-card-icon">💊</div>
+        <div class="stat-card-value">${doneMeds}/${totalMeds}</div>
+        <div class="stat-card-label">Meds taken today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">📅</div>
+        <div class="stat-card-value">${todayAppts}</div>
+        <div class="stat-card-label">Appointments today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">🏃</div>
+        <div class="stat-card-value">${exDone}</div>
+        <div class="stat-card-label">Exercises done today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">📋</div>
+        <div class="stat-card-value">${totalAppts}</div>
+        <div class="stat-card-label">Total appointments</div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error loading stats:', error);
+    showToast('⚠ Failed to load statistics', true);
+  }
 }
 loadStats();
 
 /* ══════════════════════════════
    MEDICATIONS
 ══════════════════════════════ */
-function defaultMeds() {
-  return [
-    { name: 'BP Tablet (Morning)',    done: false },
-    { name: 'Diabetes Tablet',        done: false },
-    { name: 'BP Tablet (Evening)',    done: false },
-    { name: 'Vitamin D Supplement',   done: false }
-  ];
-}
-let meds = JSON.parse(localStorage.getItem('meds'));
+let meds = [];
 
-if (!meds || meds.length === 0) {
-  meds = defaultMeds();
-  localStorage.setItem('meds', JSON.stringify(meds));
-}
+async function loadMeds() {
+  try {
+    const response = await apiCall('/medications?activeOnly=true');
+    meds = response.data || [];
 
-function loadMeds() {
-  const list = document.getElementById('medList');
-  const saveBtn = document.getElementById('saveMedBtn');
+    const list = document.getElementById('medList');
+    const saveBtn = document.getElementById('saveMedBtn');
 
-  list.innerHTML = meds.map((m, i) => `
-    <div class="med-item ${m.done ? 'done' : ''}" id="medItem${i}">
-      ${role === 'caretaker'
-        ? `<input type="checkbox" ${m.done ? 'checked' : ''} onchange="toggleMed(${i}, this)">`
-        : ''}
-      <span class="med-item-name">${m.name}</span>
-      <span class="status-badge ${m.done ? 'status-done' : 'status-pending'}">
-        ${m.done ? '✔ Done' : '⏳ Pending'}
-      </span>
-    </div>
-  `).join('');
+    if (meds.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No medications added yet.</p>';
+      saveBtn.style.display = 'none';
+      return;
+    }
 
-  saveBtn.style.display = role === 'caretaker' ? 'inline-flex' : 'none';
-}
+    list.innerHTML = meds.map((m) => `
+      <div class="med-item ${m.takenToday ? 'done' : ''}" id="medItem${m._id}">
+        ${role === 'caregiver'
+          ? `<input type="checkbox" ${m.takenToday ? 'checked' : ''} onchange="toggleMed('${m._id}', this)">`
+          : ''}
+        <span class="med-item-name">${m.name}${m.dosage ? ` - ${m.dosage}` : ''}</span>
+        <span class="status-badge ${m.takenToday ? 'status-done' : 'status-pending'}">
+          ${m.takenToday ? '✔ Done' : '⏳ Pending'}
+        </span>
+      </div>
+    `).join('');
 
-function toggleMed(i, el) {
-  meds[i].done = el.checked;
-  const item = document.getElementById('medItem' + i);
-  item.classList.toggle('done', el.checked);
-  item.querySelector('.status-badge').className = 'status-badge ' + (el.checked ? 'status-done' : 'status-pending');
-  item.querySelector('.status-badge').textContent = el.checked ? '✔ Done' : '⏳ Pending';
+    saveBtn.style.display = 'none'; // Auto-saved now, no manual save needed
+  } catch (error) {
+    console.error('Error loading medications:', error);
+    showToast('⚠ Failed to load medications', true);
+  }
 }
 
-function saveMeds() {
-  localStorage.setItem('meds', JSON.stringify(meds));
-  showToast('✅ Medication status saved!');
+async function toggleMed(medId, el) {
+  try {
+    const endpoint = el.checked 
+      ? `/medications/${medId}/mark-taken`
+      : `/medications/${medId}/unmark`;
+    
+    await apiCall(endpoint, { method: 'PATCH' });
+    
+    const item = document.getElementById('medItem' + medId);
+    item.classList.toggle('done', el.checked);
+    item.querySelector('.status-badge').className = 'status-badge ' + (el.checked ? 'status-done' : 'status-pending');
+    item.querySelector('.status-badge').textContent = el.checked ? '✔ Done' : '⏳ Pending';
+    
+    // Refresh stats
+    loadStats();
+  } catch (error) {
+    console.error('Error toggling medication:', error);
+    showToast('⚠ Failed to update medication', true);
+    el.checked = !el.checked; // Revert checkbox
+  }
 }
-function addMedication() {
+
+async function addMedication() {
   const input = document.getElementById("newMedInput");
-  let name = input.value.trim();
+  const name = input.value.trim();
 
   if (!name) {
     showToast("⚠ Enter medication name", true);
     return;
   }
 
-  meds.push({
-    name: name,
-    done: false
-  });
+  try {
+    await apiCall('/medications', {
+      method: 'POST',
+      body: JSON.stringify({ name, isActive: true })
+    });
 
-  localStorage.setItem("meds", JSON.stringify(meds));
-
-  input.value = "";
-
-  loadMeds(); // refresh UI
-
-  showToast("✅ Medication added!");
+    input.value = "";
+    await loadMeds(); // Refresh list
+    showToast("✅ Medication added!");
+  } catch (error) {
+    console.error('Error adding medication:', error);
+    showToast('⚠ Failed to add medication', true);
+  }
 }
+
+// Note: saveMeds() function removed - now auto-saved on toggle
 
 /* ══════════════════════════════
    APPOINTMENTS
 ══════════════════════════════ */
-let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+let appointments = [];
 
 function initApptForm() {
-  document.getElementById('apptFormCard').style.display = role === 'caretaker' ? 'block' : 'none';
+  document.getElementById('apptFormCard').style.display = role === 'caregiver' ? 'block' : 'none';
 }
 
-function saveAppointment() {
+async function saveAppointment() {
   const title    = document.getElementById('apptTitle').value.trim();
   const date     = document.getElementById('apptDate').value;
   const time     = document.getElementById('apptTime').value;
   const location = document.getElementById('apptLocation').value.trim();
   const notes    = document.getElementById('apptNotes').value.trim();
 
-  if (!title || !date || !time) { showToast('⚠ Please fill Title, Date and Time.', true); return; }
+  if (!title || !date || !time) { 
+    showToast('⚠ Please fill Title, Date and Time.', true); 
+    return; 
+  }
 
-  appointments.push({ title, date, time, location, notes, status: 'upcoming' });
-  localStorage.setItem('appointments', JSON.stringify(appointments));
+  try {
+    await apiCall('/appointments', {
+      method: 'POST',
+      body: JSON.stringify({ title, date, time, location, notes })
+    });
 
-  ['apptTitle','apptDate','apptTime','apptLocation','apptNotes'].forEach(id => document.getElementById(id).value = '');
-  updateStatuses();
-  loadAppointments();
-  showToast('✅ Appointment added!');
-}
-
-function updateStatuses() {
-  const now = new Date();
-  appointments.forEach(a => {
-    if (a.status !== 'completed') {
-      const t = new Date(a.date + ' ' + a.time);
-      if (t < now) a.status = 'missed';
-    }
-  });
-  localStorage.setItem('appointments', JSON.stringify(appointments));
-}
-
-function loadAppointments() {
-  const today = new Date().toISOString().split('T')[0];
-  let todayHTML = '', upcomingHTML = '', completedHTML = '', missedHTML = '';
-
-  appointments.forEach((a, i) => {
-    const actions = role === 'caretaker' ? `
-      ${a.status === 'upcoming' ? `<button class="btn btn-sm btn-primary" onclick="markCompleted(${i})">✔ Mark Done</button>` : ''}
-      <button class="btn btn-sm btn-danger" onclick="deleteAppt(${i})">🗑 Delete</button>
-    ` : '';
-
-    const card = `
-      <div class="item">
-        <strong>${a.title}</strong><br>
-        📍 ${a.location || 'No location'} &nbsp;|&nbsp; 📅 ${a.date} &nbsp;⏰ ${a.time}<br>
-        ${a.notes ? `📝 ${a.notes}<br>` : ''}
-        <div class="btn-row" style="margin-top:8px;">${actions}</div>
-      </div>
-    `;
-
-    if (a.date === today && a.status === 'upcoming') todayHTML += card;
-    else if (a.status === 'upcoming')   upcomingHTML  += card;
-    else if (a.status === 'completed')  completedHTML += card;
-    else if (a.status === 'missed')     missedHTML    += card;
-  });
-
-  const sec = (label, cls, html) => html ? `
-    <p style="font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;">
-      <span class="status-badge ${cls}">${label}</span>
-    </p>${html}` : '';
-
-  document.getElementById('todaySection').innerHTML    = sec("Today",     "status-today",   todayHTML);
-  document.getElementById('upcomingSection').innerHTML = sec("Upcoming",  "status-pending", upcomingHTML);
-  document.getElementById('completedSection').innerHTML= sec("Completed", "status-done",    completedHTML);
-  document.getElementById('missedSection').innerHTML   = sec("Missed",    "status-missed",  missedHTML);
-
-  if (!appointments.length) {
-    document.getElementById('upcomingSection').innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No appointments yet.</p>';
+    ['apptTitle','apptDate','apptTime','apptLocation','apptNotes'].forEach(id => 
+      document.getElementById(id).value = ''
+    );
+    
+    await loadAppointments();
+    await loadStats();
+    showToast('✅ Appointment added!');
+  } catch (error) {
+    console.error('Error saving appointment:', error);
+    showToast('⚠ Failed to save appointment', true);
   }
 }
 
-function markCompleted(i) {
-  appointments[i].status = 'completed';
-  localStorage.setItem('appointments', JSON.stringify(appointments));
-  loadAppointments();
-  showToast('✅ Marked as completed!');
+async function loadAppointments() {
+  try {
+    const response = await apiCall('/appointments');
+    appointments = response.data || [];
+
+    const today = new Date().toISOString().split('T')[0];
+    let todayHTML = '', upcomingHTML = '', completedHTML = '', missedHTML = '';
+
+    appointments.forEach((a) => {
+      const actions = role === 'caregiver' ? `
+        ${a.status === 'upcoming' ? `<button class="btn btn-sm btn-primary" onclick="markCompleted('${a._id}')">✔ Mark Done</button>` : ''}
+        <button class="btn btn-sm btn-danger" onclick="deleteAppt('${a._id}')">🗑 Delete</button>
+      ` : '';
+
+      const card = `
+        <div class="item">
+          <strong>${a.title}</strong><br>
+          📍 ${a.location || 'No location'} &nbsp;|&nbsp; 📅 ${a.date.split('T')[0]} &nbsp;⏰ ${a.time}<br>
+          ${a.notes ? `📝 ${a.notes}<br>` : ''}
+          <div class="btn-row" style="margin-top:8px;">${actions}</div>
+        </div>
+      `;
+
+      if (a.date.startsWith(today) && a.status === 'upcoming') todayHTML += card;
+      else if (a.status === 'upcoming')   upcomingHTML  += card;
+      else if (a.status === 'completed')  completedHTML += card;
+      else if (a.status === 'missed')     missedHTML    += card;
+    });
+
+    const sec = (label, cls, html) => html ? `
+      <p style="font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;">
+        <span class="status-badge ${cls}">${label}</span>
+      </p>${html}` : '';
+
+    document.getElementById('todaySection').innerHTML    = sec("Today",     "status-today",   todayHTML);
+    document.getElementById('upcomingSection').innerHTML = sec("Upcoming",  "status-pending", upcomingHTML);
+    document.getElementById('completedSection').innerHTML= sec("Completed", "status-done",    completedHTML);
+    document.getElementById('missedSection').innerHTML   = sec("Missed",    "status-missed",  missedHTML);
+
+    if (!appointments.length) {
+      document.getElementById('upcomingSection').innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No appointments yet.</p>';
+    }
+  } catch (error) {
+    console.error('Error loading appointments:', error);
+    showToast('⚠ Failed to load appointments', true);
+  }
 }
 
-function deleteAppt(i) {
+async function markCompleted(apptId) {
+  try {
+    await apiCall(`/appointments/${apptId}/complete`, { method: 'PATCH' });
+    await loadAppointments();
+    await loadStats();
+    showToast('✅ Marked as completed!');
+  } catch (error) {
+    console.error('Error marking appointment:', error);
+    showToast('⚠ Failed to update appointment', true);
+  }
+}
+
+async function deleteAppt(apptId) {
   if (!confirm('Delete this appointment?')) return;
-  appointments.splice(i, 1);
-  localStorage.setItem('appointments', JSON.stringify(appointments));
-  loadAppointments();
+  
+  try {
+    await apiCall(`/appointments/${apptId}`, { method: 'DELETE' });
+    await loadAppointments();
+    await loadStats();
+    showToast('✅ Appointment deleted');
+  } catch (error) {
+    console.error('Error deleting appointment:', error);
+    showToast('⚠ Failed to delete appointment', true);
+  }
+}
+
+// Auto-update missed appointments on page load
+async function updateStatuses() {
+  try {
+    await apiCall('/appointments/update-missed', { method: 'POST' });
+  } catch (error) {
+    console.error('Error updating statuses:', error);
+  }
 }
 
 /* ══════════════════════════════
@@ -1144,46 +1245,55 @@ const exerciseRoutines = {
   ]
 };
 
-const todayKey = new Date().toISOString().split('T')[0];
-let exerciseLog = JSON.parse(localStorage.getItem('exerciseLog')) || { date: todayKey, completed: {} };
-if (exerciseLog.date !== todayKey) {
-  exerciseLog = { date: todayKey, completed: {} };
-  localStorage.setItem('exerciseLog', JSON.stringify(exerciseLog));
-}
-
+let exerciseLog = { date: null, completed: {} };
 let currentRoutineName = '';
 
-function initExercise() {
+async function initExercise() {
   const catCard     = document.getElementById('exerciseCatCard');
   const routineCard = document.getElementById('exerciseRoutineCard');
   const logCard     = document.getElementById('exerciseLogCard');
 
   routineCard.style.display = 'none';
 
-  if (role === 'caretaker') {
-    catCard.style.display = 'block';
-    logCard.style.display = 'none';
+  try {
+    // Load today's exercise log from backend
+    const response = await apiCall('/exercises/log/today');
+    exerciseLog = response.data || { date: new Date().toISOString(), completed: new Map() };
+    
+    // Convert Map to object if needed
+    if (exerciseLog.completed instanceof Map) {
+      exerciseLog.completed = Object.fromEntries(exerciseLog.completed);
+    }
 
-    document.getElementById('exerciseCatList').innerHTML =
-      Object.keys(exerciseRoutines).map(name => {
-        const done = (exerciseLog.completed[name] || []).length;
-        const total = exerciseRoutines[name].length;
-        return `
-          <div class="exercise-cat" onclick="openRoutine('${name.replace(/'/g,"\\'")}')">
-            <div class="exercise-cat-left">
-              <span class="exercise-cat-icon">${name.split(' ')[0]}</span>
-              <div>
-                <div class="exercise-cat-name">${name.slice(2)}</div>
-                <div class="exercise-cat-count">${done}/${total} completed today</div>
+    if (role === 'caregiver') {
+      catCard.style.display = 'block';
+      logCard.style.display = 'none';
+
+      document.getElementById('exerciseCatList').innerHTML =
+        Object.keys(exerciseRoutines).map(name => {
+          const completedSteps = exerciseLog.completed?.[name] || [];
+          const done = completedSteps.length;
+          const total = exerciseRoutines[name].length;
+          return `
+            <div class="exercise-cat" onclick="openRoutine('${name.replace(/'/g,"\\'")}')">
+              <div class="exercise-cat-left">
+                <span class="exercise-cat-icon">${name.split(' ')[0]}</span>
+                <div>
+                  <div class="exercise-cat-name">${name.slice(2)}</div>
+                  <div class="exercise-cat-count">${done}/${total} completed today</div>
+                </div>
               </div>
-            </div>
-            <span class="exercise-cat-arrow">›</span>
-          </div>`;
-      }).join('');
-  } else {
-    catCard.style.display = 'none';
-    logCard.style.display = 'block';
-    loadDailyLog();
+              <span class="exercise-cat-arrow">›</span>
+            </div>`;
+        }).join('');
+    } else {
+      catCard.style.display = 'none';
+      logCard.style.display = 'block';
+      loadDailyLog();
+    }
+  } catch (error) {
+    console.error('Error loading exercises:', error);
+    showToast('⚠ Failed to load exercises', true);
   }
 }
 
@@ -1194,7 +1304,7 @@ function openRoutine(name) {
   document.getElementById('routineTitle').textContent = name;
 
   const steps = exerciseRoutines[name];
-  const done  = exerciseLog.completed[name] || [];
+  const done  = exerciseLog.completed?.[name] || [];
 
   document.getElementById('routineList').innerHTML = steps.map(ex => `
     <div class="exercise-step ${done.includes(ex) ? 'done' : ''}" id="step-${btoa(ex).replace(/=/g,'')}">
@@ -1205,51 +1315,88 @@ function openRoutine(name) {
   `).join('');
 }
 
-function toggleExercise(cat, ex, el) {
-  let done = exerciseLog.completed[cat] || [];
-  if (el.checked) { if (!done.includes(ex)) done.push(ex); }
-  else { done = done.filter(x => x !== ex); }
+async function toggleExercise(cat, ex, el) {
+  let done = exerciseLog.completed?.[cat] || [];
+  if (el.checked) { 
+    if (!done.includes(ex)) done.push(ex); 
+  } else { 
+    done = done.filter(x => x !== ex); 
+  }
+  
+  if (!exerciseLog.completed) exerciseLog.completed = {};
   exerciseLog.completed[cat] = done;
-  exerciseLog.date = todayKey;
-  localStorage.setItem('exerciseLog', JSON.stringify(exerciseLog));
 
   const stepId = 'step-' + btoa(ex).replace(/=/g, '');
   document.getElementById(stepId)?.classList.toggle('done', el.checked);
 }
 
-function saveRoutine() {
-  showToast('✔ Exercise progress saved!');
-  closeRoutine();
+async function saveRoutine() {
+  try {
+    const category = currentRoutineName;
+    const steps = exerciseLog.completed?.[category] || [];
+    
+    if (steps.length > 0) {
+      await apiCall('/exercises/log', {
+        method: 'POST',
+        body: JSON.stringify({
+          category,
+          steps,
+          duration: 10 // Estimate 10 minutes
+        })
+      });
+    }
+    
+    showToast('✔ Exercise progress saved!');
+    await loadStats();
+    closeRoutine();
+  } catch (error) {
+    console.error('Error saving exercise:', error);
+    showToast('⚠ Failed to save exercise', true);
+  }
 }
 
-function closeRoutine() {
+async function closeRoutine() {
   document.getElementById('exerciseRoutineCard').style.display = 'none';
-  if (role === 'caretaker') {
+  if (role === 'caregiver') {
     document.getElementById('exerciseCatCard').style.display = 'block';
-    initExercise(); // refresh counts
+    await initExercise(); // refresh counts
   } else {
     document.getElementById('exerciseLogCard').style.display = 'block';
-    loadDailyLog();
+    await loadDailyLog();
   }
 }
 
-function loadDailyLog() {
-  const completed = exerciseLog.completed;
-  if (!Object.keys(completed).length) {
-    document.getElementById('logContent').innerHTML =
-      '<p style="color:var(--text-muted);font-size:14px;">No exercises completed today yet.</p>';
-    return;
+async function loadDailyLog() {
+  try {
+    const response = await apiCall('/exercises/log/today');
+    const log = response.data || {};
+    const completed = log.completed || {};
+    
+    // Convert Map to object if needed
+    const completedObj = completed instanceof Map 
+      ? Object.fromEntries(completed) 
+      : completed;
+    
+    if (!Object.keys(completedObj).length) {
+      document.getElementById('logContent').innerHTML =
+        '<p style="color:var(--text-muted);font-size:14px;">No exercises completed today yet.</p>';
+      return;
+    }
+    
+    document.getElementById('logContent').innerHTML = Object.entries(completedObj)
+      .map(([cat, steps]) => `
+        <div class="item">
+          <strong>${cat}</strong><br>
+          <span class="status-badge status-done">✔ ${steps.length} completed</span>
+          <ul style="margin-top:8px;padding-left:18px;font-size:13px;color:var(--text-muted);">
+            ${steps.map(s => `<li>${s}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+  } catch (error) {
+    console.error('Error loading daily log:', error);
+    showToast('⚠ Failed to load exercise log', true);
   }
-  document.getElementById('logContent').innerHTML = Object.entries(completed)
-    .map(([cat, steps]) => `
-      <div class="item">
-        <strong>${cat}</strong><br>
-        <span class="status-badge status-done">✔ ${steps.length} completed</span>
-        <ul style="margin-top:8px;padding-left:18px;font-size:13px;color:var(--text-muted);">
-          ${steps.map(s => `<li>${s}</li>`).join('')}
-        </ul>
-      </div>
-    `).join('');
 }
 
 /* ══════════════════════════════
@@ -1276,26 +1423,36 @@ function loadGallery() {
 /* ══════════════════════════════
    EMERGENCY
 ══════════════════════════════ */
-function triggerEmergency() {
-  if (!navigator.geolocation) { showToast('⚠ Geolocation not supported.', true); return; }
+async function triggerEmergency() {
+  if (!navigator.geolocation) { 
+    showToast('⚠ Geolocation not supported.', true); 
+    return; 
+  }
 
-  navigator.geolocation.getCurrentPosition(pos => {
+  navigator.geolocation.getCurrentPosition(async (pos) => {
     const lat = pos.coords.latitude;
     const lng = pos.coords.longitude;
 
-    fetch('/send-emergency', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ latitude: lat, longitude: lng })
-    }).then(() => {
+    try {
+      await apiCall('/emergency/trigger', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          latitude: lat, 
+          longitude: lng,
+          alertType: 'manual',
+          accuracy: pos.coords.accuracy
+        })
+      });
+      
       showToast('🚨 Emergency location sent to all contacts!', false, 5000);
-    }).catch(() => {
-      showToast('⚠ Could not reach server, but location obtained.', true);
-    });
-
-    // Switch to map and show location
-    showPage('map', null);
-    setTimeout(() => showMapAt(lat, lng), 400);
+      
+      // Switch to map and show location
+      showPage('map', null);
+      setTimeout(() => showMapAt(lat, lng), 400);
+    } catch (error) {
+      console.error('Error triggering emergency:', error);
+      showToast('⚠ Could not send alert to server', true);
+    }
   }, () => {
     showToast('⚠ Could not get location. Please allow GPS.', true);
   });
@@ -1313,13 +1470,12 @@ function loadMyLocation() {
   });
 }
 
-function showMapAt(lat, lng) { //changed
+function showMapAt(lat, lng) {
   if (typeof google === 'undefined') {
-
-    fetch('/config')
+    // Fetch API key from backend
+    fetch('/api/config')
       .then(res => res.json())
       .then(cfg => {
-
         console.log("API KEY:", cfg.googleMapsKey);
 
         if (!cfg.googleMapsKey) {
@@ -1329,9 +1485,7 @@ function showMapAt(lat, lng) { //changed
         }
 
         const script = document.createElement('script');
-
         script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.googleMapsKey}&libraries=places&callback=initMap`;
-
         script.async = true;
         script.defer = true;
 
@@ -1346,7 +1500,6 @@ function showMapAt(lat, lng) { //changed
         document.getElementById('map').innerHTML =
           '<p style="color:red;">Failed to load map</p>';
       });
-
   } else {
     renderMap(lat, lng);
   }

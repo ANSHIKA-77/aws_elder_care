@@ -2,74 +2,113 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Voice Assistant</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Assistant — Elder Care</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
 <style>
-body{
-    font-family: "Segoe UI";
-    background: linear-gradient(135deg,#eef2ff,#fcf6ff);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
+.voice-container {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.container{
-    background:white;
-    padding:30px;
-    border-radius:15px;
-    width:350px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.1);
-    text-align:center;
+select, textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
 }
 
-select, textarea, button{
-    width:100%;
-    margin-top:10px;
-    padding:10px;
-    border-radius:10px;
-    border:1px solid #ccc;
+textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
-button{
-    background:#7d8cff;
-    color:white;
-    cursor:pointer;
+.voice-button {
+  width: 100%;
+  padding: 16px;
+  margin-top: 16px;
+  background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.voice-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74,114,89,0.4);
+}
+
+.voice-button:active {
+  transform: translateY(0);
 }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-    <h2>🎤 Voice Assistant</h2>
+<div class="container voice-container">
+  <a href="/home.html" class="back-button">
+    ← Back to Dashboard
+  </a>
 
+  <div class="page-header">
+    <div>
+      <h1>🎤 Voice Assistant</h1>
+      <p>Speak commands to manage your care</p>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>Language Selection</h2>
     <select id="lang">
-        <option value="en-US">English</option>
-        <option value="hi-IN">Hindi</option>
-        <option value="ta-IN">Tamil</option>
+      <option value="en-US">English</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="ta-IN">Tamil</option>
     </select>
 
-    <textarea id="text" rows="4" placeholder="Speak something..."></textarea>
+    <h2 style="margin-top:24px;">Voice Input</h2>
+    <textarea id="text" placeholder="Tap 'Speak' and say your command..."></textarea>
 
-    <button onclick="startListening()">🎙️ Speak</button>
+    <button class="voice-button" onclick="startListening()">🎙️ Start Speaking</button>
+  </div>
 
-    <button style="background:linear-gradient(135deg,#f09bbb,#ee6d85); margin-top:15px;" onclick="goBack()">
-        ← Back to Dashboard
-    </button>
+  <div class="section-card">
+    <h2>💡 Example Commands</h2>
+    <div class="item">
+      <strong>Medications:</strong><br>
+      "BP tablet taken" or "Diabetes medicine taken"
+    </div>
+    <div class="item">
+      <strong>Appointments:</strong><br>
+      "Set appointment for doctor tomorrow at 3"
+    </div>
+    <div class="item">
+      <strong>Exercises:</strong><br>
+      "Mark exercise completed"
+    </div>
+  </div>
 </div>
 
+<div id="toast"></div>
+
+<script src="/js/shared.js"></script>
 <script>
 
 // 🎙️ SPEECH TO TEXT
 function startListening(){
-
     let lang = document.getElementById("lang").value;
 
     let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if(!SpeechRecognition){
-        alert("Speech Recognition not supported in this browser");
+        showToast("Speech Recognition not supported in this browser", true);
         return;
     }
 
@@ -89,13 +128,13 @@ function startListening(){
     };
 
     recognition.onerror = function(){
-        alert("Error recognizing speech");
+        showToast("Error recognizing speech", true);
     };
 }
 
 
 // 🧠 MAIN COMMAND PROCESSOR
-function processCommand(command, lang){
+async function processCommand(command, lang){
     console.log("PROCESSING:", command);
     command = command.toLowerCase().trim();
 
@@ -108,90 +147,103 @@ function processCommand(command, lang){
                         && !isMedCommand; // never treat med command as appointment
 
     // =========================
-    // 💊 MEDICATION — check FIRST
+    // 💊 MEDICATION
     // =========================
     if(isMedCommand){
-    let stored = localStorage.getItem("meds");
-    let meds = (stored && JSON.parse(stored).length > 0) 
-        ? JSON.parse(stored) 
-        : [
-            {name:"BP Tablet (Morning)", done:false},
-            {name:"Diabetes Tablet", done:false},
-            {name:"BP Tablet (Evening)", done:false},
-            {name:"Vitamin D Supplement", done:false}
-        ];
+        try {
+            // Get medications from backend
+            const response = await apiCall('/medications?activeOnly=true');
+            const meds = response.data || [];
+            
+            if (meds.length === 0) {
+                speakResponse("No medications found", lang);
+                return;
+            }
 
-    console.log("MEDS LOADED:", meds); // check this in console
+            let updated = false;
+            const toUpdate = [];
 
-    let updated = false;
+            meds.forEach(m => {
+                let medName = m.name.toLowerCase();
+                let matchFound = false;
 
-    meds.forEach(m => {
-        let medName = m.name.toLowerCase();
-        let matchFound = false;
+                console.log("CHECKING MED:", medName, "| COMMAND:", command);
 
-        console.log("CHECKING MED:", medName, "| COMMAND:", command); // ADD THIS
+                if(medName.includes("bp")){
+                    if(command.includes("bp") || command.includes("b p") || 
+                       command.includes("blood pressure")) matchFound = true;
+                }
+                if(medName.includes("diabetes")){
+                    if(command.includes("diabetes") || command.includes("diabetic") ||
+                       command.includes("sugar") || command.includes("diabet")) matchFound = true;
+                }
+                if(medName.includes("vitamin")){
+                    if(command.includes("vitamin") || command.includes("vitamins") ||
+                       command.includes("vit ")) matchFound = true;
+                }
 
-        if(medName.includes("bp")){
-            if(command.includes("bp") || command.includes("b p") || 
-               command.includes("blood pressure")) matchFound = true;
+                if(command.includes("morning") && medName.includes("morning")) matchFound = true;
+                if(command.includes("evening") && medName.includes("evening")) matchFound = true;
+                if(command.includes("all") || command.includes("every")) matchFound = true;
+
+                console.log("MATCH RESULT for", m.name, ":", matchFound);
+
+                if(matchFound && !m.takenToday){
+                    toUpdate.push(m._id);
+                    updated = true;
+                }
+            });
+
+            // Update medications via API
+            if (updated) {
+                for (const medId of toUpdate) {
+                    await apiCall(`/medications/${medId}/mark-taken`, { method: 'PATCH' });
+                }
+                speakResponse("Medication marked as taken", lang);
+                showToast("✅ Medication updated successfully");
+            } else {
+                speakResponse("Please say bp tablet, diabetes tablet, or vitamin", lang);
+            }
+        } catch (error) {
+            console.error("Error updating medication:", error);
+            speakResponse("Failed to update medication", lang);
+            showToast("⚠ Failed to update medication", true);
         }
-        if(medName.includes("diabetes")){
-            if(command.includes("diabetes") || command.includes("diabetic") ||
-               command.includes("sugar") || command.includes("diabet")) matchFound = true;
-        }
-        if(medName.includes("vitamin")){
-            if(command.includes("vitamin") || command.includes("vitamins") ||
-               command.includes("vit ")) matchFound = true;
-        }
-
-        if(command.includes("morning") && medName.includes("morning")) matchFound = true;
-        if(command.includes("evening") && medName.includes("evening")) matchFound = true;
-        if(command.includes("all") || command.includes("every")) matchFound = true;
-
-        console.log("MATCH RESULT for", m.name, ":", matchFound); // ADD THIS
-
-        if(matchFound){
-            m.done = true;
-            updated = true;
-        }
-    });
-
-    localStorage.setItem("meds", JSON.stringify(meds));
-
-    if(updated){
-        speakResponse("Medication marked as taken", lang);
-    } else {
-        speakResponse("Please say bp tablet, diabetes tablet, or vitamin", lang);
     }
-}
 
     // =========================
     // 📅 APPOINTMENT
     // =========================
     else if(isApptCommand){
-
         let title = extractTitle(command);
         let time = extractTime(command);
         let date = extractDate(command);
 
         if(!title || !time || !date){
             speakResponse("Could not understand appointment details", lang);
+            showToast("⚠ Please provide appointment title, date and time", true);
             return;
         }
 
-        let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+        try {
+            await apiCall('/appointments', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: title,
+                    date: date,
+                    time: time,
+                    location: "Voice Added",
+                    notes: "Added via voice assistant"
+                })
+            });
 
-        appointments.push({
-            title: title,
-            date: date,
-            time: time,
-            location: "Voice Added",
-            notes: "Added via voice",
-            status: "upcoming"
-        });
-
-        localStorage.setItem("appointments", JSON.stringify(appointments));
-        speakResponse("Appointment added successfully", lang);
+            speakResponse("Appointment added successfully", lang);
+            showToast("✅ Appointment created");
+        } catch (error) {
+            console.error("Error adding appointment:", error);
+            speakResponse("Failed to add appointment", lang);
+            showToast("⚠ Failed to add appointment", true);
+        }
     }
 
     // =========================
@@ -202,42 +254,90 @@ function processCommand(command, lang){
         command.includes("workout") ||
         command.includes("व्यायाम")
     ){
-        let today = new Date().toISOString().split("T")[0];
-        let exerciseLog = JSON.parse(localStorage.getItem("exerciseLog")) || {
-            date: today,
-            completed: {}
-        };
-
-        let category = "Morning Stretching";
-        let exercises = [
+        // Determine which exercise based on keywords
+        let category = "Morning Stretching";  // default
+        let steps = [
             "Raise arms slowly 10 times",
             "Neck rotation clockwise 5 times",
-            "Neck rotation anti-clockwise 5 times",
-            "Shoulder rolls 10 times",
-            "Side bending 10 seconds"
+            "Shoulder rolls 10 times"
         ];
+        let duration = 10;
 
-        exerciseLog.completed[category] = exercises;
-        exerciseLog.date = today;
-        localStorage.setItem("exerciseLog", JSON.stringify(exerciseLog));
+        // Check for specific exercise types
+        if(command.includes("breathing") || command.includes("breath")){
+            category = "Breathing Exercises";
+            steps = [
+                "Deep belly breathing 10 times",
+                "Alternate nostril breathing 5 rounds"
+            ];
+            duration = 5;
+        }
+        else if(command.includes("walk") || command.includes("walking")){
+            category = "Walking Routine";
+            steps = [
+                "Light walking for 10 minutes"
+            ];
+            duration = 10;
+        }
+        else if(command.includes("balance")){
+            category = "Balance Exercises";
+            steps = [
+                "Single leg stand 30 seconds"
+            ];
+            duration = 5;
+        }
+        else if(command.includes("physio") || command.includes("therapy")){
+            category = "Physiotherapy";
+            steps = [
+                "Prescribed exercises completed"
+            ];
+            duration = 15;
+        }
+        else if(command.includes("stretch") || command.includes("morning")){
+            category = "Morning Stretching";
+            steps = [
+                "Raise arms slowly 10 times",
+                "Neck rotation clockwise 5 times",
+                "Shoulder rolls 10 times"
+            ];
+            duration = 10;
+        }
 
-        speakResponse("Exercise marked as completed for today", lang);
+        try {
+            await apiCall('/exercises/log', {
+                method: 'POST',
+                body: JSON.stringify({
+                    category,
+                    steps,
+                    duration
+                })
+            });
+
+            speakResponse(`${category} logged successfully`, lang);
+            showToast(`✅ ${category} logged`);
+        } catch (error) {
+            console.error("Error logging exercise:", error);
+            speakResponse("Failed to log exercise", lang);
+            showToast("⚠ Failed to log exercise", true);
+        }
     }
 
     // =========================
     // ❌ UNKNOWN
     // =========================
     else{
-        speakResponse("Command not recognized. Try saying bp tablet taken or diabetes tablet taken.", lang);
+        speakResponse("Command not recognized. Try saying bp tablet taken or set appointment for doctor tomorrow at 3", lang);
+        showToast("⚠ Command not understood", true);
     }
 }
+
 // 🔍 HELPERS
 function extractTitle(cmd){
     let words = cmd.split("for");
     if(words.length > 1){
         return words[1].split("at")[0].trim();
     }
-    return null;
+    return "Voice Appointment";
 }
 
 function extractTime(cmd){
@@ -245,7 +345,7 @@ function extractTime(cmd){
     if(match){
         return match[0].padStart(2,'0') + ":00";
     }
-    return null;
+    return "10:00";
 }
 
 function extractDate(cmd){
@@ -264,12 +364,6 @@ function speakResponse(text, lang){
     let speech = new SpeechSynthesisUtterance(text);
     speech.lang = lang;
     window.speechSynthesis.speak(speech);
-}
-
-
-// 🔙 BACK
-function goBack(){
-    window.location.href = "dashboard.html";
 }
 
 </script>

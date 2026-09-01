@@ -17,10 +17,10 @@ app.use(cors({
     credentials: true
 }));
 
-// Rate limiting
+// Rate limiting - Increased for dashboard with multiple API calls
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 500, // Increased from 100 to support dashboard with 8+ simultaneous calls
     message: { error: 'Too many requests, slow down.' }
 });
 app.use('/api/', limiter);
@@ -29,6 +29,9 @@ app.use('/api/', limiter);
 app.use(express.json());
 //app.use(mongoSanitize({ replaceWith: '_' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Routes — just this one line, routes/index.js handles the rest
 app.use('/api/v1', require('./routes'));

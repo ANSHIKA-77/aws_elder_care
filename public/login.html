@@ -219,7 +219,7 @@ async function verifyOTP(){
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('role',  data.data.user.role);
         localStorage.setItem('userName', data.data.user.name);
-        window.location.href = 'dashboard.html';
+        window.location.href = 'home.html';
     } else {
         msgEl.innerHTML = `<p class="error">${data.message || 'Invalid OTP'}</p>`;
     }

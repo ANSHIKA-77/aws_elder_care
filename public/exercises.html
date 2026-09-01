@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercises — Elder Care</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+<style>
+  /* ─── EXERCISE CATEGORIES ─── */
+  .exercise-cat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #F7FAF8;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .exercise-cat:hover { 
+    border-color: var(--sage-light); 
+    background: rgba(123,158,135,0.06); 
+  }
+  
+  .exercise-cat-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+  }
+  
+  .exercise-cat-icon { 
+    font-size: 24px; 
+  }
+  
+  .exercise-cat-name { 
+    font-weight: 600; 
+    font-size: 14.5px; 
+    color: var(--text); 
+  }
+  
+  .exercise-cat-count { 
+    font-size: 12px; 
+    color: var(--text-muted); 
+    margin-top: 2px; 
+  }
+  
+  .exercise-cat-arrow { 
+    color: var(--text-muted); 
+    font-size: 18px; 
+  }
+  
+  /* ─── EXERCISE STEPS ─── */
+  .exercise-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    margin-bottom: 8px;
+    background: #F7FAF8;
+    transition: border-color 0.2s;
+  }
+  
+  .exercise-step.done { 
+    background: var(--green-light); 
+    border-color: rgba(58,125,84,0.2); 
+  }
+  
+  .exercise-step input[type="checkbox"] { 
+    width: 17px; 
+    height: 17px; 
+    accent-color: var(--green); 
+    cursor: pointer; 
+    flex-shrink: 0; 
+  }
+  
+  .exercise-step-text { 
+    font-size: 14px; 
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="/home.html" class="back-button">
+    ← Back to Dashboard
+  </a>
+
+  <div class="page-header">
+    <div>
+      <h1>🏃 Exercise</h1>
+      <p>Daily exercise routines and progress</p>
+    </div>
+  </div>
+
+  <div class="section-card" id="summaryCard">
+    <h2>Today's Summary</h2>
+    <div id="exerciseSummary">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card" id="catCard">
+    <h2>Exercise Categories</h2>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">
+      Select a routine to start exercising
+    </p>
+    <div id="exerciseCatList"></div>
+  </div>
+  
+  <!-- Routine Detail -->
+  <div class="section-card" id="routineCard" style="display:none;">
+    <h2 id="routineTitle">—</h2>
+    <div id="routineList"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveRoutine()">💾 Save Progress</button>
+      <button class="btn btn-ghost" onclick="closeRoutine()">← Back</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/js/shared.js"></script>
+<script>
+const exerciseRoutines = {
+  "🌅 Morning Stretching": [
+    "Raise arms slowly 10 times",
+    "Neck rotation clockwise 5 times",
+    "Neck rotation anti-clockwise 5 times",
+    "Shoulder rolls 10 times",
+    "Side bending 10 seconds"
+  ],
+  "🫁 Breathing Exercises": [
+    "Slow inhale for 4 seconds",
+    "Hold for 2 seconds",
+    "Exhale for 6 seconds",
+    "Repeat 10 times"
+  ],
+  "🚶 Light Walking Routine": [
+    "Walk indoors for 5 minutes",
+    "Pause and stretch",
+    "Walk for another 5 minutes"
+  ],
+  "⚖️ Balance Training": [
+    "Stand on one leg (support nearby)",
+    "Heel-to-toe walking 10 steps",
+    "Side stepping 10 times"
+  ],
+  "🏥 Physio Recommended": [
+    "Seated leg raise 10 times",
+    "Ankle rotation 10 times",
+    "Light knee bends",
+    "Shoulder mobility circles"
+  ]
+};
+
+let exerciseLog = { date: null, completed: {} };
+let currentRoutineName = '';
+const role = getRole();
+
+async function loadSummary() {
+  try {
+    const response = await apiCall('/exercises/summary');
+    const data = response.data || {};
+
+    document.getElementById('exerciseSummary').innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+        <div class="item">
+          <strong>Total Steps Completed</strong><br>
+          <span style="font-size:24px;font-weight:700;color:var(--sage-dark);">${data.totalStepsCompleted || 0}</span>
+        </div>
+        <div class="item">
+          <strong>Total Minutes</strong><br>
+          <span style="font-size:24px;font-weight:700;color:var(--sage-dark);">${data.totalMinutes || 0}</span>
+        </div>
+        <div class="item">
+          <strong>Categories Completed</strong><br>
+          <span style="font-size:24px;font-weight:700;color:var(--sage-dark);">${data.categoriesCompleted || 0}</span>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error loading summary:', error);
+    document.getElementById('exerciseSummary').innerHTML = `
+      <div class="empty-state">
+        <p>No exercise data for today</p>
+      </div>
+    `;
+  }
+}
+
+async function loadExerciseLog() {
+  try {
+    const response = await apiCall('/exercises/log/today');
+    exerciseLog = response.data || { date: new Date().toISOString(), completed: {} };
+    
+    if (exerciseLog.completed instanceof Map) {
+      exerciseLog.completed = Object.fromEntries(exerciseLog.completed);
+    }
+    
+    renderCategories();
+  } catch (error) {
+    console.error('Error loading exercise log:', error);
+    exerciseLog = { date: new Date().toISOString(), completed: {} };
+    renderCategories();
+  }
+}
+
+function renderCategories() {
+  const html = Object.keys(exerciseRoutines).map(name => {
+    const completedSteps = exerciseLog.completed?.[name] || [];
+    const done = completedSteps.length;
+    const total = exerciseRoutines[name].length;
+    
+    return `
+      <div class="exercise-cat" onclick="openRoutine('${name.replace(/'/g,"\\'")}')">
+        <div class="exercise-cat-left">
+          <span class="exercise-cat-icon">${name.split(' ')[0]}</span>
+          <div>
+            <div class="exercise-cat-name">${name.slice(2)}</div>
+            <div class="exercise-cat-count">${done}/${total} completed today</div>
+          </div>
+        </div>
+        <span class="exercise-cat-arrow">›</span>
+      </div>
+    `;
+  }).join('');
+  
+  document.getElementById('exerciseCatList').innerHTML = html;
+}
+
+function openRoutine(name) {
+  currentRoutineName = name;
+  document.getElementById('catCard').style.display = 'none';
+  document.getElementById('routineCard').style.display = 'block';
+  document.getElementById('summaryCard').style.display = 'none';
+  document.getElementById('routineTitle').textContent = name;
+
+  const steps = exerciseRoutines[name];
+  const done = exerciseLog.completed?.[name] || [];
+
+  document.getElementById('routineList').innerHTML = steps.map(ex => `
+    <div class="exercise-step ${done.includes(ex) ? 'done' : ''}" id="step-${btoa(ex).replace(/=/g,'')}">
+      <input type="checkbox" ${done.includes(ex) ? 'checked' : ''}
+        onchange="toggleExercise('${name.replace(/'/g,"\\'")}', '${ex.replace(/'/g,"\\'")}', this)">
+      <span class="exercise-step-text">${ex}</span>
+    </div>
+  `).join('');
+}
+
+function toggleExercise(cat, ex, el) {
+  let done = exerciseLog.completed?.[cat] || [];
+  if (el.checked) { 
+    if (!done.includes(ex)) done.push(ex); 
+  } else { 
+    done = done.filter(x => x !== ex); 
+  }
+  
+  if (!exerciseLog.completed) exerciseLog.completed = {};
+  exerciseLog.completed[cat] = done;
+
+  const stepId = 'step-' + btoa(ex).replace(/=/g, '');
+  document.getElementById(stepId)?.classList.toggle('done', el.checked);
+}
+
+async function saveRoutine() {
+  try {
+    const category = currentRoutineName;
+    const steps = exerciseLog.completed?.[category] || [];
+    
+    if (steps.length > 0) {
+      await apiCall('/exercises/log', {
+        method: 'POST',
+        body: JSON.stringify({
+          category,
+          steps,
+          duration: 10
+        })
+      });
+    }
+    
+    showToast('✔ Exercise progress saved!');
+    closeRoutine();
+    loadSummary();
+  } catch (error) {
+    console.error('Error saving exercise:', error);
+    showToast('⚠ Failed to save exercise', true);
+  }
+}
+
+function closeRoutine() {
+  document.getElementById('routineCard').style.display = 'none';
+  document.getElementById('catCard').style.display = 'block';
+  document.getElementById('summaryCard').style.display = 'block';
+  loadExerciseLog();
+}
+
+loadSummary();
+loadExerciseLog();
+</script>
+
+</body>
+</html>

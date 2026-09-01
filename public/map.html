@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Map — Elder Care</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+<style>
+  /* ─── MAP ─── */
+  #map {
+    height: 500px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: #f0f0f0;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    color: var(--text-muted); 
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="/home.html" class="back-button">
+    ← Back to Dashboard
+  </a>
+
+  <div class="page-header">
+    <div>
+      <h1>📍 Live Location Map</h1>
+      <p>Real-time GPS tracking and nearby hospitals</p>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div id="map">
+      <span>Map loads after location permission is granted. Click "Show My Location" below.</span>
+    </div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="loadMyLocation()">📍 Show My Location</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/js/shared.js"></script>
+<script>
+let map;
+
+function loadMyLocation() {
+  if (!navigator.geolocation) { 
+    showToast('⚠ Geolocation not supported.', true); 
+    return; 
+  }
+  
+  navigator.geolocation.getCurrentPosition(pos => {
+    showMapAt(pos.coords.latitude, pos.coords.longitude);
+  }, () => {
+    showToast('⚠ Could not get location. Please allow GPS.', true);
+  });
+}
+
+function showMapAt(lat, lng) {
+  if (typeof google === 'undefined') {
+    // Fetch API key from backend
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(cfg => {
+        if (!cfg.googleMapsKey) {
+          document.getElementById('map').innerHTML = '<p style="color:red;">API key missing</p>';
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.googleMapsKey}&libraries=places&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+
+        window.initMap = function () {
+          renderMap(lat, lng);
+        };
+
+        document.head.appendChild(script);
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('map').innerHTML = '<p style="color:red;">Failed to load map</p>';
+      });
+  } else {
+    renderMap(lat, lng);
+  }
+}
+
+function renderMap(lat, lng) {
+  const el = document.getElementById('map');
+  el.innerHTML = '';
+  const userLoc = { lat, lng };
+
+  map = new google.maps.Map(el, { zoom: 15, center: userLoc });
+  new google.maps.Marker({ position: userLoc, map, title: 'Patient Location' });
+
+  const svc = new google.maps.places.PlacesService(map);
+  svc.nearbySearch({ location: userLoc, radius: 3000, type: ['hospital'] }, (results, status) => {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+      results.slice(0, 3).forEach(h => {
+        new google.maps.Marker({
+          position: h.geometry.location,
+          map,
+          icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+          title: h.name
+        });
+      });
+    }
+  });
+}
+</script>
+
+</body>
+</html>

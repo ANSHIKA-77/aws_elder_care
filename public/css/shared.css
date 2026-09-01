@@ -1,0 +1,356 @@
+/* ═══════════════════════════════════════
+   Elder Care - Shared Styles
+   Used across all dashboard pages
+═══════════════════════════════════════ */
+
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+:root {
+  --sage: #7B9E87;
+  --sage-light: #A8C5B0;
+  --sage-dark: #4A7259;
+  --warm: #E8D5B0;
+  --warm-dark: #C4A882;
+  --cream: #FAF7F2;
+  --text: #2D3A2E;
+  --text-muted: #6B7A6C;
+  --white: #ffffff;
+  --border: #E2E8E3;
+  --red: #D94F4F;
+  --red-light: #FDEAEA;
+  --green: #3A7D54;
+  --green-light: #EAF5EE;
+  --amber: #C07A2A;
+  --amber-light: #FEF3E2;
+  --blue: #3B6EA5;
+  --blue-light: #EBF2FA;
+  --shadow-sm: 0 2px 8px rgba(45,58,46,0.07);
+  --shadow: 0 8px 32px rgba(45,58,46,0.1);
+  --shadow-lg: 0 20px 60px rgba(45,58,46,0.14);
+  --radius: 20px;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── LAYOUT ─── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+/* ─── PAGE HEADER ─── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  color: var(--text);
+}
+
+.page-header p { 
+  color: var(--text-muted); 
+  font-size: 14px; 
+  margin-top: 4px; 
+}
+
+/* ─── CARDS ─── */
+.section-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.section-card h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── ITEMS ─── */
+.item {
+  background: #F7FAF8;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.item strong { 
+  color: var(--text); 
+}
+
+/* ─── STATUS BADGES ─── */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.status-done { 
+  background: var(--green-light); 
+  color: var(--green); 
+}
+
+.status-pending { 
+  background: var(--amber-light); 
+  color: var(--amber); 
+}
+
+.status-missed { 
+  background: var(--red-light); 
+  color: var(--red); 
+}
+
+.status-today { 
+  background: var(--blue-light); 
+  color: var(--blue); 
+}
+
+/* ─── FORMS ─── */
+.form-row { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 14px; 
+  margin-bottom: 14px; 
+}
+
+.form-row.single { 
+  grid-template-columns: 1fr; 
+}
+
+.field { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
+}
+
+.field label {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.field input, 
+.field select, 
+.field textarea {
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.field input:focus, 
+.field select:focus, 
+.field textarea:focus {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(123,158,135,0.13);
+}
+
+.field textarea { 
+  resize: vertical; 
+  min-height: 80px; 
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  padding: 11px 20px;
+  border: none;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(74,114,89,0.3);
+}
+
+.btn-primary:hover { 
+  transform: translateY(-1px); 
+  box-shadow: 0 6px 18px rgba(74,114,89,0.38); 
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+}
+
+.btn-ghost:hover { 
+  background: #F0F5F1; 
+  color: var(--text); 
+}
+
+.btn-danger { 
+  background: var(--red-light); 
+  color: var(--red); 
+  border: 1.5px solid #F5CECE; 
+}
+
+.btn-danger:hover { 
+  background: #f9c0c0; 
+}
+
+.btn-sm { 
+  padding: 7px 14px; 
+  font-size: 12.5px; 
+}
+
+.btn-row { 
+  display: flex; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+  margin-top: 18px; 
+}
+
+/* ─── BACK BUTTON ─── */
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin-bottom: 20px;
+}
+
+.back-button:hover {
+  background: #F0F5F1;
+  border-color: var(--sage-light);
+  transform: translateX(-2px);
+}
+
+/* ─── LOADING SPINNER ─── */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+.spinner {
+  border: 3px solid var(--border);
+  border-top: 3px solid var(--sage);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+}
+
+/* ─── TOAST NOTIFICATIONS ─── */
+#toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  transition: opacity 0.3s;
+  max-width: 320px;
+  opacity: 0;
+}
+
+/* ─── MOBILE RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .btn-row {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

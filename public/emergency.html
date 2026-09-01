@@ -58,6 +58,26 @@
   }
   .page-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
 
+  /* ── BACK BUTTON ── */
+  .back-button {
+    display: inline-block;
+    padding: 10px 16px;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+  .back-button:hover {
+    background: var(--sage-light);
+    color: white;
+    border-color: var(--sage-light);
+  }
+
   /* ── STATUS HERO ── */
 .status-hero {
   background: var(--white);
@@ -394,6 +414,21 @@
 </div>
 
 <!-- PAGE -->
+<a href="/home.html" class="back-button">
+  ← Back to Dashboard
+</a>
+
+<!-- MANUAL SOS - MOVED TO TOP -->
+<div class="card" style="border: 2px solid var(--red); box-shadow: 0 8px 28px rgba(217,79,79,0.2);">
+  <div class="card-title"><span class="card-title-icon">🆘</span> Manual SOS</div>
+  <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:16px;">
+    Press once to trigger emergency. A 10-second cancel window will appear (if enabled).
+  </p>
+  <button class="sos-btn" onclick="triggerAlert('manual')">
+    🚨 SEND EMERGENCY ALERT
+  </button>
+</div>
+
 <div class="page-header">
   <div>
     <h1>🛡️ Smart Emergency</h1>
@@ -506,17 +541,6 @@
       <span class="toggle-slider"></span>
     </label>
   </div>
-</div>
-
-<!-- MANUAL SOS -->
-<div class="card">
-  <div class="card-title"><span class="card-title-icon">🆘</span> Manual SOS</div>
-  <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:16px;">
-    Press once to trigger emergency. A 10-second cancel window will appear (if enabled).
-  </p>
-  <button class="sos-btn" onclick="triggerAlert('manual')">
-    🚨 SEND EMERGENCY ALERT
-  </button>
 </div>
 
 <!-- ALERT LOG -->
@@ -698,37 +722,6 @@ function enableSensors() {
     alert("Sensors enabled!");
   }
 }
-// Allow manual shake test (desktop button)
-function simulateFall() {
-  if (!fallDetectionEnabled) { showToast('⚠ Fall detection is disabled.', true); return; }
-  document.getElementById('fallValue').textContent = '38.2';
-  document.getElementById('shakeDot').className = 'indicator-dot warn';
-  shakeCount++;
-  document.getElementById('shakeValue').textContent = shakeCount;
-  document.getElementById('tileFall').classList.add('alerting');
-  setTimeout(() => document.getElementById('tileFall').classList.remove('alerting'), 2000);
-  triggerAlert('fall');
-}
-
-function simulateShake() {
-  shakeCount++;
-  document.getElementById('shakeValue').textContent = shakeCount;
-  document.getElementById('shakeDot').className = 'indicator-dot warn';
-  document.getElementById('fallValue').textContent = '27.4';
-  document.getElementById('tileFall').classList.add('alerting');
-  setTimeout(() => document.getElementById('tileFall').classList.remove('alerting'), 2000);
-  lastMotionTime = Date.now(); // shake = movement, resets inactivity
-  showToast('📳 Shake detected — inactivity timer reset', false, 2000);
-}
-
-function simulateMovement() {
-  lastMotionTime = Date.now();
-  inactiveSeconds = 0;
-  document.getElementById('fallValue').textContent = '10.2';
-  document.getElementById('inactiveValue').textContent = '0';
-  document.getElementById('inactiveDot').className = 'indicator-dot on';
-  showToast('🚶 Movement detected — inactivity timer reset', false, 2000);
-}
 
 /* ════════════════════════════════════
    INACTIVITY MONITOR
@@ -883,13 +876,22 @@ function sendAlert(type) {
 }
 
 function sendToServer(lat, lng, type) {
-  const payload = { latitude: lat, longitude: lng, type };
+  const token = localStorage.getItem('token');
+  const payload = { 
+    latitude: lat, 
+    longitude: lng, 
+    alertType: type 
+  };
 
-  fetch('/send-emergency', {
+  fetch('/api/v1/emergency/trigger', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify(payload)
   })
+  .then(res => res.json())
   .then(() => showToast('🚨 Emergency alert sent to all contacts!', false, 5000))
   .catch(() => showToast('⚠ Could not reach server — alert logged locally.', true, 5000));
 
@@ -980,28 +982,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-
-<!-- Desktop shake test zone -->
-<div style="margin-top:16px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;">
-  <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:6px;">🖥️ Desktop Testing</div>
-  <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">
-    On desktop, <strong>move your mouse fast</strong> to simulate motion. Or use the buttons below.
-  </p>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    <button onclick="simulateFall()"
-      style="padding:10px 18px;background:#FEF3E2;color:#C07A2A;border:1.5px solid #F5D9A8;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">
-      🧪 Simulate Fall
-    </button>
-    <button onclick="simulateShake()"
-      style="padding:10px 18px;background:var(--blue-light);color:var(--blue);border:1.5px solid #c5d9f0;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">
-      📳 Simulate Shake
-    </button>
-    <button onclick="simulateMovement()"
-      style="padding:10px 18px;background:var(--green-light);color:var(--green);border:1.5px solid #b5ddc5;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">
-      🚶 Simulate Movement
-    </button>
-  </div>
-</div>
 
 </body>
 </html>

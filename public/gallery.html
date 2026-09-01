@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — Elder Care</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+<style>
+  /* ─── GALLERY ─── */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  
+  .gallery-item {
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .gallery-item img {
+    width: 100%; 
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+  }
+  
+  .gallery-item:hover img { 
+    transform: scale(1.05); 
+  }
+  
+  .gallery-item-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 8px 12px;
+    background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="/home.html" class="back-button">
+    ← Back to Dashboard
+  </a>
+
+  <div class="page-header">
+    <div>
+      <h1>🖼️ Activity Gallery</h1>
+      <p>Daily activity photos and memories</p>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>📤 Upload New Photo</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <div class="input-group">
+        <label>Photo Title</label>
+        <input type="text" id="photoTitle" placeholder="e.g., Morning Walk, Family Visit" required>
+      </div>
+      
+      <div class="input-group">
+        <label>Select Image</label>
+        <input type="file" id="photoFile" accept="image/*" required style="padding:8px;">
+      </div>
+      
+      <button type="submit" class="btn-primary">Upload Photo</button>
+    </form>
+  </div>
+
+  <div class="section-card">
+    <h2>🖼️ My Gallery</h2>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/js/shared.js"></script>
+<script>
+let userPhotos = [];
+
+// Load gallery from backend
+async function loadGallery() {
+  try {
+    const response = await apiCall('/gallery');
+    userPhotos = response.data || [];
+    renderGallery();
+  } catch (error) {
+    console.error('Failed to load gallery:', error);
+    showToast('⚠ Failed to load gallery', true);
+  }
+}
+
+function renderGallery() {
+  const grid = document.getElementById('galleryGrid');
+  
+  if (userPhotos.length === 0) {
+    grid.innerHTML = '<p style="text-align:center; color:var(--text-secondary); padding:40px;">No photos yet. Upload your first memory! 📸</p>';
+    return;
+  }
+  
+  grid.innerHTML = userPhotos.map(p => `
+    <div class="gallery-item">
+      <img src="${p.url}" alt="${p.title}" loading="lazy">
+      <div class="gallery-item-label">
+        ${p.title}
+        <button onclick="deletePhoto('${p._id}')" style="float:right; background:none; border:none; color:white; cursor:pointer; font-size:16px;">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Handle upload
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const title = document.getElementById('photoTitle').value.trim();
+  const file = document.getElementById('photoFile').files[0];
+  
+  if (!file) {
+    showToast('⚠ Please select a photo', true);
+    return;
+  }
+  
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('⚠ Photo must be less than 5MB', true);
+    return;
+  }
+  
+  const formData = new FormData();
+  formData.append('photo', file);
+  formData.append('title', title);
+  
+  try {
+    const token = getToken();
+    const response = await fetch('/api/v1/gallery/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || 'Upload failed');
+    }
+    
+    showToast('✅ Photo uploaded successfully');
+    document.getElementById('uploadForm').reset();
+    loadGallery();
+  } catch (error) {
+    console.error('Upload error:', error);
+    showToast('⚠ Failed to upload photo', true);
+  }
+});
+
+async function deletePhoto(id) {
+  if (!confirm('Delete this photo?')) return;
+  
+  try {
+    await apiCall(`/gallery/${id}`, { method: 'DELETE' });
+    showToast('✅ Photo deleted');
+    loadGallery();
+  } catch (error) {
+    console.error('Delete error:', error);
+    showToast('⚠ Failed to delete photo', true);
+  }
+}
+
+loadGallery();
+</script>
+
+</body>
+</html>

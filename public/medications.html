@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medications — Elder Care</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+<style>
+  /* ─── MED CHECKBOX ─── */
+  .med-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #F7FAF8;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  
+  .med-item.done { 
+    background: var(--green-light); 
+    border-color: rgba(58,125,84,0.25); 
+  }
+  
+  .med-item.missed {
+    background: var(--red-light);
+    border-color: rgba(217,79,79,0.25);
+  }
+  
+  .med-item input[type="checkbox"] {
+    width: 18px; 
+    height: 18px;
+    accent-color: var(--sage-dark);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  
+  .med-item-content {
+    flex: 1;
+  }
+  
+  .med-item-name { 
+    font-size: 14px; 
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+    margin-bottom: 4px;
+  }
+  
+  .med-item-details {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  
+  .med-item-time {
+    font-weight: 600;
+    color: var(--sage-dark);
+  }
+  
+  /* ─── FILTER BUTTONS ─── */
+  .filter-btn {
+    padding: 6px 14px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  
+  .filter-btn:hover {
+    border-color: var(--sage-light);
+    background: rgba(123,158,135,0.08);
+  }
+  
+  .filter-btn.active {
+    background: var(--sage-dark);
+    color: var(--white);
+    border-color: var(--sage-dark);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="/home.html" class="back-button">
+    ← Back to Dashboard
+  </a>
+
+  <div class="page-header">
+    <div>
+      <h1>💊 Medications</h1>
+      <p>Daily medication schedule and status</p>
+    </div>
+  </div>
+
+  <!-- Add Medication Form (Always Visible) -->
+  <div id="addMedCard" class="section-card">
+    <h2>➕ Add New Medication</h2>
+    <div class="form-row">
+      <div class="field">
+        <label>Medication Name *</label>
+        <input type="text" id="medName" placeholder="e.g. BP Tablet">
+      </div>
+      <div class="field">
+        <label>Dosage</label>
+        <input type="text" id="medDosage" placeholder="e.g. 10mg">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Frequency</label>
+        <select id="medFrequency">
+          <option value="once-daily">Once Daily</option>
+          <option value="twice-daily">Twice Daily</option>
+          <option value="thrice-daily">Thrice Daily</option>
+          <option value="as-needed">As Needed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Time of Day</label>
+        <select id="medTimeOfDay">
+          <option value="morning">Morning</option>
+          <option value="afternoon">Afternoon</option>
+          <option value="evening">Evening</option>
+          <option value="night">Night</option>
+          <option value="anytime">Anytime</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Reminder Time (Optional)</label>
+        <input type="time" id="medReminderTime">
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <input type="text" id="medNotes" placeholder="Special instructions">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveMedication()">Save Medication</button>
+    </div>
+  </div>
+
+  <!-- Medications List -->
+  <div class="section-card">
+    <h2>Today's Medications</h2>
+    
+    <!-- Status Filters -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <button class="filter-btn active" data-filter="all" onclick="filterMeds('all')">All</button>
+      <button class="filter-btn" data-filter="upcoming" onclick="filterMeds('upcoming')">⏰ Upcoming</button>
+      <button class="filter-btn" data-filter="taken" onclick="filterMeds('taken')">✅ Taken</button>
+      <button class="filter-btn" data-filter="missed" onclick="filterMeds('missed')">❌ Missed</button>
+    </div>
+    
+    <div id="medList">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading medications...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/js/shared.js"></script>
+<script>
+let meds = [];
+let currentFilter = 'all';
+
+// Show add button for both caretaker and client (per requirements)
+const role = getRole();
+
+function getMedicationStatus(med) {
+  if (med.takenToday) return 'taken';
+  
+  // Check if missed based on time of day
+  const now = new Date();
+  const currentHour = now.getHours();
+  
+  const timeRanges = {
+    morning: { start: 6, end: 12 },
+    afternoon: { start: 12, end: 17 },
+    evening: { start: 17, end: 21 },
+    night: { start: 21, end: 24 }
+  };
+  
+  const range = timeRanges[med.timeOfDay];
+  if (range && currentHour > range.end) {
+    return 'missed';
+  }
+  
+  return 'upcoming';
+}
+
+function filterMeds(filter) {
+  currentFilter = filter;
+  
+  // Update active button
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  
+  renderMeds();
+}
+
+function renderMeds() {
+  const list = document.getElementById('medList');
+  
+  if (meds.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">💊</div>
+        <h3>No medications added yet</h3>
+        <p>Add your first medication to get started</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Filter medications
+  let filteredMeds = meds;
+  if (currentFilter !== 'all') {
+    filteredMeds = meds.filter(m => getMedicationStatus(m) === currentFilter);
+  }
+  
+  if (filteredMeds.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <p>No ${currentFilter} medications</p>
+      </div>
+    `;
+    return;
+  }
+  
+  list.innerHTML = filteredMeds.map((m) => {
+    const status = getMedicationStatus(m);
+    const statusClass = status === 'taken' ? 'done' : status === 'missed' ? 'missed' : '';
+    const statusBadge = status === 'taken' ? 'status-done' : status === 'missed' ? 'status-missed' : 'status-pending';
+    const statusText = status === 'taken' ? '✔ Taken' : status === 'missed' ? '❌ Missed' : '⏰ Upcoming';
+    
+    return `
+      <div class="med-item ${statusClass}" id="medItem${m._id}">
+        <input type="checkbox" ${m.takenToday ? 'checked' : ''} onchange="toggleMed('${m._id}', this)">
+        <div class="med-item-content">
+          <span class="med-item-name">${m.name}</span>
+          <div class="med-item-details">
+            ${m.dosage ? `💊 ${m.dosage} • ` : ''}
+            <span class="med-item-time">⏰ ${formatTimeOfDay(m.timeOfDay)}</span>
+            ${m.reminderTime ? ` at ${m.reminderTime}` : ''}
+            ${m.frequency ? ` • ${formatFrequency(m.frequency)}` : ''}
+          </div>
+          ${m.notes ? `<div class="med-item-details" style="margin-top:4px;">📝 ${m.notes}</div>` : ''}
+        </div>
+        <span class="status-badge ${statusBadge}">
+          ${statusText}
+        </span>
+      </div>
+    `;
+  }).join('');
+}
+
+function formatTimeOfDay(time) {
+  const map = {
+    morning: 'Morning',
+    afternoon: 'Afternoon',
+    evening: 'Evening',
+    night: 'Night',
+    anytime: 'Anytime'
+  };
+  return map[time] || time;
+}
+
+function formatFrequency(freq) {
+  const map = {
+    'once-daily': 'Once daily',
+    'twice-daily': 'Twice daily',
+    'thrice-daily': '3x daily',
+    'as-needed': 'As needed'
+  };
+  return map[freq] || freq;
+}
+
+async function loadMeds() {
+  try {
+    const response = await apiCall('/medications?activeOnly=true');
+    meds = response.data || [];
+    renderMeds();
+    checkMissedMedications();
+  } catch (error) {
+    console.error('Error loading medications:', error);
+    document.getElementById('medList').innerHTML = `
+      <div class="empty-state">
+        <p style="color:var(--red);">Failed to load medications</p>
+      </div>
+    `;
+    showToast('⚠ Failed to load medications', true);
+  }
+}
+
+async function toggleMed(medId, el) {
+  try {
+    const endpoint = el.checked 
+      ? `/medications/${medId}/mark-taken`
+      : `/medications/${medId}/unmark`;
+    
+    await apiCall(endpoint, { method: 'PATCH' });
+    
+    // Update local state
+    const med = meds.find(m => m._id === medId);
+    if (med) {
+      med.takenToday = el.checked;
+      renderMeds();
+    }
+    
+    showToast(el.checked ? '✅ Medication marked as taken' : 'ℹ Medication unmarked');
+  } catch (error) {
+    console.error('Error toggling medication:', error);
+    showToast('⚠ Failed to update medication', true);
+    el.checked = !el.checked;
+  }
+}
+
+async function saveMedication() {
+  const name = document.getElementById('medName').value.trim();
+  const dosage = document.getElementById('medDosage').value.trim() || '1 tablet';
+  const frequency = document.getElementById('medFrequency').value || 'once-daily';
+  const timeOfDay = document.getElementById('medTimeOfDay').value || 'morning';
+  const reminderTime = document.getElementById('medReminderTime').value || '';
+  const notes = document.getElementById('medNotes').value.trim() || '';
+
+  if (!name) {
+    showToast("⚠ Please enter medication name", true);
+    return;
+  }
+
+  try {
+    await apiCall('/medications', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        name, 
+        dosage, 
+        frequency, 
+        timeOfDay, 
+        reminderTime: reminderTime || null, 
+        notes,
+        isActive: true 
+      })
+    });
+
+    // Clear form after successful save
+    document.getElementById('medName').value = '';
+    document.getElementById('medDosage').value = '';
+    document.getElementById('medFrequency').value = 'once-daily';
+    document.getElementById('medTimeOfDay').value = 'morning';
+    document.getElementById('medReminderTime').value = '';
+    document.getElementById('medNotes').value = '';
+    
+    await loadMeds();
+    showToast("✅ Medication added!");
+  } catch (error) {
+    console.error('Error adding medication:', error);
+    showToast('⚠ Failed to add medication: ' + (error.message || 'Unknown error'), true);
+  }
+}
+
+// Check for missed medications and show notification
+function checkMissedMedications() {
+  const missedMeds = meds.filter(m => getMedicationStatus(m) === 'missed');
+  
+  if (missedMeds.length > 0) {
+    showToast(`⚠ ${missedMeds.length} medication(s) missed today`, true, 5000);
+  }
+}
+
+// Load on page ready
+loadMeds();
+
+// Check every 5 minutes for missed medications
+setInterval(() => {
+  if (meds.length > 0) {
+    renderMeds();
+    checkMissedMedications();
+  }
+}, 5 * 60 * 1000);
+</script>
+
+</body>
+</html>
