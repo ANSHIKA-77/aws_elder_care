@@ -1,414 +1,504 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Elder Care — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/shared.css">
-<style>
-  /* ─── HERO BANNER ─── */
-  .hero-banner {
-    background: linear-gradient(135deg, var(--sage-dark) 0%, var(--sage) 100%);
-    border-radius: var(--radius);
-    padding: 32px 36px;
-    margin-bottom: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  .hero-banner::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.07);
-  }
-  
-  .hero-text h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    color: var(--white);
-    margin-bottom: 6px;
-  }
-  
-  .hero-text p { 
-    color: rgba(255,255,255,0.75); 
-    font-size: 14px; 
-  }
-  
-  .hero-icon { 
-    font-size: 60px; 
-    opacity: 0.9; 
-    position: relative; 
-    z-index: 1; 
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elder Care — Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/shared.css">
+  <style>
+    /* ─── HERO BANNER ─── */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--sage-dark) 0%, var(--sage) 100%);
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
 
-  /* ─── STAT CARDS ─── */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  
-  .stat-card {
-    background: var(--white);
-    border-radius: 16px;
-    padding: 20px 22px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border);
-  }
-  
-  .stat-card-icon {
-    font-size: 26px;
-    margin-bottom: 10px;
-  }
-  
-  .stat-card-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-  }
-  
-  .stat-card-label { 
-    font-size: 12px; 
-    color: var(--text-muted); 
-    margin-top: 4px; 
-    font-weight: 500; 
-  }
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.07);
+    }
 
-  /* ─── DASHBOARD GRID ─── */
-  .dash-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
-  }
+    .hero-text h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
 
-  .dash-card {
-    background: var(--white);
-    border-radius: 18px;
-    padding: 26px 20px;
-    text-align: center;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    transition: all 0.22s;
-    position: relative;
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--text);
-  }
-  
-  .dash-card::before {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--sage-dark), var(--sage-light));
-    transform: scaleX(0);
-    transition: transform 0.22s;
-  }
-  
-  .dash-card:hover { 
-    transform: translateY(-4px); 
-    box-shadow: var(--shadow); 
-    border-color: var(--sage-light); 
-  }
-  
-  .dash-card:hover::before { 
-    transform: scaleX(1); 
-  }
-  
-  .dash-card-icon { 
-    font-size: 36px; 
-    margin-bottom: 10px; 
-    display: block; 
-  }
-  
-  .dash-card h3 { 
-    font-size: 13.5px; 
-    font-weight: 600; 
-    color: var(--text); 
-  }
+    .hero-text p {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 14px;
+    }
 
-  .dash-card.emergency { 
-    border-color: #f5b8b8; 
-    background: linear-gradient(135deg, #fff6f6, var(--white)); 
-  }
-  
-  .dash-card.emergency:hover { 
-    border-color: var(--red); 
-    box-shadow: 0 8px 28px rgba(217,79,79,0.15); 
-  }
-  
-  .dash-card.emergency::before { 
-    background: linear-gradient(90deg, var(--red), #f5a0a0); 
-  }
+    .hero-icon {
+      font-size: 60px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
 
-  /* ─── WELCOME CARD ─── */
-  .welcome-card {
-    background: linear-gradient(135deg, #F0F5F1, var(--white));
-    border-radius: 16px;
-    padding: 24px 26px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(123,158,135,0.15);
-    box-shadow: var(--shadow-sm);
-  }
-  
-  .welcome-card h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 12px;
-  }
-  
-  .pending-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  
-  .pending-item:last-child { border-bottom: none; }
-  
-  .pending-item-icon { font-size: 20px; }
-  
-  .pending-item-text {
-    flex: 1;
-    font-size: 13.5px;
-    color: var(--text-muted);
-  }
-  
-  .pending-item-text strong { 
-    color: var(--text); 
-    font-weight: 600; 
-  }
+    /* ─── STAT CARDS ─── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
 
-  /* ─── HEALTH TIP CARD ─── */
-  .health-tip-card {
-    background: linear-gradient(135deg, #EBF2FA, var(--white));
-    border-radius: 16px;
-    padding: 22px 26px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(59,110,165,0.15);
-    box-shadow: var(--shadow-sm);
-  }
-  
-  .health-tip-card h3 {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .health-tip-card p {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
+    .stat-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
 
-  /* ─── RECENT ACTIVITY ─── */
-  .activity-card {
-    background: var(--white);
-    border-radius: 16px;
-    padding: 22px 26px;
-    margin-bottom: 24px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-  }
-  
-  .activity-card h3 {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 16px;
-  }
-  
-  .activity-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  
-  .activity-item:last-child { border-bottom: none; }
-  
-  .activity-item-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-    background: var(--cream);
-  }
-  
-  .activity-item-info {
-    flex: 1;
-  }
-  
-  .activity-item-title {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--text);
-  }
-  
-  .activity-item-time {
-    font-size: 11.5px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-</style>
+    .stat-card-icon {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-card-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ─── DASHBOARD GRID ─── */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .dash-card {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 26px 20px;
+      text-align: center;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.22s;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .dash-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--sage-dark), var(--sage-light));
+      transform: scaleX(0);
+      transition: transform 0.22s;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+      border-color: var(--sage-light);
+    }
+
+    .dash-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .dash-card-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .dash-card h3 {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .dash-card.emergency {
+      border-color: #f5b8b8;
+      background: linear-gradient(135deg, #fff6f6, var(--white));
+    }
+
+    .dash-card.emergency:hover {
+      border-color: var(--red);
+      box-shadow: 0 8px 28px rgba(217, 79, 79, 0.15);
+    }
+
+    .dash-card.emergency::before {
+      background: linear-gradient(90deg, var(--red), #f5a0a0);
+    }
+
+    /* ─── WELCOME CARD ─── */
+    .welcome-card {
+      background: linear-gradient(135deg, #F0F5F1, var(--white));
+      border-radius: 16px;
+      padding: 24px 26px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(123, 158, 135, 0.15);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .welcome-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .pending-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pending-item:last-child {
+      border-bottom: none;
+    }
+
+    .pending-item-icon {
+      font-size: 20px;
+    }
+
+    .pending-item-text {
+      flex: 1;
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    .pending-item-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ─── HEALTH TIP CARD ─── */
+    .health-tip-card {
+      background: linear-gradient(135deg, #EBF2FA, var(--white));
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(59, 110, 165, 0.15);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .health-tip-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .health-tip-card p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ─── RECENT ACTIVITY ─── */
+    .activity-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .activity-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      background: var(--cream);
+    }
+
+    .activity-item-info {
+      flex: 1;
+    }
+
+    .activity-item-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .activity-item-time {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-  <div class="hero-banner">
-    <div class="hero-text">
-      <h2>Good <span id="timeOfDay">morning</span>, <span id="heroName">—</span> 👋</h2>
-      <p id="heroDate"></p>
-    </div>
-    <span class="hero-icon">🌿</span>
-  </div>
-
-  <div class="stats-row" id="statsRow">
-    <div class="loading">
-      <div class="spinner"></div>
-    </div>
-  </div>
-
-  <!-- Welcome Card with Pending Tasks -->
-  <div class="welcome-card" id="welcomeCard">
-    <h3>📋 Today's Summary</h3>
-    <div id="pendingList">
-      <div class="loading"><div class="spinner"></div></div>
-    </div>
-  </div>
-
-  <!-- Health Tip -->
-  <div class="health-tip-card">
-    <h3>💡 Daily Health Tip</h3>
-    <p id="healthTip">Loading...</p>
-  </div>
-
-  <!-- Recent Activity -->
-  <div class="activity-card">
-    <h3>🕒 Recent Activity</h3>
-    <div id="recentActivity">
-      <div class="empty-state">
-        <p>No recent activity to display</p>
+  <div class="container">
+    <!-- ACTIVE EMERGENCY ALERT BANNER -->
+    <div id="homeEmergencyAlertBanner" style="display:none;margin-bottom:20px;padding:18px 20px;background:#FFF0F0;border:2px solid var(--red);border-radius:18px;box-shadow:0 8px 24px rgba(217,79,79,0.28);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:32px;">🚨</span>
+          <div>
+            <h3 style="margin:0 0 4px 0;color:var(--red-dark);font-size:18px;font-weight:800;">ACTIVE EMERGENCY ALERT</h3>
+            <p id="homeEmergencyDesc" style="margin:0;font-size:13.5px;color:var(--text);font-weight:500;">An emergency alert has been triggered!</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <a href="/video.html" style="padding:9px 16px;background:var(--red);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;">📹 Call Now</a>
+          <a href="/emergency.html" onclick="if (window._currentActiveEmergencyAlert && typeof showActiveEmergencyModal === 'function') { try { sessionStorage.removeItem('dismissed_emergency_' + (window._currentActiveEmergencyAlert._id || window._currentActiveEmergencyAlert.id)); } catch(e){} showActiveEmergencyModal(window._currentActiveEmergencyAlert); return false; }" style="padding:9px 16px;background:var(--white);color:var(--red);border:1.5px solid var(--red);text-decoration:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">View SOS & Resolve →</a>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="section-card">
-    <h2>Quick Access</h2>
-    <div class="dash-grid">
-      <a href="/medications.html" class="dash-card">
-        <span class="dash-card-icon">💊</span>
-        <h3>Medications</h3>
-      </a>
-      <a href="/appointments.html" class="dash-card">
-        <span class="dash-card-icon">📅</span>
-        <h3>Appointments</h3>
-      </a>
-      <a href="/exercises.html" class="dash-card">
-        <span class="dash-card-icon">🏃</span>
-        <h3>Exercise</h3>
-      </a>
-      <a href="/gallery.html" class="dash-card">
-        <span class="dash-card-icon">🖼️</span>
-        <h3>Gallery</h3>
-      </a>
-      <a href="/map.html" class="dash-card">
-        <span class="dash-card-icon">📍</span>
-        <h3>Live Map</h3>
-      </a>
-      <a href="/video.html" class="dash-card">
-        <span class="dash-card-icon">📹</span>
-        <h3>Video Call</h3>
-      </a>
-      <a href="/voice.html" class="dash-card">
-        <span class="dash-card-icon">🎤</span>
-        <h3>Voice Assistant</h3>
-      </a>
-      <a href="/emergency.html" class="dash-card emergency">
-        <span class="dash-card-icon">🚨</span>
-        <h3>Emergency</h3>
-      </a>
+    <div class="hero-banner">
+      <div class="hero-text">
+        <h2>Good <span id="timeOfDay">morning</span>, <span id="heroName">—</span> 👋</h2>
+        <p id="heroDate"></p>
+        <div style="margin-top:12px;">
+          <a href="/video.html" id="heroCallBtn" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:12px;color:white;font-size:13px;font-weight:700;text-decoration:none;transition:background 0.2s;">
+            <span id="heroCallText">📹 One-Tap Family Call</span>
+          </a>
+        </div>
+      </div>
+      <span class="hero-icon">🌿</span>
+    </div>
+
+    <!-- Family Hub / Caregiver Invite Box (Caretaker only) -->
+    <div id="familyHubCard" class="welcome-card" style="display:none;background:linear-gradient(135deg, #EAF5EE, #FAF7F2);border:1.5px dashed var(--sage-dark);margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h3 style="margin-bottom:4px;color:var(--sage-dark);font-size:16px;">🏡 Family Care Group</h3>
+          <p style="font-size:13px;color:var(--text-muted);margin:0;">Share your invite code with family members so they can join your care group.</p>
+        </div>
+        <div style="background:var(--white);padding:8px 16px;border-radius:12px;border:1.5px dashed var(--sage-dark);text-align:center;">
+          <div style="font-size:11px;font-weight:700;color:var(--text-muted);">INVITE CODE</div>
+          <div id="homeInviteCode" style="font-size:20px;font-weight:700;letter-spacing:3px;color:var(--sage-dark);">—</div>
+          <button onclick="copyHomeInviteCode()" style="margin-top:4px;padding:3px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;background:var(--sage-dark);color:white;cursor:pointer;">📋 Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row" id="statsRow">
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <!-- Welcome Card with Pending Tasks -->
+    <div class="welcome-card" id="welcomeCard">
+      <h3>📋 Today's Summary</h3>
+      <div id="pendingList">
+        <div class="loading">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Health Tip -->
+    <div class="health-tip-card">
+      <h3>💡 Daily Health Tip</h3>
+      <p id="healthTip">Loading...</p>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-card">
+      <h3>🕒 Recent Activity</h3>
+      <div id="recentActivity">
+        <div class="empty-state">
+          <p>No recent activity to display</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h2>Quick Access</h2>
+      <div class="dash-grid">
+        <a href="/medications.html" class="dash-card">
+          <span class="dash-card-icon">💊</span>
+          <h3>Medications</h3>
+        </a>
+        <a href="/appointments.html" class="dash-card">
+          <span class="dash-card-icon">📅</span>
+          <h3>Appointments</h3>
+        </a>
+        <a href="/exercises.html" class="dash-card">
+          <span class="dash-card-icon">🏃</span>
+          <h3>Exercise</h3>
+        </a>
+        <a href="/gallery.html" class="dash-card">
+          <span class="dash-card-icon">🖼️</span>
+          <h3>Gallery</h3>
+        </a>
+        <a href="/map.html" class="dash-card">
+          <span class="dash-card-icon">📍</span>
+          <h3>Live Map</h3>
+        </a>
+        <a href="/video.html" class="dash-card">
+          <span class="dash-card-icon">📹</span>
+          <h3 id="videoCardTitle">Video Call</h3>
+        </a>
+        <a href="/voice.html" class="dash-card">
+          <span class="dash-card-icon">🎤</span>
+          <h3>Voice Assistant</h3>
+        </a>
+        <a href="/emergency.html" class="dash-card emergency">
+          <span class="dash-card-icon">🚨</span>
+          <h3>Emergency</h3>
+        </a>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <button class="btn btn-danger" onclick="logout()" style="width:auto;">
+        ↩ Sign Out
+      </button>
     </div>
   </div>
 
-  <div class="section-card">
-    <button class="btn btn-danger" onclick="logout()" style="width:auto;">
-      ↩ Sign Out
-    </button>
-  </div>
-</div>
+  <div id="toast"></div>
 
-<div id="toast"></div>
+  <script src="/js/config.js"></script>
+  <script src="/js/shared.js"></script>
+  <script>
+    // Set greeting
+    const hour = new Date().getHours();
+    document.getElementById('timeOfDay').textContent =
+      hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
 
-<script src="/js/shared.js"></script>
-<script>
-// Set greeting
-const hour = new Date().getHours();
-document.getElementById('timeOfDay').textContent = 
-  hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+    document.getElementById('heroName').textContent = getUserName();
+    document.getElementById('heroDate').textContent = new Date().toLocaleDateString('en-IN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
-document.getElementById('heroName').textContent = getUserName();
-document.getElementById('heroDate').textContent = new Date().toLocaleDateString('en-IN', { 
-  weekday:'long', 
-  year:'numeric', 
-  month:'long', 
-  day:'numeric' 
-});
+    const userRole = getRole();
+    const heroCallText = document.getElementById('heroCallText');
+    const videoCardTitle = document.getElementById('videoCardTitle');
+    if (userRole === 'caretaker') {
+      if (heroCallText) heroCallText.textContent = '📹 Call Client';
+      if (videoCardTitle) videoCardTitle.textContent = 'Call Client';
+    } else {
+      if (heroCallText) heroCallText.textContent = '📹 Call Caretaker';
+      if (videoCardTitle) videoCardTitle.textContent = 'Call Caretaker';
+    }
 
-// Load statistics
-async function loadStats() {
-  try {
-    const [medStats, apptStats, exStats] = await Promise.all([
-      apiCall('/medications/stats/today').catch((err) => {
-        console.error('Med stats error:', err);
-        return { data: { taken: 0, total: 0 } };
-      }),
-      apiCall('/appointments/stats/summary').catch((err) => {
-        console.error('Appt stats error:', err);
-        return { data: { today: 0, total: 0 } };
-      }),
-      apiCall('/exercises/summary').catch((err) => {
-        console.error('Exercise stats error:', err);
-        return { data: { totalStepsCompleted: 0 } };
-      })
-    ]);
+    // Active emergency alerts and popups are managed globally by shared.js (initActiveEmergencyListener)
 
-    console.log('=== STATS DEBUG ===');
-    console.log('medStats:', JSON.stringify(medStats, null, 2));
-    console.log('apptStats:', JSON.stringify(apptStats, null, 2));
-    console.log('exStats:', JSON.stringify(exStats, null, 2));
+    // Display Caretaker Invite Code
+    if (getRole() === 'caretaker') {
+      apiCall('/auth/invite-code').then(res => {
+        if (res && res.data && res.data.inviteCode) {
+          const card = document.getElementById('familyHubCard');
+          if (card) card.style.display = 'block';
+          const codeEl = document.getElementById('homeInviteCode');
+          if (codeEl) codeEl.textContent = res.data.inviteCode;
+        }
+      }).catch(console.error);
+    }
 
-    const doneMeds = medStats?.data?.taken || 0;
-    const totalMeds = medStats?.data?.total || 0;
-    const todayAppts = apptStats?.data?.today || 0;
-    // Exercise returns totalSteps (not totalStepsCompleted)
-    const exDone = exStats?.data?.totalSteps || 0;
-    const totalAppts = apptStats?.data?.total || 0;
-    
-    console.log('Extracted values:', { doneMeds, totalMeds, todayAppts, exDone, totalAppts });
+    function copyHomeInviteCode() {
+      const code = document.getElementById('homeInviteCode').textContent;
+      if (code && code !== '—') {
+        navigator.clipboard.writeText(code).then(() => {
+          showToast('✅ Invite code copied: ' + code);
+        }).catch(() => {
+          showToast('Code: ' + code);
+        });
+      }
+    }
 
-    document.getElementById('statsRow').innerHTML = `
+    // Load statistics
+    async function loadStats() {
+      try {
+        const [medStats, apptStats, exStats] = await Promise.all([
+          apiCall('/medications/stats/today').catch((err) => {
+            console.error('Med stats error:', err);
+            return { data: { taken: 0, total: 0 } };
+          }),
+          apiCall('/appointments/stats/summary').catch((err) => {
+            console.error('Appt stats error:', err);
+            return { data: { today: 0, total: 0 } };
+          }),
+          apiCall('/exercises/summary').catch((err) => {
+            console.error('Exercise stats error:', err);
+            return { data: { totalStepsCompleted: 0 } };
+          })
+        ]);
+
+        console.log('=== STATS DEBUG ===');
+        console.log('medStats:', JSON.stringify(medStats, null, 2));
+        console.log('apptStats:', JSON.stringify(apptStats, null, 2));
+        console.log('exStats:', JSON.stringify(exStats, null, 2));
+
+        const doneMeds = medStats?.data?.taken || 0;
+        const totalMeds = medStats?.data?.total || 0;
+        const todayAppts = apptStats?.data?.today || 0;
+        // Exercise returns totalSteps (not totalStepsCompleted)
+        const exDone = exStats?.data?.totalSteps || 0;
+        const totalAppts = apptStats?.data?.total || 0;
+
+        console.log('Extracted values:', { doneMeds, totalMeds, todayAppts, exDone, totalAppts });
+
+        document.getElementById('statsRow').innerHTML = `
       <div class="stat-card">
         <div class="stat-card-icon">💊</div>
         <div class="stat-card-value">${doneMeds}/${totalMeds}</div>
@@ -430,54 +520,54 @@ async function loadStats() {
         <div class="stat-card-label">Total appointments</div>
       </div>
     `;
-  } catch (error) {
-    console.error('Error loading stats:', error);
-    document.getElementById('statsRow').innerHTML = `
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        document.getElementById('statsRow').innerHTML = `
       <div class="empty-state">
         <p>Unable to load statistics</p>
       </div>
     `;
-  }
-}
+      }
+    }
 
-loadStats();
+    loadStats();
 
-// Health tips rotation
-const healthTips = [
-  "Stay hydrated! Aim for 6-8 glasses of water daily.",
-  "Take a 10-minute walk after meals to aid digestion.",
-  "Deep breathing exercises can reduce stress and lower blood pressure.",
-  "Get 7-8 hours of quality sleep for better health.",
-  "Eat colorful fruits and vegetables for essential nutrients.",
-  "Maintain good posture to prevent back and neck pain.",
-  "Social connections are vital for mental health and longevity.",
-  "Regular stretching improves flexibility and reduces injury risk.",
-  "Limit screen time before bed for better sleep quality.",
-  "Take medications at the same time each day for better adherence."
-];
+    // Health tips rotation
+    const healthTips = [
+      "Stay hydrated! Aim for 6-8 glasses of water daily.",
+      "Take a 10-minute walk after meals to aid digestion.",
+      "Deep breathing exercises can reduce stress and lower blood pressure.",
+      "Get 7-8 hours of quality sleep for better health.",
+      "Eat colorful fruits and vegetables for essential nutrients.",
+      "Maintain good posture to prevent back and neck pain.",
+      "Social connections are vital for mental health and longevity.",
+      "Regular stretching improves flexibility and reduces injury risk.",
+      "Limit screen time before bed for better sleep quality.",
+      "Take medications at the same time each day for better adherence."
+    ];
 
-document.getElementById('healthTip').textContent = 
-  healthTips[Math.floor(Math.random() * healthTips.length)];
+    document.getElementById('healthTip').textContent =
+      healthTips[Math.floor(Math.random() * healthTips.length)];
 
-// Load pending tasks
-async function loadPendingTasks() {
-  try {
-    const [medications, appointments] = await Promise.all([
-      apiCall('/medications?activeOnly=true').catch(() => ({ data: [] })),
-      apiCall('/appointments?status=upcoming').catch(() => ({ data: [] }))
-    ]);
+    // Load pending tasks
+    async function loadPendingTasks() {
+      try {
+        const [medications, appointments] = await Promise.all([
+          apiCall('/medications?activeOnly=true').catch(() => ({ data: [] })),
+          apiCall('/appointments?status=upcoming').catch(() => ({ data: [] }))
+        ]);
 
-    const pendingMeds = (medications.data || []).filter(m => !m.takenToday);
-    const upcomingAppts = (appointments.data || []).filter(a => {
-      const apptDate = new Date(a.date).toDateString();
-      const today = new Date().toDateString();
-      return apptDate === today;
-    });
+        const pendingMeds = (medications.data || []).filter(m => !m.takenToday);
+        const upcomingAppts = (appointments.data || []).filter(a => {
+          const apptDate = new Date(a.date).toDateString();
+          const today = new Date().toDateString();
+          return apptDate === today;
+        });
 
-    let html = '';
-    
-    if (pendingMeds.length > 0) {
-      html += `
+        let html = '';
+
+        if (pendingMeds.length > 0) {
+          html += `
         <div class="pending-item">
           <span class="pending-item-icon">💊</span>
           <div class="pending-item-text">
@@ -485,11 +575,11 @@ async function loadPendingTasks() {
           </div>
         </div>
       `;
-    }
-    
-    if (upcomingAppts.length > 0) {
-      const nextAppt = upcomingAppts[0];
-      html += `
+        }
+
+        if (upcomingAppts.length > 0) {
+          const nextAppt = upcomingAppts[0];
+          html += `
         <div class="pending-item">
           <span class="pending-item-icon">📅</span>
           <div class="pending-item-text">
@@ -497,79 +587,84 @@ async function loadPendingTasks() {
           </div>
         </div>
       `;
-    }
-    
-    if (!html) {
-      html = '<div class="empty-state"><p>All caught up! No pending tasks 🎉</p></div>';
-    }
-    
-    document.getElementById('pendingList').innerHTML = html;
-  } catch (error) {
-    console.error('Error loading pending tasks:', error);
-    document.getElementById('pendingList').innerHTML = 
-      '<div class="empty-state"><p>Unable to load tasks</p></div>';
-  }
-}
+        }
 
-// Load recent activity
-async function loadRecentActivity() {
-  try {
-    const [medications, appointments, exercises] = await Promise.all([
-      apiCall('/medications').catch(() => ({ data: [] })),
-      apiCall('/appointments').catch(() => ({ data: [] })),
-      apiCall('/exercises/history?days=7').catch(() => ({ data: [] }))
-    ]);
+        if (!html) {
+          html = '<div class="empty-state"><p>All caught up! No pending tasks 🎉</p></div>';
+        }
 
-    const activities = [];
-    
-    // Recent medications taken
-    (medications.data || [])
-      .filter(m => m.takenToday)
-      .slice(0, 3)
-      .forEach(m => {
-        activities.push({
-          icon: '💊',
-          title: `Took ${m.name}`,
-          time: 'Today',
-          bg: '#EAF5EE'
-        });
-      });
-    
-    // Recent appointments
-    (appointments.data || [])
-      .filter(a => a.status === 'completed')
-      .slice(0, 2)
-      .forEach(a => {
-        activities.push({
-          icon: '✅',
-          title: `Completed: ${a.title}`,
-          time: formatDate(a.date),
-          bg: '#EBF2FA'
-        });
-      });
-    
-    // Recent exercises
-    if (exercises.data && exercises.data.length > 0) {
-      const recentEx = exercises.data[0];
-      if (recentEx.categories && Object.keys(recentEx.categories).length > 0) {
-        activities.push({
-          icon: '🏃',
-          title: `Completed exercise routine`,
-          time: formatDate(recentEx.date),
-          bg: '#FEF3E2'
-        });
+        document.getElementById('pendingList').innerHTML = html;
+      } catch (error) {
+        console.error('Error loading pending tasks:', error);
+        document.getElementById('pendingList').innerHTML =
+          '<div class="empty-state"><p>Unable to load tasks</p></div>';
       }
     }
-    
-    if (activities.length === 0) {
-      document.getElementById('recentActivity').innerHTML = 
-        '<div class="empty-state"><p>No recent activity to display</p></div>';
-      return;
-    }
-    
-    document.getElementById('recentActivity').innerHTML = activities
-      .slice(0, 5)
-      .map(a => `
+
+    // Load recent activity
+    async function loadRecentActivity() {
+      try {
+        const [medications, appointments, exercises] = await Promise.all([
+          apiCall('/medications').catch(() => ({ data: [] })),
+          apiCall('/appointments').catch(() => ({ data: [] })),
+          apiCall('/exercises/history?days=7').catch(() => ({ data: [] }))
+        ]);
+
+        const activities = [];
+
+        // Recent medications taken
+        (medications.data || [])
+          .filter(m => m.takenToday)
+          .slice(0, 3)
+          .forEach(m => {
+            activities.push({
+              icon: '💊',
+              title: `Took ${m.name}`,
+              time: 'Today',
+              bg: '#EAF5EE'
+            });
+          });
+
+        // Recent appointments
+        (appointments.data || [])
+          .filter(a => a.status === 'completed')
+          .slice(0, 2)
+          .forEach(a => {
+            activities.push({
+              icon: '✅',
+              title: `Completed: ${a.title}`,
+              time: formatDate(a.date),
+              bg: '#EBF2FA'
+            });
+          });
+
+        // Recent exercises
+        if (exercises.data && exercises.data.length > 0) {
+          const recentEx = exercises.data[0];
+          let exComment = '';
+          if (recentEx.comment) {
+            exComment = ` — "${recentEx.comment}"`;
+          } else if (recentEx.exercises && recentEx.exercises.length > 0) {
+            const withComment = recentEx.exercises.find(e => e.comment);
+            if (withComment) exComment = ` — "${withComment.comment}"`;
+          }
+          activities.push({
+            icon: '🏃',
+            title: (userRole === 'client' ? "Caretaker completed exercise" : "Completed exercise routine") + exComment,
+            time: formatDate(recentEx.date),
+            bg: '#FEF3E2'
+          });
+        }
+
+        if (activities.length === 0) {
+          document.getElementById('recentActivity').innerHTML =
+            '<div class="empty-state"><p>No recent activity to display</p></div>';
+          return;
+        }
+
+        document.getElementById('recentActivity').innerHTML = activities
+          .slice(0, 5)
+          .map(a => `
         <div class="activity-item">
           <div class="activity-item-icon" style="background:${a.bg}">${a.icon}</div>
           <div class="activity-item-info">
@@ -578,16 +673,17 @@ async function loadRecentActivity() {
           </div>
         </div>
       `).join('');
-  } catch (error) {
-    console.error('Error loading recent activity:', error);
-    document.getElementById('recentActivity').innerHTML = 
-      '<div class="empty-state"><p>Unable to load activity</p></div>';
-  }
-}
+      } catch (error) {
+        console.error('Error loading recent activity:', error);
+        document.getElementById('recentActivity').innerHTML =
+          '<div class="empty-state"><p>Unable to load activity</p></div>';
+      }
+    }
 
-loadPendingTasks();
-loadRecentActivity();
-</script>
+    loadPendingTasks();
+    loadRecentActivity();
+  </script>
 
 </body>
+
 </html>

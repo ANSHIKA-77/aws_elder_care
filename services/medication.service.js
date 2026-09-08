@@ -2,10 +2,37 @@
 const Medication = require('../models/medicationModel');
 
 /**
- * Get all medications for a specific user
+ * Helper to build user query condition (single ID or array of group IDs)
  */
-exports.getUserMedications = async (userId, options = {}) => {
-    const query = { userId };
+function buildUserQuery(userIdOrIds) {
+    if (Array.isArray(userIdOrIds)) {
+        return { $in: userIdOrIds };
+    }
+    return userIdOrIds;
+}
+
+/**
+ * Get all medications for a specific user or group of users
+ */
+exports.getUserMedications = async (userIdOrIds, options = {}) => {
+    const userQuery = buildUserQuery(userIdOrIds);
+
+    // Auto-reset: Any medication marked taken on a previous calendar day resets to takenToday: false
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    await Medication.updateMany({
+        userId: userQuery,
+        takenToday: true,
+        $or: [
+            { lastTakenAt: null },
+            { lastTakenAt: { $lt: startOfToday } }
+        ]
+    }, {
+        $set: { takenToday: false }
+    });
+
+    const query = { userId: userQuery };
     
     // Filter by active status if requested
     if (options.activeOnly) {
@@ -13,19 +40,20 @@ exports.getUserMedications = async (userId, options = {}) => {
     }
     
     const medications = await Medication.find(query)
+        .populate('userId', 'name role')
         .sort({ timeOfDay: 1, createdAt: 1 });  // Sort by time of day
     
     return medications;
 };
 
 /**
- * Get single medication by ID (with user ownership check)
+ * Get single medication by ID (with user/group ownership check)
  */
-exports.getMedicationById = async (medId, userId) => {
+exports.getMedicationById = async (medId, userIdOrIds) => {
     const medication = await Medication.findOne({
         _id: medId,
-        userId: userId  // Security: ensure user owns this medication
-    });
+        userId: buildUserQuery(userIdOrIds)
+    }).populate('userId', 'name role');
     
     return medication;
 };
@@ -48,8 +76,11 @@ exports.createMedication = async (medData) => {
 /**
  * Mark medication as taken for today
  */
-exports.markMedicationAsTaken = async (medId, userId) => {
-    const medication = await Medication.findOne({ _id: medId, userId });
+exports.markMedicationAsTaken = async (medId, userIdOrIds) => {
+    const medication = await Medication.findOne({
+        _id: medId,
+        userId: buildUserQuery(userIdOrIds)
+    });
     
     if (!medication) {
         return null;
@@ -64,8 +95,11 @@ exports.markMedicationAsTaken = async (medId, userId) => {
 /**
  * Unmark medication (undo taken status)
  */
-exports.unmarkMedication = async (medId, userId) => {
-    const medication = await Medication.findOne({ _id: medId, userId });
+exports.unmarkMedication = async (medId, userIdOrIds) => {
+    const medication = await Medication.findOne({
+        _id: medId,
+        userId: buildUserQuery(userIdOrIds)
+    });
     
     if (!medication) {
         return null;
@@ -81,11 +115,11 @@ exports.unmarkMedication = async (medId, userId) => {
 /**
  * Update medication details
  */
-exports.updateMedication = async (medId, userId, updates) => {
+exports.updateMedication = async (medId, userIdOrIds, updates) => {
     const medication = await Medication.findOneAndUpdate(
-        { _id: medId, userId },
+        { _id: medId, userId: buildUserQuery(userIdOrIds) },
         { $set: updates },
-        { new: true, runValidators: true }  // Return updated doc, run validation
+        { returnDocument: 'after', runValidators: true }  // Return updated doc, run validation
     );
     
     return medication;
@@ -94,22 +128,39 @@ exports.updateMedication = async (medId, userId, updates) => {
 /**
  * Soft delete medication (set isActive to false)
  */
-exports.deleteMedication = async (medId, userId) => {
+exports.deleteMedication = async (medId, userIdOrIds) => {
     const medication = await Medication.findOneAndUpdate(
-        { _id: medId, userId },
+        { _id: medId, userId: buildUserQuery(userIdOrIds) },
         { $set: { isActive: false } },
-        { new: true }
+        { returnDocument: 'after' }
     );
     
     return medication;
 };
 
 /**
- * Get today's medication statistics
+ * Get today's medication statistics (for single user or combined group)
  */
-exports.getTodayStats = async (userId) => {
+exports.getTodayStats = async (userIdOrIds) => {
+    const userQuery = buildUserQuery(userIdOrIds);
+
+    // Auto-reset: Any medication marked taken on a previous calendar day resets to takenToday: false
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    await Medication.updateMany({
+        userId: userQuery,
+        takenToday: true,
+        $or: [
+            { lastTakenAt: null },
+            { lastTakenAt: { $lt: startOfToday } }
+        ]
+    }, {
+        $set: { takenToday: false }
+    });
+
     const medications = await Medication.find({
-        userId,
+        userId: userQuery,
         isActive: true
     });
     

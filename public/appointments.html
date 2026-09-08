@@ -1,248 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Appointments — Elder Care</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/shared.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointments — Elder Care</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/shared.css">
+  <style>
+    .badge-caretaker {
+      background: #EAF5EE;
+      color: #2D6A4F;
+      border: 1px solid #B7E4C7;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .badge-client {
+      background: #EBF2FA;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-  <a href="/home.html" class="back-button">
-    ← Back to Dashboard
-  </a>
+  <div class="container">
+    <a href="/home.html" class="back-button">
+      ← Back to Dashboard
+    </a>
 
-  <div class="page-header">
-    <div>
-      <h1>📅 Appointments</h1>
-      <p>Manage and track medical appointments</p>
+    <div class="page-header">
+      <div>
+        <h1>📅 Appointments</h1>
+        <p>Manage and track medical appointments</p>
+      </div>
+    </div>
+
+    <!-- Add Appointment Form -->
+    <div id="apptFormCard" class="section-card">
+      <h2>➕ Add Appointment</h2>
+      <div class="form-row">
+        <div class="field">
+          <label>Doctor Name</label>
+          <input type="text" id="apptDoctor" placeholder="e.g. Dr. Sarah Johnson">
+        </div>
+        <div class="field">
+          <label>Hospital / Clinic</label>
+          <input type="text" id="apptHospital" placeholder="e.g. Apollo Hospital / City Clinic">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="apptDate">
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <input type="time" id="apptTime">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Address</label>
+          <input type="text" id="apptAddress" placeholder="e.g. 104 Main Street, Floor 3">
+        </div>
+        <div class="field">
+          <label>Reminder Before</label>
+          <select id="apptReminder">
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60" selected>1 hour</option>
+            <option value="120">2 hours</option>
+            <option value="1440">1 day</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="field">
+          <label>Purpose / Notes</label>
+          <textarea id="apptNotes" placeholder="e.g. Routine blood pressure and sugar checkup"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveAppointment()">Add Appointment</button>
+      </div>
+    </div>
+
+    <!-- Appointments List -->
+    <div class="section-card">
+      <h2>📋 All Appointments</h2>
+      <div id="todaySection"></div>
+      <div id="upcomingSection"></div>
+      <div id="completedSection"></div>
+      <div id="missedSection"></div>
     </div>
   </div>
 
-  <!-- Add Appointment Form (Caregivers only) -->
-  <div id="apptFormCard" class="section-card" style="display:none;">
-    <h2>➕ Add Appointment</h2>
-    <div class="form-row">
-      <div class="field">
-        <label>Title</label>
-        <input type="text" id="apptTitle" placeholder="e.g. Cardiology Check-up">
-      </div>
-      <div class="field">
-        <label>Location</label>
-        <input type="text" id="apptLocation" placeholder="Hospital / Clinic name">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="field">
-        <label>Date</label>
-        <input type="date" id="apptDate">
-      </div>
-      <div class="field">
-        <label>Time</label>
-        <input type="time" id="apptTime">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="field">
-        <label>Reminder (minutes before)</label>
-        <select id="apptReminder">
-          <option value="15">15 minutes</option>
-          <option value="30">30 minutes</option>
-          <option value="60" selected>1 hour</option>
-          <option value="120">2 hours</option>
-          <option value="1440">1 day</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Status</label>
-        <input type="text" value="Upcoming" disabled style="background:#f5f5f5;">
-      </div>
-    </div>
-    <div class="form-row single">
-      <div class="field">
-        <label>Notes</label>
-        <textarea id="apptNotes" placeholder="Additional notes…"></textarea>
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveAppointment()">Add Appointment</button>
-    </div>
-  </div>
+  <div id="toast"></div>
 
-  <!-- Appointments List -->
-  <div class="section-card">
-    <h2>📋 All Appointments</h2>
-    <div id="todaySection"></div>
-    <div id="upcomingSection"></div>
-    <div id="completedSection"></div>
-    <div id="missedSection"></div>
-  </div>
-</div>
+  <script src="/js/config.js"></script>
+  <script src="/js/shared.js"></script>
+  <script>
+    let appointments = [];
+    const role = getRole();
 
-<div id="toast"></div>
+    // selectedClientId: null = own data; set = caretaker acting for a client
+    let selectedClientId = null;
 
-<script src="/js/shared.js"></script>
-<script>
-let appointments = [];
-const role = getRole();
+    function clientQS() {
+      return '';
+    }
 
-// Show form for both roles (per requirements: "Both roles can add")
-document.getElementById('apptFormCard').style.display = 'block';
+    // Show form for both roles
+    document.getElementById('apptFormCard').style.display = 'block';
 
-async function saveAppointment() {
-  const title = document.getElementById('apptTitle').value.trim();
-  const date = document.getElementById('apptDate').value;
-  const time = document.getElementById('apptTime').value;
-  const location = document.getElementById('apptLocation').value.trim();
-  const notes = document.getElementById('apptNotes').value.trim();
-  const reminderMinutesBefore = parseInt(document.getElementById('apptReminder').value);
+    async function saveAppointment() {
+      const doctor = document.getElementById('apptDoctor').value.trim();
+      const hospital = document.getElementById('apptHospital').value.trim();
+      const date = document.getElementById('apptDate').value;
+      const time = document.getElementById('apptTime').value;
+      const address = document.getElementById('apptAddress').value.trim();
+      const notes = document.getElementById('apptNotes').value.trim();
+      const reminderMinutesBefore = parseInt(document.getElementById('apptReminder').value);
 
-  if (!title || !date || !time) {
-    showToast('⚠ Please fill Title, Date and Time.', true);
-    return;
-  }
+      if (!date || !time) {
+        showToast('⚠ Please fill Date and Time.', true);
+        return;
+      }
 
-  try {
-    await apiCall('/appointments', {
-      method: 'POST',
-      body: JSON.stringify({ title, date, time, location, notes, reminderMinutesBefore })
-    });
+      const title = doctor ? `Dr. ${doctor}` : (hospital || 'Doctor Visit');
 
-    ['apptTitle','apptDate','apptTime','apptLocation','apptNotes'].forEach(id =>
-      document.getElementById(id).value = ''
-    );
-    document.getElementById('apptReminder').value = '60';
+      try {
+        await apiCall('/appointments' + clientQS(), {
+          method: 'POST',
+          body: JSON.stringify({
+            title,
+            doctor,
+            hospital,
+            address,
+            location: address || hospital || 'Not specified',
+            date,
+            time,
+            notes,
+            reminderMinutesBefore
+          })
+        });
 
-    await loadAppointments();
-    checkUpcomingReminders();
-    showToast('✅ Appointment added!');
-  } catch (error) {
-    console.error('Error saving appointment:', error);
-    showToast('⚠ Failed to save appointment', true);
-  }
-}
+        ['apptDoctor', 'apptHospital', 'apptDate', 'apptTime', 'apptAddress', 'apptNotes'].forEach(id =>
+          document.getElementById(id).value = ''
+        );
+        document.getElementById('apptReminder').value = '60';
 
-async function loadAppointments() {
-  try {
-    const response = await apiCall('/appointments');
-    appointments = response.data || [];
+        await loadAppointments();
+        checkUpcomingReminders();
+        showToast('✅ Appointment added!');
+      } catch (error) {
+        console.error('Error saving appointment:', error);
+        showToast('⚠ Failed to save appointment', true);
+      }
+    }
 
-    const today = new Date().toISOString().split('T')[0];
-    let todayHTML = '', upcomingHTML = '', completedHTML = '', missedHTML = '';
+    async function loadAppointments() {
+      try {
+        const response = await apiCall('/appointments' + clientQS());
+        appointments = response.data || [];
 
-    appointments.forEach((a) => {
-      // Both roles can manage appointments
-      const actions = `
-        ${a.status === 'upcoming' ? `<button class="btn btn-sm btn-primary" onclick="markCompleted('${a._id}')">✔ Mark Done</button>` : ''}
-        <button class="btn btn-sm btn-danger" onclick="deleteAppt('${a._id}')">🗑 Delete</button>
-      `;
+        const today = new Date().toISOString().split('T')[0];
+        let todayHTML = '', upcomingHTML = '', completedHTML = '', missedHTML = '';
 
-      const card = `
+        appointments.forEach((a) => {
+          const isClient = a.createdByRole === 'client';
+          const badge = isClient
+            ? '<span class="badge-client">Added by: Client</span>'
+            : '<span class="badge-caretaker">Added by: Caretaker</span>';
+
+          const statusBadge = (a.status === 'attended' || a.status === 'completed')
+            ? '<span class="status-badge status-done">✔ Attended</span>'
+            : a.status === 'cancelled'
+            ? '<span class="status-badge status-missed">🚫 Cancelled</span>'
+            : a.status === 'missed'
+            ? '<span class="status-badge status-missed">❌ Missed</span>'
+            : '<span class="status-badge status-pending">⏰ Upcoming</span>';
+
+          const actions = `
+            ${a.status === 'upcoming' ? `<button class="btn btn-sm btn-primary" onclick="markAttended('${a._id}')">✔ Mark Attended</button>` : ''}
+            ${a.status === 'upcoming' && role === 'caretaker' ? `<button class="btn btn-sm btn-secondary" onclick="cancelAppt('${a._id}')">🚫 Cancel</button>` : ''}
+            ${role === 'caretaker' ? `<button class="btn btn-sm btn-danger" onclick="deleteAppt('${a._id}')">🗑 Delete</button>` : ''}
+          `;
+
+          const card = `
         <div class="item">
-          <strong>${a.title}</strong><br>
-          📍 ${a.location || 'No location'} &nbsp;|&nbsp; 📅 ${formatDate(a.date)} &nbsp;⏰ ${a.time}<br>
-          ${a.notes ? `📝 ${a.notes}<br>` : ''}
-          <div class="btn-row" style="margin-top:8px;">${actions}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <strong style="font-size:15px;">🩺 ${a.doctor ? `Dr. ${a.doctor}` : a.title}</strong>
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${badge}
+              ${statusBadge}
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--text);margin-bottom:4px;">
+            🏥 <strong>${a.hospital || a.location || 'Clinic'}</strong> ${a.address ? `• 📍 ${a.address}` : ''}
+          </div>
+          <div style="font-size:13px;color:var(--sage-dark);font-weight:600;">
+            📅 ${formatDate(a.date)} &nbsp;⏰ ${a.time}
+          </div>
+          ${a.notes ? `<div style="font-size:12.5px;color:var(--text-muted);margin-top:4px;">📝 <strong>Purpose:</strong> ${a.notes}</div>` : ''}
+          ${a.notesAfter ? `<div style="font-size:12.5px;color:var(--text);background:var(--green-light);padding:6px 10px;border-radius:8px;margin-top:6px;">📋 <strong>Post-Appointment Notes:</strong> ${a.notesAfter}</div>` : ''}
+          <div class="btn-row" style="margin-top:10px;">${actions}</div>
         </div>
       `;
 
-      if (a.date.startsWith(today) && a.status === 'upcoming') todayHTML += card;
-      else if (a.status === 'upcoming') upcomingHTML += card;
-      else if (a.status === 'completed') completedHTML += card;
-      else if (a.status === 'missed') missedHTML += card;
-    });
+          if (a.date.startsWith(today) && a.status === 'upcoming') todayHTML += card;
+          else if (a.status === 'upcoming') upcomingHTML += card;
+          else if (a.status === 'attended' || a.status === 'completed') completedHTML += card;
+          else if (a.status === 'missed' || a.status === 'cancelled') missedHTML += card;
+        });
 
-    const sec = (label, cls, html) => html ? `
+        const sec = (label, cls, html) => html ? `
       <p style="font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;">
         <span class="status-badge ${cls}">${label}</span>
       </p>${html}` : '';
 
-    document.getElementById('todaySection').innerHTML = sec("Today", "status-today", todayHTML);
-    document.getElementById('upcomingSection').innerHTML = sec("Upcoming", "status-pending", upcomingHTML);
-    document.getElementById('completedSection').innerHTML= sec("Completed", "status-done", completedHTML);
-    document.getElementById('missedSection').innerHTML = sec("Missed", "status-missed", missedHTML);
+        document.getElementById('todaySection').innerHTML = sec("Today", "status-today", todayHTML);
+        document.getElementById('upcomingSection').innerHTML = sec("Upcoming", "status-pending", upcomingHTML);
+        document.getElementById('completedSection').innerHTML = sec("Attended", "status-done", completedHTML);
+        document.getElementById('missedSection').innerHTML = sec("Missed / Cancelled", "status-missed", missedHTML);
 
-    if (!appointments.length) {
-      document.getElementById('upcomingSection').innerHTML = `
+        if (!appointments.length) {
+          document.getElementById('upcomingSection').innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">📅</div>
           <h3>No appointments yet</h3>
           <p>Add your first appointment to get started</p>
         </div>
       `;
+        }
+      } catch (error) {
+        console.error('Error loading appointments:', error);
+        showToast('⚠ Failed to load appointments', true);
+      }
     }
-  } catch (error) {
-    console.error('Error loading appointments:', error);
-    showToast('⚠ Failed to load appointments', true);
-  }
-}
 
-async function markCompleted(apptId) {
-  try {
-    await apiCall(`/appointments/${apptId}/complete`, { method: 'PATCH' });
-    await loadAppointments();
-    showToast('✅ Marked as completed!');
-  } catch (error) {
-    console.error('Error marking appointment:', error);
-    showToast('⚠ Failed to update appointment', true);
-  }
-}
-
-async function deleteAppt(apptId) {
-  if (!confirm('Delete this appointment?')) return;
-
-  try {
-    await apiCall(`/appointments/${apptId}`, { method: 'DELETE' });
-    await loadAppointments();
-    showToast('✅ Appointment deleted');
-  } catch (error) {
-    console.error('Error deleting appointment:', error);
-    showToast('⚠ Failed to delete appointment', true);
-  }
-}
-
-// Auto-update missed appointments
-async function updateStatuses() {
-  try {
-    await apiCall('/appointments/update-missed', { method: 'POST' });
-  } catch (error) {
-    console.error('Error updating statuses:', error);
-  }
-}
-
-// Check for upcoming appointment reminders
-function checkUpcomingReminders() {
-  const now = new Date();
-  
-  appointments.forEach(appt => {
-    if (appt.status !== 'upcoming') return;
-    
-    const apptDateTime = new Date(`${appt.date}T${appt.time}`);
-    const minutesUntil = (apptDateTime - now) / (1000 * 60);
-    const reminderWindow = appt.reminderMinutesBefore || 60;
-    
-    // Show reminder if within reminder window
-    if (minutesUntil > 0 && minutesUntil <= reminderWindow && minutesUntil > (reminderWindow - 5)) {
-      showToast(`🔔 Reminder: "${appt.title}" in ${Math.round(minutesUntil)} minutes`, false, 8000);
+    async function markAttended(apptId) {
+      const notesAfter = prompt('Optional: Add post-appointment notes (doctor recommendations, prescription changes):', '') || '';
+      try {
+        await apiCall(`/appointments/${apptId}/attend`, {
+          method: 'PATCH',
+          body: JSON.stringify({ notesAfter })
+        });
+        await loadAppointments();
+        showToast('✅ Marked as attended!');
+      } catch (error) {
+        console.error('Error marking appointment:', error);
+        showToast('⚠ Failed to update appointment', true);
+      }
     }
-  });
-}
 
-// Load on page ready
-updateStatuses().then(() => {
-  loadAppointments();
-  checkUpcomingReminders();
-});
+    async function cancelAppt(apptId) {
+      if (!confirm('Cancel this appointment?')) return;
+      try {
+        await apiCall(`/appointments/${apptId}/cancel`, { method: 'PATCH' });
+        await loadAppointments();
+        showToast('🚫 Appointment cancelled');
+      } catch (error) {
+        console.error('Error cancelling appointment:', error);
+        showToast('⚠ Failed to cancel appointment', true);
+      }
+    }
 
-// Check reminders every 5 minutes
-setInterval(() => {
-  if (appointments.length > 0) {
-    checkUpcomingReminders();
-  }
-}, 5 * 60 * 1000);
-</script>
+    async function deleteAppt(apptId) {
+      if (!confirm('Delete this appointment permanently?')) return;
+
+      try {
+        await apiCall(`/appointments/${apptId}`, { method: 'DELETE' });
+        await loadAppointments();
+        showToast('✅ Appointment deleted');
+      } catch (error) {
+        console.error('Error deleting appointment:', error);
+        showToast('⚠ Failed to delete appointment', true);
+      }
+    }
+
+    // Auto-update missed appointments
+    async function updateStatuses() {
+      try {
+        await apiCall('/appointments/update-missed', { method: 'POST' });
+      } catch (error) {
+        console.error('Error updating statuses:', error);
+      }
+    }
+
+    // Check for upcoming appointment reminders
+    function checkUpcomingReminders() {
+      const now = new Date();
+
+      appointments.forEach(appt => {
+        if (appt.status !== 'upcoming') return;
+
+        const apptDateTime = new Date(`${appt.date}T${appt.time}`);
+        const minutesUntil = (apptDateTime - now) / (1000 * 60);
+        const reminderWindow = appt.reminderMinutesBefore || 60;
+
+        if (minutesUntil > 0 && minutesUntil <= reminderWindow && minutesUntil > (reminderWindow - 5)) {
+          showToast(`🔔 Reminder: "${appt.title}" in ${Math.round(minutesUntil)} minutes`, false, 8000);
+        }
+      });
+    }
+
+    // Load on page ready
+    updateStatuses().then(() => {
+      loadAppointments();
+      checkUpcomingReminders();
+    });
+
+    setInterval(() => {
+      if (appointments.length > 0) checkUpcomingReminders();
+    }, 5 * 60 * 1000);
+  </script>
 
 </body>
+
 </html>

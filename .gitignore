@@ -46,10 +46,12 @@ coverage/
 # yarn.lock
 
 #  Deployment
-
+.serverless/
 .vercel/
 .netlify/
 
-#  Misc
+#  Scratch & temp test scripts
+scratch/
 
+#  Misc
 *.local

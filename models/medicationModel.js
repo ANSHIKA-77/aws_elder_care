@@ -10,6 +10,14 @@ const medicationSchema = new mongoose.Schema({
         index: true  // Index for faster queries by user
     },
     
+    // Link to family group for cross-user visibility
+    groupId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group',
+        default: null,
+        index: true
+    },
+    
     // Medication details
     name: {
         type: String,
@@ -46,6 +54,35 @@ const medicationSchema = new mongoose.Schema({
         default: null
     },
     
+    // Scheduled Date / Start Date
+    date: {
+        type: Date,
+        default: Date.now
+    },
+
+    startDate: {
+        type: Date,
+        default: Date.now
+    },
+
+    endDate: {
+        type: Date,
+        default: null
+    },
+
+    // Exact scheduled time e.g. "08:30"
+    time: {
+        type: String,
+        trim: true,
+        default: '08:00'
+    },
+
+    // Whether reminder is active
+    reminder: {
+        type: Boolean,
+        default: true
+    },
+
     // Optional: for scheduled reminders (future feature)
     reminderTime: {
         type: String,  // Format: "HH:MM"
@@ -62,6 +99,24 @@ const medicationSchema = new mongoose.Schema({
         type: String,
         trim: true,
         maxlength: 500
+    },
+
+    instructions: {
+        type: String,
+        trim: true,
+        maxlength: 500
+    },
+
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
+
+    createdByRole: {
+        type: String,
+        enum: ['caretaker', 'client'],
+        default: 'caretaker'
     }
     
 }, { 

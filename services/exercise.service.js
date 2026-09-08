@@ -4,8 +4,8 @@ const ExerciseLog = require('../models/exerciseLogModel');
 /**
  * Get or create today's exercise log
  */
-exports.getTodayLog = async (userId) => {
-    const log = await ExerciseLog.getTodayLog(userId);
+exports.getTodayLog = async (userId, groupId = null) => {
+    const log = await ExerciseLog.getTodayLog(userId, groupId);
     return log;
 };
 
@@ -27,7 +27,7 @@ exports.getLogByDate = async (userId, dateString) => {
 /**
  * Log completed exercises for today
  */
-exports.logExercise = async (userId, exerciseData) => {
+exports.logExercise = async (userId, exerciseData, groupId = null) => {
     const { category, steps, duration, notes } = exerciseData;
     
     // Validation
@@ -38,10 +38,16 @@ exports.logExercise = async (userId, exerciseData) => {
     }
     
     // Get or create today's log
-    const log = await ExerciseLog.getTodayLog(userId);
+    const log = await ExerciseLog.getTodayLog(userId, groupId);
     
     // Use model's instance method to add exercise
-    await log.addExercise(category, steps, duration || 0);
+    await log.addExercise(
+        category,
+        steps,
+        duration || 0,
+        exerciseData.comment || exerciseData.notes || '',
+        exerciseData.feedback || ''
+    );
     
     return log;
 };

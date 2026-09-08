@@ -5,13 +5,16 @@ const Appointment = require('../models/appointmentModel');
  * Get all appointments for a user with optional filters
  */
 exports.getUserAppointments = async (userId, filters = {}) => {
+    // Auto-update any upcoming appointments whose date/time has already passed to 'missed'
+    await Appointment.updateMissedAppointments().catch(err => console.error('Error auto-updating missed appointments:', err));
+
     const query = { userId };
-    
+
     // Filter by status
     if (filters.status) {
         query.status = filters.status;
     }
-    
+
     // Filter by date range
     if (filters.dateRange) {
         query.date = {};
@@ -22,11 +25,11 @@ exports.getUserAppointments = async (userId, filters = {}) => {
             query.date.$lte = filters.dateRange.to;
         }
     }
-    
+
     const appointments = await Appointment.find(query)
         .sort({ date: 1, time: 1 })  // Sort chronologically
         .populate('createdBy', 'name role');  // Include creator info
-    
+
     return appointments;
 };
 
@@ -38,7 +41,7 @@ exports.getAppointmentById = async (apptId, userId) => {
         _id: apptId,
         userId: userId
     }).populate('createdBy', 'name role');
-    
+
     return appointment;
 };
 
@@ -46,12 +49,15 @@ exports.getAppointmentById = async (apptId, userId) => {
  * Get today's appointments
  */
 exports.getTodayAppointments = async (userId) => {
+    // Auto-update any upcoming appointments whose date/time has passed
+    await Appointment.updateMissedAppointments().catch(err => console.error('Error auto-updating missed appointments:', err));
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const appointments = await Appointment.find({
         userId,
         date: {
@@ -60,7 +66,7 @@ exports.getTodayAppointments = async (userId) => {
         },
         status: { $ne: 'cancelled' }  // Exclude cancelled
     }).sort({ time: 1 });
-    
+
     return appointments;
 };
 
@@ -74,18 +80,21 @@ exports.createAppointment = async (apptData) => {
         error.statusCode = 400;
         throw error;
     }
-    
-    // Validate date is not in the past
-    const apptDate = new Date(apptData.date);
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    
-    if (apptDate < now) {
+
+    // Validate date is not in the past.
+    // apptData.date is a YYYY-MM-DD string from <input type="date">.
+    // We get today's date in IST (Asia/Kolkata) as a YYYY-MM-DD string and
+    // compare lexicographically — no Date() parsing, no timezone shift.
+    const todayIST = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata'
+    }).format(new Date());  // en-CA formats as YYYY-MM-DD
+
+    if (apptData.date < todayIST) {
         const error = new Error('Appointment date cannot be in the past');
         error.statusCode = 400;
         throw error;
     }
-    
+
     const appointment = await Appointment.create(apptData);
     return appointment;
 };
@@ -94,25 +103,26 @@ exports.createAppointment = async (apptData) => {
  * Update appointment details
  */
 exports.updateAppointment = async (apptId, userId, updates) => {
-    // If date is being updated, validate it's not in the past
+    // If date is being updated, validate it's not in the past.
+    // Same IST string comparison used in createAppointment.
     if (updates.date) {
-        const newDate = new Date(updates.date);
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        
-        if (newDate < now && updates.status !== 'completed') {
+        const todayIST = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Kolkata'
+        }).format(new Date());
+
+        if (updates.date < todayIST && updates.status !== 'completed') {
             const error = new Error('Cannot update to a past date unless marking as completed');
             error.statusCode = 400;
             throw error;
         }
     }
-    
+
     const appointment = await Appointment.findOneAndUpdate(
         { _id: apptId, userId },
         { $set: updates },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     );
-    
+
     return appointment;
 };
 
@@ -121,14 +131,28 @@ exports.updateAppointment = async (apptId, userId, updates) => {
  */
 exports.markAsCompleted = async (apptId, userId) => {
     const appointment = await Appointment.findOne({ _id: apptId, userId });
-    
+
     if (!appointment) {
         return null;
     }
-    
+
     // Use model's instance method
     await appointment.markCompleted();
-    
+
+    return appointment;
+};
+
+/**
+ * Mark appointment as attended with optional post notes
+ */
+exports.markAsAttended = async (apptId, userId, notesAfter = '') => {
+    const appointment = await Appointment.findOne({ _id: apptId, userId });
+
+    if (!appointment) {
+        return null;
+    }
+
+    await appointment.markAttended(notesAfter);
     return appointment;
 };
 
@@ -137,16 +161,16 @@ exports.markAsCompleted = async (apptId, userId) => {
  */
 exports.cancelAppointment = async (apptId, userId, reason = '') => {
     const appointment = await Appointment.findOne({ _id: apptId, userId });
-    
+
     if (!appointment) {
         return null;
     }
-    
+
     appointment.status = 'cancelled';
     if (reason) {
         appointment.notes = (appointment.notes || '') + `\n[Cancelled: ${reason}]`;
     }
-    
+
     await appointment.save();
     return appointment;
 };
@@ -160,70 +184,43 @@ exports.deleteAppointment = async (apptId, userId) => {
 };
 
 /**
- * Get appointment statistics
+ * Get appointment statistics for a single userId.
+ * Uses countDocuments throughout — avoids the ObjectId casting bug
+ * that caused aggregate() to silently return 0 results in some Mongoose versions.
  */
 exports.getAppointmentStats = async (userId) => {
     const mongoose = require('mongoose');
     const now = new Date();
-    
-    // Convert userId string to ObjectId for MongoDB aggregate query
-    // Note: In newer mongoose versions, this conversion may be automatic
-    let userIdToMatch = userId;
-    try {
-        // Try to convert to ObjectId if it's a string
-        if (typeof userId === 'string') {
-            userIdToMatch = new mongoose.Types.ObjectId(userId);
-        }
-    } catch (e) {
-        console.log('UserId is already ObjectId or conversion failed, using as-is');
-    }
-    
-    console.log('Querying appointments with userId:', userIdToMatch, 'Type:', typeof userIdToMatch);
-    
-    // Count by status - try both with ObjectId and without
-    const statusCounts = await Appointment.aggregate([
-        { $match: { userId: userIdToMatch } },
-        { $group: { _id: '$status', count: { $sum: 1 } } }
+
+    // Always work with an ObjectId so both aggregate and countDocuments agree
+    const oid = typeof userId === 'string'
+        ? new mongoose.Types.ObjectId(userId)
+        : userId;
+
+    // Parallel count queries — one per status + today
+    const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(todayStart); todayEnd.setDate(todayEnd.getDate() + 1);
+
+    const [upcoming, completed, missed, cancelled, today] = await Promise.all([
+        Appointment.countDocuments({ userId: oid, status: 'upcoming' }),
+        Appointment.countDocuments({ userId: oid, status: 'completed' }),
+        Appointment.countDocuments({ userId: oid, status: 'missed' }),
+        Appointment.countDocuments({ userId: oid, status: 'cancelled' }),
+        Appointment.countDocuments({
+            userId: oid,
+            date: { $gte: todayStart, $lt: todayEnd },
+            status: { $ne: 'cancelled' }
+        })
     ]);
-    
-    console.log('Status counts from aggregate:', statusCounts);
-    
-    // If aggregate returned nothing, try direct query
-    if (statusCounts.length === 0) {
-        console.log('Aggregate returned 0 results, trying direct count...');
-        const totalCount = await Appointment.countDocuments({ userId: userId });
-        console.log('Direct count result:', totalCount);
-    }
-    
-    const stats = {
-        total: 0,
-        upcoming: 0,
-        completed: 0,
-        missed: 0,
-        cancelled: 0,
-        today: 0
+
+    return {
+        total: upcoming + completed + missed + cancelled,
+        upcoming,
+        completed,
+        missed,
+        cancelled,
+        today
     };
-    
-    statusCounts.forEach(item => {
-        stats[item._id] = item.count;
-        stats.total += item.count;
-    });
-    
-    // Count today's appointments
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(todayStart);
-    todayEnd.setDate(todayEnd.getDate() + 1);
-    
-    stats.today = await Appointment.countDocuments({
-        userId: userId,
-        date: { $gte: todayStart, $lt: todayEnd },
-        status: { $ne: 'cancelled' }
-    });
-    
-    console.log('Final appointment stats:', stats);
-    
-    return stats;
 };
 
 /**
@@ -240,16 +237,16 @@ exports.updateMissedAppointments = async () => {
 exports.getUpcomingAppointments = async (userId, days = 7) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const future = new Date(today);
     future.setDate(future.getDate() + days);
-    
+
     const appointments = await Appointment.find({
         userId,
         date: { $gte: today, $lt: future },
         status: 'upcoming'
     }).sort({ date: 1, time: 1 });
-    
+
     return appointments;
 };
 
@@ -263,11 +260,11 @@ exports.checkConflicts = async (userId, date, time, excludeId = null) => {
         time,
         status: { $in: ['upcoming', 'completed'] }  // Don't check cancelled/missed
     };
-    
+
     if (excludeId) {
         query._id = { $ne: excludeId };  // Exclude current appointment when updating
     }
-    
+
     const conflicts = await Appointment.find(query);
     return conflicts;
 };

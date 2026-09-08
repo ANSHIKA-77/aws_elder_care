@@ -42,6 +42,16 @@ const groupSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+
+    // Active video call state for incoming call popups
+    activeCall: {
+        callerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        callerName: { type: String, default: '' },
+        callerRole: { type: String, default: '' },
+        roomName: { type: String, default: '' },
+        status: { type: String, default: 'ended' },
+        createdAt: { type: Date, default: null }
     }
     
 }, { timestamps: true });
@@ -52,7 +62,8 @@ groupSchema.index({ clients: 1 });
 
 // Instance method: Add client to group
 groupSchema.methods.addClient = async function(clientId) {
-    if (!this.clients.includes(clientId)) {
+    const cid = clientId ? clientId.toString() : '';
+    if (cid && !this.clients.some(id => id && id.toString() === cid)) {
         this.clients.push(clientId);
         await this.save();
     }

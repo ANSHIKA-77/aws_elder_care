@@ -1,124 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Map — Elder Care</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/shared.css">
-<style>
-  /* ─── MAP ─── */
-  #map {
-    height: 500px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    background: #f0f0f0;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    color: var(--text-muted); 
-    font-size: 14px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Location Map — Elder Care</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/shared.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 460px;
+      border-radius: 16px;
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      background: #eef2f0;
+      position: relative;
+    }
+
+    .sharing-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .sharing-active {
+      background: #EAF5EE;
+      color: #2D6A4F;
+      border: 1px solid #B7E4C7;
+    }
+
+    .sharing-inactive {
+      background: #FEF3E2;
+      color: #9A3412;
+      border: 1px solid #FCD34D;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2D6A4F;
+      box-shadow: 0 0 0 0 rgba(45, 106, 79, 0.7);
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(45, 106, 79, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 8px rgba(45, 106, 79, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(45, 106, 79, 0);
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-  <a href="/home.html" class="back-button">
-    ← Back to Dashboard
-  </a>
+  <div class="container">
+    <a href="/home.html" class="back-button">
+      ← Back to Dashboard
+    </a>
 
-  <div class="page-header">
-    <div>
-      <h1>📍 Live Location Map</h1>
-      <p>Real-time GPS tracking and nearby hospitals</p>
+    <div class="page-header">
+      <div>
+        <h1 id="pageTitle">📍 Live Location Map</h1>
+        <p id="pageSubtitle">Permission-based real-time location sharing</p>
+      </div>
+      <div id="statusBadgeContainer"></div>
+    </div>
+
+    <!-- Caretaker Controls Card -->
+    <div id="caretakerCard" class="section-card" style="display:none;">
+      <h2>🛡️ Permission-Based Location Sharing</h2>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">
+        You have complete control over your privacy. When you turn location sharing on, your client can see your location on their map. You can stop sharing at any time.
+      </p>
+
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <button id="btnToggleSharing" class="btn btn-primary" onclick="toggleLocationSharing()">
+          📍 Share My Current Location
+        </button>
+        <span id="caretakerStatusNote" style="font-size:13px;color:var(--text-muted);">
+          Sharing is currently OFF
+        </span>
+      </div>
+    </div>
+
+    <!-- Client Status Card -->
+    <div id="clientCard" class="section-card" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <h2 id="clientHeader" style="margin-bottom:0;">📍 Caretaker's Location</h2>
+        <button class="btn btn-sm btn-ghost" onclick="loadLocation()">🔄 Refresh Location</button>
+      </div>
+      <p id="clientTimeNote" style="font-size:14px;color:var(--text-muted);margin-bottom:0;">
+        Checking caretaker's location status…
+      </p>
+    </div>
+
+    <!-- Map Card -->
+    <div class="section-card">
+      <div id="map">
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);padding:20px;text-align:center;">
+          <p id="mapNotice">Loading location map…</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="section-card">
-    <div id="map">
-      <span>Map loads after location permission is granted. Click "Show My Location" below.</span>
-    </div>
-    <div class="btn-row" style="margin-top:16px;">
-      <button class="btn btn-primary" onclick="loadMyLocation()">📍 Show My Location</button>
-    </div>
-  </div>
-</div>
+  <div id="toast"></div>
 
-<div id="toast"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/shared.js"></script>
+  <script>
+    const role = getRole();
+    let isSharingActive = false;
+    let watchId = null;
+    let leafletMap = null;
+    let mapMarker = null;
 
-<script src="/js/shared.js"></script>
-<script>
-let map;
+    // Initialize View based on Role
+    if (role === 'caretaker') {
+      // Caretaker
+      document.getElementById('caretakerCard').style.display = 'block';
+      document.getElementById('pageTitle').textContent = '📍 My Location Sharing';
+      document.getElementById('pageSubtitle').textContent = 'Control when your client can view your location';
+    } else {
+      // Client
+      document.getElementById('clientCard').style.display = 'block';
+      document.getElementById('pageTitle').textContent = "📍 Caretaker's Live Location";
+      document.getElementById('pageSubtitle').textContent = "Real-time location when shared by your caretaker";
+    }
 
-function loadMyLocation() {
-  if (!navigator.geolocation) { 
-    showToast('⚠ Geolocation not supported.', true); 
-    return; 
-  }
-  
-  navigator.geolocation.getCurrentPosition(pos => {
-    showMapAt(pos.coords.latitude, pos.coords.longitude);
-  }, () => {
-    showToast('⚠ Could not get location. Please allow GPS.', true);
-  });
-}
+    async function loadLocation() {
+      try {
+        const res = await apiCall('/location');
+        const data = res.data || {};
 
-function showMapAt(lat, lng) {
-  if (typeof google === 'undefined') {
-    // Fetch API key from backend
-    fetch('/api/config')
-      .then(res => res.json())
-      .then(cfg => {
-        if (!cfg.googleMapsKey) {
-          document.getElementById('map').innerHTML = '<p style="color:red;">API key missing</p>';
+        if (role === 'caretaker') {
+          // Caretaker view
+          isSharingActive = !!data.isSharing;
+          updateCaretakerControls(data);
+          if (isSharingActive && data.latitude && data.longitude) {
+            renderLeafletMap(data.latitude, data.longitude, 'My Current Location');
+          } else {
+            showNotice('Location sharing is off. Click "Share My Current Location" above.');
+          }
+        } else {
+          // Client view
+          const caretakerName = res.parentName || 'Caretaker';
+          document.getElementById('clientHeader').textContent = `📍 ${caretakerName}'s Location`;
+
+          if (data.isSharing && data.latitude && data.longitude) {
+            const timeAgo = getTimeAgo(data.updatedAt);
+            document.getElementById('clientTimeNote').innerHTML = `Last updated: <strong>${timeAgo}</strong>`;
+            document.getElementById('statusBadgeContainer').innerHTML = `
+              <div class="sharing-badge sharing-active"><span class="pulse-dot"></span> Live Sharing Active</div>
+            `;
+            renderLeafletMap(data.latitude, data.longitude, `${caretakerName}'s Location`);
+          } else {
+            document.getElementById('clientTimeNote').innerHTML = `
+              <span style="color:#9A3412;">🔒 ${caretakerName} has turned off location sharing.</span>
+            `;
+            document.getElementById('statusBadgeContainer').innerHTML = `
+              <div class="sharing-badge sharing-inactive">Sharing Inactive</div>
+            `;
+            showNotice(`${caretakerName} has not enabled location sharing at this time.`);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading location:', err);
+        showToast('⚠ Failed to fetch location status', true);
+      }
+    }
+
+    function updateCaretakerControls(data) {
+      const btn = document.getElementById('btnToggleSharing');
+      const note = document.getElementById('caretakerStatusNote');
+      const badge = document.getElementById('statusBadgeContainer');
+
+      if (isSharingActive) {
+        btn.textContent = '🛑 Stop Sharing Location';
+        btn.className = 'btn btn-danger';
+        note.innerHTML = `<span style="color:#2D6A4F;font-weight:600;">✅ Location sharing is ON (Last updated: ${getTimeAgo(data.updatedAt)})</span>`;
+        badge.innerHTML = `<div class="sharing-badge sharing-active"><span class="pulse-dot"></span> Sharing ON</div>`;
+      } else {
+        btn.textContent = '📍 Share My Current Location';
+        btn.className = 'btn btn-primary';
+        note.innerHTML = 'Sharing is currently OFF';
+        badge.innerHTML = `<div class="sharing-badge sharing-inactive">Sharing OFF</div>`;
+      }
+    }
+
+    async function toggleLocationSharing() {
+      if (isSharingActive) {
+        // Stop sharing
+        if (watchId) {
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+        }
+        try {
+          await apiCall('/location/share', {
+            method: 'POST',
+            body: JSON.stringify({ isSharing: false })
+          });
+          isSharingActive = false;
+          showToast('🛑 Location sharing stopped');
+          loadLocation();
+        } catch (e) {
+          showToast('⚠ Failed to stop sharing', true);
+        }
+      } else {
+        // Start sharing
+        if (!navigator.geolocation) {
+          showToast('⚠ Geolocation not supported by your browser', true);
           return;
         }
 
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.googleMapsKey}&libraries=places&callback=initMap`;
-        script.async = true;
-        script.defer = true;
+        showToast('📍 Getting GPS coordinates…');
+        navigator.geolocation.getCurrentPosition(async pos => {
+          try {
+            await apiCall('/location/share', {
+              method: 'POST',
+              body: JSON.stringify({
+                isSharing: true,
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+                accuracy: pos.coords.accuracy
+              })
+            });
+            isSharingActive = true;
+            showToast('✅ Location sharing started!');
+            loadLocation();
 
-        window.initMap = function () {
-          renderMap(lat, lng);
-        };
-
-        document.head.appendChild(script);
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById('map').innerHTML = '<p style="color:red;">Failed to load map</p>';
-      });
-  } else {
-    renderMap(lat, lng);
-  }
-}
-
-function renderMap(lat, lng) {
-  const el = document.getElementById('map');
-  el.innerHTML = '';
-  const userLoc = { lat, lng };
-
-  map = new google.maps.Map(el, { zoom: 15, center: userLoc });
-  new google.maps.Marker({ position: userLoc, map, title: 'Patient Location' });
-
-  const svc = new google.maps.places.PlacesService(map);
-  svc.nearbySearch({ location: userLoc, radius: 3000, type: ['hospital'] }, (results, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-      results.slice(0, 3).forEach(h => {
-        new google.maps.Marker({
-          position: h.geometry.location,
-          map,
-          icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-          title: h.name
-        });
-      });
+            // Set up watchPosition for updates
+            watchId = navigator.geolocation.watchPosition(async p => {
+              if (isSharingActive) {
+                await apiCall('/location/share', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    isSharing: true,
+                    latitude: p.coords.latitude,
+                    longitude: p.coords.longitude,
+                    accuracy: p.coords.accuracy
+                  })
+                }).catch(() => {});
+              }
+            });
+          } catch (err) {
+            showToast('⚠ Failed to share location with server', true);
+          }
+        }, err => {
+          showToast('⚠ Permission denied or GPS unavailable. Please allow location.', true);
+        }, { enableHighAccuracy: true });
+      }
     }
-  });
-}
-</script>
+
+    function renderLeafletMap(lat, lng, title) {
+      const mapDiv = document.getElementById('map');
+      mapDiv.innerHTML = '';
+
+      if (!leafletMap) {
+        leafletMap = L.map('map').setView([lat, lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap'
+        }).addTo(leafletMap);
+      } else {
+        leafletMap.setView([lat, lng], 15);
+      }
+
+      if (mapMarker) {
+        leafletMap.removeLayer(mapMarker);
+      }
+
+      mapMarker = L.marker([lat, lng]).addTo(leafletMap)
+        .bindPopup(`<b>${title}</b><br>Updated: ${new Date().toLocaleTimeString()}`)
+        .openPopup();
+    }
+
+    function showNotice(text) {
+      if (leafletMap) {
+        leafletMap.remove();
+        leafletMap = null;
+        mapMarker = null;
+      }
+      document.getElementById('map').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);padding:20px;text-align:center;">
+          <p style="font-size:15px;">${text}</p>
+        </div>
+      `;
+    }
+
+    function getTimeAgo(dateString) {
+      if (!dateString) return 'recently';
+      const diffMs = Date.now() - new Date(dateString).getTime();
+      const mins = Math.floor(diffMs / 60000);
+      if (mins < 1) return 'just now';
+      if (mins === 1) return '1 minute ago';
+      if (mins < 60) return `${mins} minutes ago`;
+      const hrs = Math.floor(mins / 60);
+      return hrs === 1 ? '1 hour ago' : `${hrs} hours ago`;
+    }
+
+    loadLocation();
+  </script>
 
 </body>
+
 </html>

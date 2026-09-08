@@ -7,6 +7,12 @@ const gallerySchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group',
+    default: null,
+    index: true
+  },
   title: {
     type: String,
     required: true,

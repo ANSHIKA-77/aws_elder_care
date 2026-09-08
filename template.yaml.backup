@@ -1,0 +1,89 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Elder Care API — Node.js/Express on AWS Lambda + API Gateway
+
+Globals:
+  Function:
+    Timeout: 29          # API Gateway HTTP API max is 29 seconds
+    MemorySize: 256      # MB — free tier: 400,000 GB-seconds/month
+    Runtime: nodejs20.x
+    Environment:
+      Variables:
+        NODE_ENV: production
+        MONGODB_URI: !Ref MongoUri
+        JWT_SECRET: !Ref JwtSecret
+        FRONTEND_URL: !Ref FrontendUrl
+        TWILIO_ACCOUNT_SID: !Ref TwilioSid
+        TWILIO_AUTH_TOKEN: !Ref TwilioToken
+        TWILIO_PHONE: !Ref TwilioPhone
+        EMERGENCY_CONTACT_1: !Ref EmergencyContact1
+        EMERGENCY_CONTACT_2: !Ref EmergencyContact2
+        EMERGENCY_CONTACT_3: !Ref EmergencyContact3
+        GOOGLE_MAPS_KEY: !Ref GoogleMapsKey
+
+# Parameters let you pass secrets at deploy time (not hardcoded in template)
+Parameters:
+  MongoUri:
+    Type: String
+    NoEcho: true
+    Description: MongoDB Atlas connection string
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    Description: JWT signing secret
+  FrontendUrl:
+    Type: String
+    Default: 'http://localhost:3000'
+    Description: Allowed CORS origin (your frontend URL)
+  TwilioSid:
+    Type: String
+    Default: ''
+  TwilioToken:
+    Type: String
+    Default: ''
+    NoEcho: true
+  TwilioPhone:
+    Type: String
+    Default: ''
+  EmergencyContact1:
+    Type: String
+    Default: ''
+  EmergencyContact2:
+    Type: String
+    Default: ''
+  EmergencyContact3:
+    Type: String
+    Default: ''
+  GoogleMapsKey:
+    Type: String
+    Default: ''
+
+Resources:
+  ElderCareApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: elder-care-api
+      Handler: lambda.handler          # lambda.js → exports.handler
+      CodeUri: ./                      # Package entire project directory
+      Description: Elder Care REST API (Express wrapped with serverless-http)
+      Events:
+        # Catch ALL routes and methods — Express handles routing internally
+        ProxyRoute:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+        RootRoute:
+          Type: HttpApi
+          Properties:
+            Path: /
+            Method: ANY
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL — use this in your frontend"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+  FunctionArn:
+    Description: "Lambda function ARN"
+    Value: !GetAtt ElderCareApiFunction.Arn

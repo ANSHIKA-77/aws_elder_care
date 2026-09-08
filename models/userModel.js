@@ -58,6 +58,15 @@ const userSchema = new mongoose.Schema({
     lastLoginAt: {
         type: Date,
         default: null
+    },
+
+    // Permission-based live location sharing
+    locationSharing: {
+        isSharing: { type: Boolean, default: false },
+        latitude: { type: Number, default: null },
+        longitude: { type: Number, default: null },
+        accuracy: { type: Number, default: null },
+        updatedAt: { type: Date, default: null }
     }
     
 }, { timestamps: true });

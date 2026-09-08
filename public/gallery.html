@@ -1,185 +1,504 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gallery — Elder Care</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/shared.css">
-<style>
-  /* ─── GALLERY ─── */
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 14px;
-  }
-  
-  .gallery-item {
-    border-radius: 14px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: var(--shadow-sm);
-  }
-  
-  .gallery-item img {
-    width: 100%; 
-    height: 160px;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s;
-  }
-  
-  .gallery-item:hover img { 
-    transform: scale(1.05); 
-  }
-  
-  .gallery-item-label {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 8px 12px;
-    background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
-    color: var(--white);
-    font-size: 12px;
-    font-weight: 600;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Gallery — Elder Care</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/shared.css">
+  <style>
+    /* ─── GALLERY GRID ─── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .gallery-card {
+      background: var(--white);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--border);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(46, 125, 82, 0.15);
+      border-color: var(--sage);
+    }
+
+    .gallery-img-wrap {
+      width: 100%;
+      height: 230px;
+      position: relative;
+      overflow: hidden;
+      background: #F3F4F6;
+    }
+
+    .gallery-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.35s ease;
+    }
+
+    .gallery-card:hover .gallery-img-wrap img {
+      transform: scale(1.06);
+    }
+
+    .gallery-zoom-hint {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .gallery-card:hover .gallery-zoom-hint {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .gallery-card-body {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #FFFFFF;
+    }
+
+    .gallery-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    .gallery-card-date {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .gallery-del-btn {
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #DC2626;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .gallery-del-btn:hover {
+      background: #DC2626;
+      color: white;
+    }
+
+    /* ─── UPLOAD FORM ─── */
+    .upload-zone {
+      border: 2px dashed #CBD5E1;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      background: #FAFCFA;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--sage);
+      background: #F2F8F4;
+    }
+
+    .preview-box {
+      margin-top: 14px;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: white;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .preview-box img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    /* ─── LIGHTBOX ZOOM MODAL ─── */
+    #imageZoomModal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 15, 12, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .zoom-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 8px 18px;
+      border-radius: 30px;
+      margin-bottom: 14px;
+      color: white;
+    }
+
+    .zoom-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .zoom-btn:hover {
+      background: white;
+      color: #111827;
+    }
+
+    .zoom-close-btn {
+      background: #EF4444;
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .zoom-close-btn:hover {
+      background: #DC2626;
+      transform: scale(1.1);
+    }
+
+    .zoom-img-container {
+      max-width: 90vw;
+      max-height: 75vh;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      background: #000000;
+    }
+
+    #zoomedImage {
+      max-width: 90vw;
+      max-height: 75vh;
+      object-fit: contain;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: grab;
+      border-radius: 12px;
+    }
+
+    .zoom-caption {
+      margin-top: 14px;
+      color: #F3F4F6;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-  <a href="/home.html" class="back-button">
-    ← Back to Dashboard
-  </a>
+  <div class="container">
+    <a href="/home.html" class="back-button">
+      ← Back to Dashboard
+    </a>
 
-  <div class="page-header">
-    <div>
-      <h1>🖼️ Activity Gallery</h1>
-      <p>Daily activity photos and memories</p>
+    <div class="page-header">
+      <div>
+        <h1>🖼️ Activity Gallery</h1>
+        <p>Daily activity photos and shared memories • Click any photo to zoom</p>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="section-card">
+      <h2 style="margin-bottom:16px;">📤 Upload New Photo</h2>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="input-group">
+          <label style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:6px;display:block;">Photo Title</label>
+          <input type="text" id="photoTitle" placeholder="e.g., Morning Walk in the Garden, Family Lunch" required style="width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:12px;font-size:14px;">
+        </div>
+
+        <div class="upload-zone" onclick="document.getElementById('photoFile').click()">
+          <div style="font-size:36px;margin-bottom:8px;">📷</div>
+          <div style="font-weight:600;font-size:15px;color:var(--text);">Choose a photo to upload</div>
+          <div style="font-size:12.5px;color:var(--text-muted);margin-top:4px;">JPG, PNG, WebP supported up to 5MB</div>
+          <input type="file" id="photoFile" accept="image/*" required style="display:none;" onchange="handleFileSelected(this)">
+          <div id="filePreviewBox" class="preview-box">
+            <img id="previewImg" src="" alt="preview">
+            <div style="text-align:left;flex:1;">
+              <div id="previewName" style="font-weight:600;font-size:13px;">Selected file</div>
+              <div id="previewSize" style="font-size:11px;color:var(--text-muted);">Size</div>
+            </div>
+            <span style="color:var(--sage-dark);font-weight:700;font-size:12px;">✅ Ready</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" style="padding:12px 28px;font-size:14.5px;border-radius:12px;">
+          🚀 Upload to Gallery
+        </button>
+      </form>
+    </div>
+
+    <!-- Gallery Grid Section -->
+    <div class="section-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2>🖼️ Shared Gallery Photos</h2>
+        <span id="galleryCount" style="font-size:13px;color:var(--text-muted);font-weight:600;">0 photos</span>
+      </div>
+      <div class="gallery-grid" id="galleryGrid"></div>
     </div>
   </div>
 
-  <div class="section-card">
-    <h2>📤 Upload New Photo</h2>
-    <form id="uploadForm" enctype="multipart/form-data">
-      <div class="input-group">
-        <label>Photo Title</label>
-        <input type="text" id="photoTitle" placeholder="e.g., Morning Walk, Family Visit" required>
-      </div>
-      
-      <div class="input-group">
-        <label>Select Image</label>
-        <input type="file" id="photoFile" accept="image/*" required style="padding:8px;">
-      </div>
-      
-      <button type="submit" class="btn-primary">Upload Photo</button>
-    </form>
-  </div>
-
-  <div class="section-card">
-    <h2>🖼️ My Gallery</h2>
-    <div class="gallery-grid" id="galleryGrid"></div>
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<script src="/js/shared.js"></script>
-<script>
-let userPhotos = [];
-
-// Load gallery from backend
-async function loadGallery() {
-  try {
-    const response = await apiCall('/gallery');
-    userPhotos = response.data || [];
-    renderGallery();
-  } catch (error) {
-    console.error('Failed to load gallery:', error);
-    showToast('⚠ Failed to load gallery', true);
-  }
-}
-
-function renderGallery() {
-  const grid = document.getElementById('galleryGrid');
-  
-  if (userPhotos.length === 0) {
-    grid.innerHTML = '<p style="text-align:center; color:var(--text-secondary); padding:40px;">No photos yet. Upload your first memory! 📸</p>';
-    return;
-  }
-  
-  grid.innerHTML = userPhotos.map(p => `
-    <div class="gallery-item">
-      <img src="${p.url}" alt="${p.title}" loading="lazy">
-      <div class="gallery-item-label">
-        ${p.title}
-        <button onclick="deletePhoto('${p._id}')" style="float:right; background:none; border:none; color:white; cursor:pointer; font-size:16px;">🗑️</button>
-      </div>
+  <!-- FULLSCREEN LIGHTBOX ZOOM MODAL -->
+  <div id="imageZoomModal" onclick="handleModalBgClick(event)">
+    <div class="zoom-toolbar" onclick="event.stopPropagation()">
+      <span id="zoomLevelText" style="font-size:13px;font-weight:600;">100%</span>
+      <button class="zoom-btn" onclick="changeZoom(0.25)">🔍 Zoom In (+)</button>
+      <button class="zoom-btn" onclick="changeZoom(-0.25)">🔍 Zoom Out (-)</button>
+      <button class="zoom-btn" onclick="resetZoom()">↺ Reset (100%)</button>
+      <a id="zoomDownloadBtn" href="#" download class="zoom-btn" style="text-decoration:none;">⬇ Download</a>
+      <button class="zoom-close-btn" onclick="closeZoomModal()" title="Close (Esc)">✕</button>
     </div>
-  `).join('');
-}
 
-// Handle upload
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const title = document.getElementById('photoTitle').value.trim();
-  const file = document.getElementById('photoFile').files[0];
-  
-  if (!file) {
-    showToast('⚠ Please select a photo', true);
-    return;
-  }
-  
-  // Validate file size (max 5MB)
-  if (file.size > 5 * 1024 * 1024) {
-    showToast('⚠ Photo must be less than 5MB', true);
-    return;
-  }
-  
-  const formData = new FormData();
-  formData.append('photo', file);
-  formData.append('title', title);
-  
-  try {
-    const token = getToken();
-    const response = await fetch('/api/v1/gallery/upload', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
-    });
-    
-    const result = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(result.message || 'Upload failed');
+    <div class="zoom-img-container" onclick="event.stopPropagation()">
+      <img id="zoomedImage" src="" alt="Zoomed view">
+    </div>
+
+    <div class="zoom-caption" id="zoomCaption"></div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/shared.js"></script>
+  <script>
+    let userPhotos = [];
+    let currentZoom = 1;
+
+    function handleFileSelected(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const previewBox = document.getElementById('filePreviewBox');
+      const previewImg = document.getElementById('previewImg');
+      const previewName = document.getElementById('previewName');
+      const previewSize = document.getElementById('previewSize');
+
+      previewName.textContent = file.name;
+      previewSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+      previewImg.src = URL.createObjectURL(file);
+      previewBox.style.display = 'flex';
     }
-    
-    showToast('✅ Photo uploaded successfully');
-    document.getElementById('uploadForm').reset();
-    loadGallery();
-  } catch (error) {
-    console.error('Upload error:', error);
-    showToast('⚠ Failed to upload photo', true);
-  }
-});
 
-async function deletePhoto(id) {
-  if (!confirm('Delete this photo?')) return;
-  
-  try {
-    await apiCall(`/gallery/${id}`, { method: 'DELETE' });
-    showToast('✅ Photo deleted');
-    loadGallery();
-  } catch (error) {
-    console.error('Delete error:', error);
-    showToast('⚠ Failed to delete photo', true);
-  }
-}
+    async function loadGallery() {
+      try {
+        const response = await apiCall('/gallery');
+        userPhotos = response.data || [];
+        renderGallery();
+      } catch (error) {
+        console.error('Failed to load gallery:', error);
+        showToast('⚠ Failed to load gallery', true);
+      }
+    }
 
-loadGallery();
-</script>
+    function renderGallery() {
+      const grid = document.getElementById('galleryGrid');
+      const countEl = document.getElementById('galleryCount');
+      if (countEl) countEl.textContent = `${userPhotos.length} photo${userPhotos.length === 1 ? '' : 's'}`;
+
+      if (userPhotos.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align:center; padding:50px 20px; color:var(--text-muted);">
+            <div style="font-size:48px; margin-bottom:12px;">📸</div>
+            <h3 style="color:var(--text); margin-bottom:6px;">No photos uploaded yet</h3>
+            <p style="font-size:14px;">Upload your first memory using the form above!</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = userPhotos.map((p, idx) => `
+        <div class="gallery-card" onclick="openZoomModal(${idx})">
+          <div class="gallery-img-wrap">
+            <img src="${p.url}" alt="${p.title}" loading="lazy">
+            <div class="gallery-zoom-hint">🔍 Click to zoom</div>
+          </div>
+          <div class="gallery-card-body">
+            <div>
+              <div class="gallery-card-title">${p.title || 'Untitled Photo'}</div>
+              <div class="gallery-card-date">${p.createdAt ? new Date(p.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}</div>
+            </div>
+            <button class="gallery-del-btn" onclick="deletePhoto('${p._id}', event)" title="Delete Photo">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ─── ZOOM LIGHTBOX FUNCTIONS ───
+    function openZoomModal(index) {
+      const photo = userPhotos[index];
+      if (!photo) return;
+
+      currentZoom = 1;
+      const modal = document.getElementById('imageZoomModal');
+      const img = document.getElementById('zoomedImage');
+      const caption = document.getElementById('zoomCaption');
+      const dlBtn = document.getElementById('zoomDownloadBtn');
+
+      img.src = photo.url;
+      img.style.transform = `scale(1)`;
+      caption.textContent = `${photo.title || 'Photo'} • ${photo.createdAt ? new Date(photo.createdAt).toLocaleString() : ''}`;
+      if (dlBtn) dlBtn.href = photo.url;
+
+      document.getElementById('zoomLevelText').textContent = '100%';
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Prevent page scroll
+    }
+
+    function closeZoomModal() {
+      const modal = document.getElementById('imageZoomModal');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      currentZoom = 1;
+    }
+
+    function changeZoom(delta) {
+      currentZoom = Math.min(Math.max(0.5, currentZoom + delta), 3.0);
+      const img = document.getElementById('zoomedImage');
+      img.style.transform = `scale(${currentZoom})`;
+      document.getElementById('zoomLevelText').textContent = `${Math.round(currentZoom * 100)}%`;
+    }
+
+    function resetZoom() {
+      currentZoom = 1;
+      const img = document.getElementById('zoomedImage');
+      img.style.transform = `scale(1)`;
+      document.getElementById('zoomLevelText').textContent = '100%';
+    }
+
+    function handleModalBgClick(e) {
+      if (e.target.id === 'imageZoomModal' || e.target.classList.contains('zoom-img-container')) {
+        closeZoomModal();
+      }
+    }
+
+    // Close on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeZoomModal();
+    });
+
+    // ─── UPLOAD PHOTO ───
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('photoTitle').value.trim();
+      const file = document.getElementById('photoFile').files[0];
+      if (!file) { showToast('⚠ Please select a photo', true); return; }
+      if (file.size > 5 * 1024 * 1024) { showToast('⚠ Photo must be less than 5MB', true); return; }
+
+      const formData = new FormData();
+      formData.append('photo', file);
+      formData.append('title', title);
+
+      try {
+        const token = getToken();
+        const url = `${API_BASE}/gallery/upload`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Upload failed');
+        showToast('✅ Photo uploaded successfully');
+        document.getElementById('uploadForm').reset();
+        document.getElementById('filePreviewBox').style.display = 'none';
+        loadGallery();
+      } catch (error) {
+        console.error('Upload error:', error);
+        showToast('⚠ Failed to upload photo', true);
+      }
+    });
+
+    async function deletePhoto(id, ev) {
+      if (ev) ev.stopPropagation();
+      if (!confirm('Delete this photo from gallery?')) return;
+      try {
+        await apiCall(`/gallery/${id}`, { method: 'DELETE' });
+        showToast('✅ Photo deleted');
+        loadGallery();
+      } catch (error) {
+        console.error('Delete error:', error);
+        showToast('⚠ Failed to delete photo', true);
+      }
+    }
+
+    // Load gallery on start
+    loadGallery();
+  </script>
 
 </body>
+
 </html>

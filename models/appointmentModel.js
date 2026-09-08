@@ -10,6 +10,14 @@ const appointmentSchema = new mongoose.Schema({
         index: true
     },
     
+    // Link to family group for cross-user visibility
+    groupId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group',
+        default: null,
+        index: true
+    },
+    
     // Appointment details
     title: {
         type: String,
@@ -37,10 +45,28 @@ const appointmentSchema = new mongoose.Schema({
         match: [/^([01]\d|2[0-3]):([0-5]\d)$/, 'Invalid time format. Use HH:MM']
     },
     
+    doctor: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+
+    hospital: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+
+    address: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+
     // Status management
     status: {
         type: String,
-        enum: ['upcoming', 'completed', 'missed', 'cancelled'],
+        enum: ['upcoming', 'attended', 'completed', 'missed', 'cancelled'],
         default: 'upcoming',
         index: true
     },
@@ -50,12 +76,25 @@ const appointmentSchema = new mongoose.Schema({
         trim: true,
         maxlength: 1000
     },
+
+    notesAfter: {
+        type: String,
+        trim: true,
+        maxlength: 1000,
+        default: ''
+    },
     
-    // Optional: caregiver who created/manages this appointment
+    // Caregiver or child who created/manages this appointment
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: null
+    },
+
+    createdByRole: {
+        type: String,
+        enum: ['caretaker', 'client'],
+        default: 'caretaker'
     },
     
     // Track completion
@@ -132,6 +171,14 @@ appointmentSchema.statics.updateMissedAppointments = async function() {
 appointmentSchema.methods.markCompleted = function() {
     this.status = 'completed';
     this.completedAt = new Date();
+    return this.save();
+};
+
+// Instance method: Mark appointment as attended
+appointmentSchema.methods.markAttended = function(notesAfter = '') {
+    this.status = 'attended';
+    this.completedAt = new Date();
+    if (notesAfter) this.notesAfter = notesAfter;
     return this.save();
 };
 

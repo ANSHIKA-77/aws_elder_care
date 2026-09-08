@@ -1,978 +1,1411 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Elder Care — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elder Care — Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  :root {
-    --sage: #7B9E87;
-    --sage-light: #A8C5B0;
-    --sage-dark: #4A7259;
-    --warm: #E8D5B0;
-    --warm-dark: #C4A882;
-    --cream: #FAF7F2;
-    --text: #2D3A2E;
-    --text-muted: #6B7A6C;
-    --white: #ffffff;
-    --border: #E2E8E3;
-    --red: #D94F4F;
-    --red-light: #FDEAEA;
-    --green: #3A7D54;
-    --green-light: #EAF5EE;
-    --amber: #C07A2A;
-    --amber-light: #FEF3E2;
-    --blue: #3B6EA5;
-    --blue-light: #EBF2FA;
-    --shadow-sm: 0 2px 8px rgba(45,58,46,0.07);
-    --shadow: 0 8px 32px rgba(45,58,46,0.1);
-    --shadow-lg: 0 20px 60px rgba(45,58,46,0.14);
-    --radius: 20px;
-  }
+    :root {
+      --sage: #7B9E87;
+      --sage-light: #A8C5B0;
+      --sage-dark: #4A7259;
+      --warm: #E8D5B0;
+      --warm-dark: #C4A882;
+      --cream: #FAF7F2;
+      --text: #2D3A2E;
+      --text-muted: #6B7A6C;
+      --white: #ffffff;
+      --border: #E2E8E3;
+      --red: #D94F4F;
+      --red-light: #FDEAEA;
+      --green: #3A7D54;
+      --green-light: #EAF5EE;
+      --amber: #C07A2A;
+      --amber-light: #FEF3E2;
+      --blue: #3B6EA5;
+      --blue-light: #EBF2FA;
+      --shadow-sm: 0 2px 8px rgba(45, 58, 46, 0.07);
+      --shadow: 0 8px 32px rgba(45, 58, 46, 0.1);
+      --shadow-lg: 0 20px 60px rgba(45, 58, 46, 0.14);
+      --radius: 20px;
+    }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--text);
-    min-height: 100vh;
-  }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-  /* ─── LAYOUT ─── */
-  .app-shell {
-    display: flex;
-    min-height: 100vh;
-  }
+    /* ─── LAYOUT ─── */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
 
-  /* ─── SIDEBAR ─── */
-  .sidebar {
-    width: 260px;
-    background: var(--white);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 28px 20px;
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    z-index: 100;
-    transition: transform 0.3s ease;
-    overflow-y: auto; 
-  }
-
-  .sidebar-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 8px 28px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 20px;
-  }
-  .sidebar-brand-icon {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, var(--sage-dark), var(--sage));
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
-  .sidebar-brand-text h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 17px;
-    color: var(--text);
-    line-height: 1.2;
-  }
-  .sidebar-brand-text span {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 400;
-  }
-
-  .sidebar-user {
-    background: linear-gradient(135deg, rgba(123,158,135,0.1), rgba(232,213,176,0.15));
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 20px;
-  }
-  .sidebar-user-name {
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--text);
-  }
-  .sidebar-user-role {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 3px;
-  }
-  .role-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 50px;
-    font-size: 11px;
-    font-weight: 600;
-    margin-top: 6px;
-  }
-  .role-badge.caretaker { background: rgba(74,114,89,0.12); color: var(--sage-dark); }
-  .role-badge.client    { background: rgba(59,110,165,0.12); color: var(--blue); }
-
-  .sidebar-nav { flex: 1; }
-  .nav-label {
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    padding: 0 8px;
-    margin-bottom: 8px;
-    margin-top: 20px;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 14px;
-    border-radius: 12px;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.18s;
-    margin-bottom: 2px;
-  }
-  .nav-item:hover { background: rgba(123,158,135,0.08); color: var(--text); }
-  .nav-item.active { background: linear-gradient(135deg, rgba(74,114,89,0.12), rgba(123,158,135,0.08)); color: var(--sage-dark); font-weight: 600; }
-  .nav-icon { font-size: 17px; width: 22px; text-align: center; }
-
-  .sidebar-footer {
-  position: sticky;
-  bottom: 0;
-  background: var(--white);
-  padding-top: 16px;
-}
-  .btn-logout {
-    width: 100%;
-    padding: 11px;
-    border: 1.5px solid #FCCFCF;
-    background: var(--red-light);
-    color: var(--red);
-    border-radius: 12px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s;
-  }
-  .btn-logout:hover { background: #f9b8b8; }
-
-  /* ─── MAIN CONTENT ─── */
-  .main {
-    margin-left: 260px;
-    flex: 1;
-    padding: 32px;
-    max-width: 1100px;
-  }
-
-  .page { display: none; animation: fadeIn 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* ─── PAGE HEADER ─── */
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-  }
-  .page-header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: var(--text);
-  }
-  .page-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-
-  /* ─── HERO BANNER ─── */
-  .hero-banner {
-    background: linear-gradient(135deg, var(--sage-dark) 0%, var(--sage) 100%);
-    border-radius: var(--radius);
-    padding: 32px 36px;
-    margin-bottom: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    overflow: hidden;
-    position: relative;
-  }
-  .hero-banner::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.07);
-  }
-  .hero-banner::after {
-    content: '';
-    position: absolute;
-    bottom: -60px; right: 120px;
-    width: 150px; height: 150px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-  }
-  .hero-text h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    color: var(--white);
-    margin-bottom: 6px;
-  }
-  .hero-text p { color: rgba(255,255,255,0.75); font-size: 14px; }
-  .hero-icon { font-size: 60px; opacity: 0.9; position: relative; z-index: 1; }
-
-  /* ─── STAT CARDS ─── */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  .stat-card {
-    background: var(--white);
-    border-radius: 16px;
-    padding: 20px 22px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border);
-  }
-  .stat-card-icon {
-    font-size: 26px;
-    margin-bottom: 10px;
-  }
-  .stat-card-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-  }
-  .stat-card-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
-
-  /* ─── DASHBOARD GRID ─── */
-  .dash-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
-  }
-
-  .dash-card {
-    background: var(--white);
-    border-radius: 18px;
-    padding: 26px 20px;
-    text-align: center;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    transition: all 0.22s;
-    position: relative;
-    overflow: hidden;
-  }
-  .dash-card::before {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--sage-dark), var(--sage-light));
-    transform: scaleX(0);
-    transition: transform 0.22s;
-  }
-  .dash-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--sage-light); }
-  .dash-card:hover::before { transform: scaleX(1); }
-  .dash-card-icon { font-size: 36px; margin-bottom: 10px; display: block; }
-  .dash-card h3 { font-size: 13.5px; font-weight: 600; color: var(--text); }
-
-  .dash-card.emergency { border-color: #f5b8b8; background: linear-gradient(135deg, #fff6f6, var(--white)); }
-  .dash-card.emergency:hover { border-color: var(--red); box-shadow: 0 8px 28px rgba(217,79,79,0.15); }
-  .dash-card.emergency::before { background: linear-gradient(90deg, var(--red), #f5a0a0); }
-
-  /* ─── SECTION CARD ─── */
-  .section-card {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 28px 32px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-  }
-  .section-card h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 20px;
-    color: var(--text);
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* ─── ITEMS ─── */
-  .item {
-    background: #F7FAF8;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  .item strong { color: var(--text); }
-
-  .status-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 50px;
-    font-size: 11.5px;
-    font-weight: 600;
-  }
-  .status-done    { background: var(--green-light);  color: var(--green); }
-  .status-pending { background: var(--amber-light);  color: var(--amber); }
-  .status-missed  { background: var(--red-light);    color: var(--red); }
-  .status-today   { background: var(--blue-light);   color: var(--blue); }
-
-  /* ─── FORMS ─── */
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .form-row.single { grid-template-columns: 1fr; }
-
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  .field input, .field select, .field textarea {
-    padding: 12px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--text);
-    background: var(--white);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    width: 100%;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--sage);
-    box-shadow: 0 0 0 3px rgba(123,158,135,0.13);
-  }
-  .field textarea { resize: vertical; min-height: 80px; }
-
-  /* ─── BUTTONS ─── */
-  .btn {
-    padding: 11px 20px;
-    border: none;
-    border-radius: 11px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--sage-dark), var(--sage));
-    color: var(--white);
-    box-shadow: 0 4px 14px rgba(74,114,89,0.3);
-  }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(74,114,89,0.38); }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1.5px solid var(--border);
-  }
-  .btn-ghost:hover { background: #F0F5F1; color: var(--text); }
-  .btn-danger { background: var(--red-light); color: var(--red); border: 1.5px solid #F5CECE; }
-  .btn-danger:hover { background: #f9c0c0; }
-  .btn-sm { padding: 7px 14px; font-size: 12.5px; }
-
-  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-
-  /* ─── MED CHECKBOX ─── */
-  .med-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: #F7FAF8;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 10px;
-    transition: border-color 0.2s;
-  }
-  .med-item.done { background: var(--green-light); border-color: rgba(58,125,84,0.25); }
-  .med-item input[type="checkbox"] {
-    width: 18px; height: 18px;
-    accent-color: var(--sage-dark);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .med-item-name { flex: 1; font-size: 14px; font-weight: 500; }
-
-  /* ─── EXERCISE ─── */
-  .exercise-cat {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #F7FAF8;
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    padding: 16px 20px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .exercise-cat:hover { border-color: var(--sage-light); background: rgba(123,158,135,0.06); }
-  .exercise-cat-left { display: flex; align-items: center; gap: 12px; }
-  .exercise-cat-icon { font-size: 24px; }
-  .exercise-cat-name { font-weight: 600; font-size: 14.5px; color: var(--text); }
-  .exercise-cat-count { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-  .exercise-cat-arrow { color: var(--text-muted); font-size: 18px; }
-
-  .exercise-step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 13px 16px;
-    border: 1px solid var(--border);
-    border-radius: 11px;
-    margin-bottom: 8px;
-    background: #F7FAF8;
-    transition: border-color 0.2s;
-  }
-  .exercise-step.done { background: var(--green-light); border-color: rgba(58,125,84,0.2); }
-  .exercise-step input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
-  .exercise-step-text { font-size: 14px; }
-
-  /* ─── GALLERY ─── */
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 14px;
-  }
-  .gallery-item {
-    border-radius: 14px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: var(--shadow-sm);
-  }
-  .gallery-item img {
-    width: 100%; height: 160px;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s;
-  }
-  .gallery-item:hover img { transform: scale(1.05); }
-  .gallery-item-label {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 8px 12px;
-    background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
-    color: var(--white);
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  /* ─── EMERGENCY ─── */
-  .emergency-section {
-    text-align: center;
-    padding: 20px 0 10px;
-  }
-  .btn-emergency {
-    background: linear-gradient(135deg, #c0392b, #e74c3c);
-    color: var(--white);
-    border: none;
-    border-radius: 16px;
-    font-size: 18px;
-    font-weight: 700;
-    font-family: 'DM Sans', sans-serif;
-    padding: 20px 44px;
-    cursor: pointer;
-    box-shadow: 0 8px 30px rgba(192,57,43,0.35);
-    transition: all 0.2s;
-    animation: emergencyPulse 2.5s ease infinite;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-  @keyframes emergencyPulse {
-    0%, 100% { box-shadow: 0 8px 30px rgba(192,57,43,0.35); }
-    50% { box-shadow: 0 8px 40px rgba(192,57,43,0.6); }
-  }
-  .btn-emergency:hover { transform: scale(1.04); }
-
-  .contact-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--red-light);
-    border: 1px solid #F5CECE;
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 10px;
-  }
-  .contact-item-info strong { font-size: 14px; color: var(--text); display: block; }
-  .contact-item-info span { font-size: 13px; color: var(--text-muted); }
-  .contact-phone {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--red);
-  }
-
-  /* ─── MAP ─── */
-  #map {
-    height: 420px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    background: #f0f0f0;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted); font-size: 14px;
-  }
-
-  /* ─── MOBILE TOGGLE ─── */
-  .mobile-topbar {
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--white);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 20px;
-    position: sticky; top: 0; z-index: 90;
-  }
-  .hamburger {
-    background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text);
-  }
-
-  .section-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 20px 0;
-  }
-
-  @media (max-width: 768px) {
+    /* ─── SIDEBAR ─── */
     .sidebar {
-      transform: translateX(-100%);
-      width: 280px;
+      width: 260px;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+      overflow-y: auto;
     }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.3);
-      z-index: 99;
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
     }
-    .sidebar-overlay.show { display: block; }
+
+    .sidebar-brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .sidebar-brand-text h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 17px;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .sidebar-brand-text span {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .sidebar-user {
+      background: linear-gradient(135deg, rgba(123, 158, 135, 0.1), rgba(232, 213, 176, 0.15));
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+
+    .sidebar-user-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .sidebar-user-role {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .role-badge.caretaker {
+      background: rgba(74, 114, 89, 0.12);
+      color: var(--sage-dark);
+    }
+
+    .role-badge.client {
+      background: rgba(59, 110, 165, 0.12);
+      color: var(--blue);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+    }
+
+    .nav-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 8px;
+      margin-bottom: 8px;
+      margin-top: 20px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.18s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: rgba(123, 158, 135, 0.08);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(74, 114, 89, 0.12), rgba(123, 158, 135, 0.08));
+      color: var(--sage-dark);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 17px;
+      width: 22px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      position: sticky;
+      bottom: 0;
+      background: var(--white);
+      padding-top: 16px;
+    }
+
+    .btn-logout {
+      width: 100%;
+      padding: 11px;
+      border: 1.5px solid #FCCFCF;
+      background: var(--red-light);
+      color: var(--red);
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #f9b8b8;
+    }
+
+    /* ─── MAIN CONTENT ─── */
     .main {
-      margin-left: 0;
-      padding: 20px 16px;
+      margin-left: 260px;
+      flex: 1;
+      padding: 32px;
+      max-width: 1100px;
     }
-    .mobile-topbar { display: flex; }
-    .form-row { grid-template-columns: 1fr; }
-  }
-</style>
+
+    .page {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─── PAGE HEADER ─── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      color: var(--text);
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    /* ─── HERO BANNER ─── */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--sage-dark) 0%, var(--sage) 100%);
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      right: 120px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .hero-text h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .hero-text p {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 14px;
+    }
+
+    .hero-icon {
+      font-size: 60px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── STAT CARDS ─── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+
+    .stat-card-icon {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-card-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ─── DASHBOARD GRID ─── */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .dash-card {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 26px 20px;
+      text-align: center;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.22s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dash-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--sage-dark), var(--sage-light));
+      transform: scaleX(0);
+      transition: transform 0.22s;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+      border-color: var(--sage-light);
+    }
+
+    .dash-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .dash-card-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .dash-card h3 {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .dash-card.emergency {
+      border-color: #f5b8b8;
+      background: linear-gradient(135deg, #fff6f6, var(--white));
+    }
+
+    .dash-card.emergency:hover {
+      border-color: var(--red);
+      box-shadow: 0 8px 28px rgba(217, 79, 79, 0.15);
+    }
+
+    .dash-card.emergency::before {
+      background: linear-gradient(90deg, var(--red), #f5a0a0);
+    }
+
+    /* ─── SECTION CARD ─── */
+    .section-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .section-card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      color: var(--text);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ─── ITEMS ─── */
+    .item {
+      background: #F7FAF8;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .item strong {
+      color: var(--text);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .status-done {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .status-pending {
+      background: var(--amber-light);
+      color: var(--amber);
+    }
+
+    .status-missed {
+      background: var(--red-light);
+      color: var(--red);
+    }
+
+    .status-today {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    /* ─── FORMS ─── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-row.single {
+      grid-template-columns: 1fr;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--sage);
+      box-shadow: 0 0 0 3px rgba(123, 158, 135, 0.13);
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      padding: 11px 20px;
+      border: none;
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+      color: var(--white);
+      box-shadow: 0 4px 14px rgba(74, 114, 89, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(74, 114, 89, 0.38);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: #F0F5F1;
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: var(--red-light);
+      color: var(--red);
+      border: 1.5px solid #F5CECE;
+    }
+
+    .btn-danger:hover {
+      background: #f9c0c0;
+    }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: 12.5px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    /* ─── MED CHECKBOX ─── */
+    .med-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #F7FAF8;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+    }
+
+    .med-item.done {
+      background: var(--green-light);
+      border-color: rgba(58, 125, 84, 0.25);
+    }
+
+    .med-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--sage-dark);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .med-item-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* ─── EXERCISE ─── */
+    .exercise-cat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #F7FAF8;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .exercise-cat:hover {
+      border-color: var(--sage-light);
+      background: rgba(123, 158, 135, 0.06);
+    }
+
+    .exercise-cat-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .exercise-cat-icon {
+      font-size: 24px;
+    }
+
+    .exercise-cat-name {
+      font-weight: 600;
+      font-size: 14.5px;
+      color: var(--text);
+    }
+
+    .exercise-cat-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .exercise-cat-arrow {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    .exercise-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      margin-bottom: 8px;
+      background: #F7FAF8;
+      transition: border-color 0.2s;
+    }
+
+    .exercise-step.done {
+      background: var(--green-light);
+      border-color: rgba(58, 125, 84, 0.2);
+    }
+
+    .exercise-step input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--green);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .exercise-step-text {
+      font-size: 14px;
+    }
+
+    /* ─── GALLERY ─── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    .gallery-item {
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .gallery-item-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 12px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+      color: var(--white);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ─── EMERGENCY ─── */
+    .emergency-section {
+      text-align: center;
+      padding: 20px 0 10px;
+    }
+
+    .btn-emergency {
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      color: var(--white);
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      padding: 20px 44px;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(192, 57, 43, 0.35);
+      transition: all 0.2s;
+      animation: emergencyPulse 2.5s ease infinite;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    @keyframes emergencyPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 8px 30px rgba(192, 57, 43, 0.35);
+      }
+
+      50% {
+        box-shadow: 0 8px 40px rgba(192, 57, 43, 0.6);
+      }
+    }
+
+    .btn-emergency:hover {
+      transform: scale(1.04);
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--red-light);
+      border: 1px solid #F5CECE;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+    }
+
+    .contact-item-info strong {
+      font-size: 14px;
+      color: var(--text);
+      display: block;
+    }
+
+    .contact-item-info span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .contact-phone {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    /* ─── MAP ─── */
+    #map {
+      height: 420px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ─── MOBILE TOGGLE ─── */
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 99;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 20px 16px;
+      }
+
+      .mobile-topbar {
+        display: flex;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- Auth guard -->
-<script>
-  const role = localStorage.getItem('role');
-  if (!role) window.location.href = 'login.html';
-</script>
+  <!-- Auth guard -->
+  <script>
+    const role = localStorage.getItem('role');
+    if (!role) window.location.href = 'login.html';
+  </script>
 
-<!-- Mobile overlay -->
-<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+  <!-- Mobile overlay -->
+  <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-<!-- Mobile topbar -->
-<div class="mobile-topbar">
-  <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <span style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text)">🌿 Elder Care</span>
-  <span style="font-size:22px;">👤</span>
-</div>
+  <!-- Mobile topbar -->
+  <div class="mobile-topbar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <span style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text)">🌿 Elder Care</span>
+    <span style="font-size:22px;">👤</span>
+  </div>
 
-<div class="app-shell">
+  <div class="app-shell">
 
-  <!-- ─── SIDEBAR ─── -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="sidebar-brand-icon">🌿</div>
-      <div class="sidebar-brand-text">
-        <h2>Elder Care</h2>
-        <span>Care Management</span>
-      </div>
-    </div>
-
-    <div class="sidebar-user">
-      <div class="sidebar-user-name" id="sidebarName">—</div>
-      <div class="sidebar-user-role">Care Portal User</div>
-      <span class="role-badge" id="roleBadge">—</span>
-    </div>
-
-    <nav class="sidebar-nav">
-      <div class="nav-label">Main</div>
-      <div class="nav-item active" onclick="showPage('home', this)"><span class="nav-icon">🏠</span> Dashboard</div>
-      <div class="nav-item" onclick="showPage('meds', this)"><span class="nav-icon">💊</span> Medications</div>
-      <div class="nav-item" onclick="showPage('appointments', this)"><span class="nav-icon">📅</span> Appointments</div>
-      <div class="nav-item" onclick="showPage('exercise', this)"><span class="nav-icon">🏃</span> Exercise</div>
-      <div class="nav-item" onclick="openVideoCall()"><span class="nav-icon">📹</span> Video Call</div>
-      <div class="nav-item" onclick="window.location.href='voice.html'"><span class="nav-icon">🎤</span> Voice Assistant</div>
-      <div class="nav-label">More</div>
-      <div class="nav-item" onclick="showPage('gallery', this)"><span class="nav-icon">🖼️</span> Gallery</div>
-<div class="nav-item" onclick="window.location.href='emergency.html'"><span class="nav-icon">🚨</span> Emergency</div>
-      <div class="nav-item" onclick="showPage('map', this)"><span class="nav-icon">📍</span> Location Map</div>
-    </nav>
-
-    <div class="sidebar-footer">
-      <button class="btn-logout" onclick="logout()">↩ Sign Out</button>
-    </div>
-  </aside>
-
-  <!-- ─── MAIN ─── -->
-  <main class="main">
-
-    <!-- HOME PAGE -->
-    <div class="page active" id="page-home">
-      <div class="hero-banner">
-        <div class="hero-text">
-          <h2>Good <span id="timeOfDay">morning</span>, <span id="heroName">—</span> 👋</h2>
-          <p id="heroDate" style="margin-top:6px;"></p>
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">🌿</div>
+        <div class="sidebar-brand-text">
+          <h2>Elder Care</h2>
+          <span>Care Management</span>
         </div>
-        <span class="hero-icon">🌿</span>
       </div>
 
-      <div class="stats-row" id="statsRow"></div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name" id="sidebarName">—</div>
+        <div class="sidebar-user-role">Care Portal User</div>
+        <span class="role-badge" id="roleBadge">—</span>
+        <div id="inviteCodeBox" style="margin-top:10px;padding:10px;background:var(--white);border:1.5px dashed var(--sage-dark);border-radius:10px;display:none;">
+          <div style="font-size:11px;color:var(--text-muted);font-weight:600;">FAMILY INVITE CODE</div>
+          <div id="sidebarInviteCode" style="font-size:18px;font-weight:700;letter-spacing:3px;color:var(--sage-dark);margin:4px 0;">—</div>
+          <button onclick="copyInviteCode()" style="padding:4px 8px;font-size:11px;border:none;border-radius:6px;background:var(--sage-dark);color:white;cursor:pointer;width:100%;font-weight:600;">📋 Copy Code</button>
+        </div>
+      </div>
 
-      <div class="section-card">
-        <h2>Quick Access</h2>
-        <div class="dash-grid">
-          <div class="dash-card" onclick="showPage('meds', null)">
-            <span class="dash-card-icon">💊</span><h3>Medications</h3>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <div class="nav-item active" onclick="showPage('home', this)"><span class="nav-icon">🏠</span> Dashboard</div>
+        <div class="nav-item" onclick="showPage('meds', this)"><span class="nav-icon">💊</span> Medications</div>
+        <div class="nav-item" onclick="showPage('appointments', this)"><span class="nav-icon">📅</span> Appointments
+        </div>
+        <div class="nav-item" onclick="showPage('exercise', this)"><span class="nav-icon">🏃</span> Exercise</div>
+        <div class="nav-item" onclick="openVideoCall()"><span class="nav-icon">📹</span> Video Call</div>
+        <div class="nav-item" onclick="window.location.href='voice.html'"><span class="nav-icon">🎤</span> Voice
+          Assistant</div>
+        <div class="nav-label">More</div>
+        <div class="nav-item" onclick="showPage('gallery', this)"><span class="nav-icon">🖼️</span> Gallery</div>
+        <div class="nav-item" onclick="window.location.href='emergency.html'"><span class="nav-icon">🚨</span> Emergency
+        </div>
+        <div class="nav-item" onclick="showPage('map', this)"><span class="nav-icon">📍</span> Location Map</div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">↩ Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- ─── MAIN ─── -->
+    <main class="main">
+
+      <!-- HOME PAGE -->
+      <div class="page active" id="page-home">
+        <div class="hero-banner">
+          <div class="hero-text">
+            <h2>Good <span id="timeOfDay">morning</span>, <span id="heroName">—</span> 👋</h2>
+            <p id="heroDate" style="margin-top:6px;"></p>
           </div>
-          <div class="dash-card" onclick="showPage('appointments', null)">
-            <span class="dash-card-icon">📅</span><h3>Appointments</h3>
+          <span class="hero-icon">🌿</span>
+        </div>
+
+        <div class="stats-row" id="statsRow"></div>
+
+        <div class="section-card">
+          <h2>Quick Access</h2>
+          <div class="dash-grid">
+            <div class="dash-card" onclick="showPage('meds', null)">
+              <span class="dash-card-icon">💊</span>
+              <h3>Medications</h3>
+            </div>
+            <div class="dash-card" onclick="showPage('appointments', null)">
+              <span class="dash-card-icon">📅</span>
+              <h3>Appointments</h3>
+            </div>
+            <div class="dash-card" onclick="showPage('exercise', null)">
+              <span class="dash-card-icon">🏃</span>
+              <h3>Exercise</h3>
+            </div>
+            <div class="dash-card" onclick="showPage('gallery', null)">
+              <span class="dash-card-icon">🖼️</span>
+              <h3>Gallery</h3>
+            </div>
+            <div class="dash-card" onclick="showPage('map', null)">
+              <span class="dash-card-icon">📍</span>
+              <h3>Live Map</h3>
+            </div>
+            <div class="dash-card" onclick="openVideoCall()">
+              <span class="dash-card-icon">📹</span>
+              <h3>Video Call</h3>
+            </div>
+            <div class="dash-card" onclick="window.location.href='voice.html'">
+              <span class="dash-card-icon">🎤</span>
+              <h3>Voice Assistant</h3>
+            </div>
+            <div class="dash-card emergency" onclick="window.location.href='emergency.html'">
+              <span class="dash-card-icon">🚨</span>
+              <h3>Emergency</h3>
+            </div>
           </div>
-          <div class="dash-card" onclick="showPage('exercise', null)">
-            <span class="dash-card-icon">🏃</span><h3>Exercise</h3>
-          </div>
-          <div class="dash-card" onclick="showPage('gallery', null)">
-            <span class="dash-card-icon">🖼️</span><h3>Gallery</h3>
-          </div>
-          <div class="dash-card" onclick="showPage('map', null)">
-            <span class="dash-card-icon">📍</span><h3>Live Map</h3>
-          </div>
-          <div class="dash-card" onclick="openVideoCall()">
-            <span class="dash-card-icon">📹</span><h3>Video Call</h3>
-          </div>
-          <div class="dash-card" onclick="window.location.href='voice.html'">
-            <span class="dash-card-icon">🎤</span><h3>Voice Assistant</h3>
-          </div>
-          <div class="dash-card emergency" onclick="window.location.href='emergency.html'">
-            <span class="dash-card-icon">🚨</span><h3>Emergency</h3>
+        </div>
+      </div>
+
+      <!-- MEDS PAGE -->
+      <div class="page" id="page-meds">
+        <div class="page-header">
+          <div>
+            <h1>💊 Medications</h1>
+            <p>Daily medication schedule and status</p>
           </div>
         </div>
-      </div>
-    </div>
+        <div class="section-card">
+          <h2>Today's Medications</h2>
+          <div id="medList"></div>
+          <div class="btn-row">
+            <input type="text" id="newMedInput" placeholder="Enter new medication name"
+              style="padding:10px;border-radius:8px;border:1px solid #ccc;">
 
-    <!-- MEDS PAGE -->
-    <div class="page" id="page-meds">
-      <div class="page-header">
-        <div>
-          <h1>💊 Medications</h1>
-          <p>Daily medication schedule and status</p>
-        </div>
-      </div>
-      <div class="section-card">
-        <h2>Today's Medications</h2>
-        <div id="medList"></div>
-        <div class="btn-row">
-  <input type="text" id="newMedInput" placeholder="Enter new medication name" 
-         style="padding:10px;border-radius:8px;border:1px solid #ccc;">
-  
-  <button class="btn btn-primary" onclick="addMedication()">➕ Add</button>
-</div>
-      </div>
-    </div>
-
-    <!-- APPOINTMENTS PAGE -->
-    <div class="page" id="page-appointments">
-      <div class="page-header">
-        <div>
-          <h1>📅 Appointments</h1>
-          <p>Manage and track medical appointments</p>
+            <button class="btn btn-primary" onclick="addMedication()">➕ Add</button>
+          </div>
         </div>
       </div>
 
-      <div id="apptFormCard" class="section-card">
-        <h2>➕ Add Appointment</h2>
-        <div class="form-row">
-          <div class="field"><label>Title</label><input type="text" id="apptTitle" placeholder="e.g. Cardiology Check-up"></div>
-          <div class="field"><label>Location</label><input type="text" id="apptLocation" placeholder="Hospital / Clinic name"></div>
+      <!-- APPOINTMENTS PAGE -->
+      <div class="page" id="page-appointments">
+        <div class="page-header">
+          <div>
+            <h1>📅 Appointments</h1>
+            <p>Manage and track medical appointments</p>
+          </div>
         </div>
-        <div class="form-row">
-          <div class="field"><label>Date</label><input type="date" id="apptDate"></div>
-          <div class="field"><label>Time</label><input type="time" id="apptTime"></div>
-        </div>
-        <div class="form-row single">
-          <div class="field"><label>Notes</label><textarea id="apptNotes" placeholder="Additional notes…"></textarea></div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="saveAppointment()">Add Appointment</button>
-        </div>
-      </div>
 
-      <div class="section-card">
-        <h2>📋 All Appointments</h2>
-        <div id="todaySection"></div>
-        <div id="upcomingSection"></div>
-        <div id="completedSection"></div>
-        <div id="missedSection"></div>
-      </div>
-    </div>
-
-    <!-- EXERCISE PAGE -->
-    <div class="page" id="page-exercise">
-      <div class="page-header">
-        <div>
-          <h1>🏃 Exercise</h1>
-          <p>Daily exercise routines and progress</p>
+        <div id="apptFormCard" class="section-card">
+          <h2>➕ Add Appointment</h2>
+          <div class="form-row">
+            <div class="field"><label>Title</label><input type="text" id="apptTitle"
+                placeholder="e.g. Cardiology Check-up"></div>
+            <div class="field"><label>Location</label><input type="text" id="apptLocation"
+                placeholder="Hospital / Clinic name"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Date</label><input type="date" id="apptDate"></div>
+            <div class="field"><label>Time</label><input type="time" id="apptTime"></div>
+          </div>
+          <div class="form-row single">
+            <div class="field"><label>Notes</label><textarea id="apptNotes" placeholder="Additional notes…"></textarea>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveAppointment()">Add Appointment</button>
+          </div>
         </div>
-      </div>
 
-      <!-- Category list -->
-      <div class="section-card" id="exerciseCatCard">
-        <h2>Exercise Categories</h2>
-        <div id="exerciseCatList"></div>
-      </div>
-
-      <!-- Routine detail -->
-      <div class="section-card" id="exerciseRoutineCard" style="display:none;">
-        <h2 id="routineTitle">—</h2>
-        <div id="routineList"></div>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="saveRoutine()">💾 Save Progress</button>
-          <button class="btn btn-ghost" onclick="closeRoutine()">← Back</button>
+        <div class="section-card">
+          <h2>📋 All Appointments</h2>
+          <div id="todaySection"></div>
+          <div id="upcomingSection"></div>
+          <div id="completedSection"></div>
+          <div id="missedSection"></div>
         </div>
       </div>
 
-      <!-- Client daily log -->
-      <div class="section-card" id="exerciseLogCard" style="display:none;">
-        <h2>📘 Today's Log</h2>
-        <div id="logContent"></div>
-      </div>
-    </div>
+      <!-- EXERCISE PAGE -->
+      <div class="page" id="page-exercise">
+        <div class="page-header">
+          <div>
+            <h1>🏃 Exercise</h1>
+            <p>Daily exercise routines and progress</p>
+          </div>
+        </div>
 
-    <!-- GALLERY PAGE -->
-    <div class="page" id="page-gallery">
-      <div class="page-header">
-        <div>
-          <h1>🖼️ Activity Gallery</h1>
-          <p>Daily activity photos and memories</p>
+        <!-- Category list -->
+        <div class="section-card" id="exerciseCatCard">
+          <h2>Exercise Categories</h2>
+          <div id="exerciseCatList"></div>
+        </div>
+
+        <!-- Routine detail -->
+        <div class="section-card" id="exerciseRoutineCard" style="display:none;">
+          <h2 id="routineTitle">—</h2>
+          <div id="routineList"></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveRoutine()">💾 Save Progress</button>
+            <button class="btn btn-ghost" onclick="closeRoutine()">← Back</button>
+          </div>
+        </div>
+
+        <!-- Client daily log -->
+        <div class="section-card" id="exerciseLogCard" style="display:none;">
+          <h2>📘 Today's Log</h2>
+          <div id="logContent"></div>
         </div>
       </div>
-      <div class="section-card">
-        <div class="gallery-grid" id="galleryGrid"></div>
-      </div>
-    </div>
 
-    <!-- EMERGENCY PAGE -->
-    <div class="page" id="page-emergency">
-      <div class="page-header">
-        <div>
-          <h1>🚨 Emergency</h1>
-          <p>Send GPS location alert and contact hospitals</p>
+      <!-- GALLERY PAGE -->
+      <div class="page" id="page-gallery">
+        <div class="page-header">
+          <div>
+            <h1>🖼️ Activity Gallery</h1>
+            <p>Daily activity photos and memories</p>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="gallery-grid" id="galleryGrid"></div>
         </div>
       </div>
 
-      <div class="section-card">
-        <h2>🆘 Send Emergency Alert</h2>
-        <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px;">
-          Press the button below to share your live GPS location with all emergency contacts via SMS.
-        </p>
-        <div class="emergency-section">
-          <button class="btn-emergency" onclick="triggerEmergency()">
-            🚨 SEND EMERGENCY ALERT
-          </button>
-          <p style="font-size:12px;color:var(--text-muted);">
-            Your GPS location will be sent to all listed hospitals.
+      <!-- EMERGENCY PAGE -->
+      <div class="page" id="page-emergency">
+        <div class="page-header">
+          <div>
+            <h1>🚨 Emergency</h1>
+            <p>Send GPS location alert and contact hospitals</p>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h2>🆘 Send Emergency Alert</h2>
+          <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px;">
+            Press the button below to share your live GPS location with all emergency contacts via SMS.
           </p>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <h2>🚑 Emergency Contacts</h2>
-        <div class="contact-item">
-          <div class="contact-item-info">
-            <strong>City Care Hospital</strong>
-            <span>24/7 Emergency Services</span>
+          <div class="emergency-section">
+            <button class="btn-emergency" onclick="triggerEmergency()">
+              🚨 SEND EMERGENCY ALERT
+            </button>
+            <p style="font-size:12px;color:var(--text-muted);">
+              Your GPS location will be sent to all listed hospitals.
+            </p>
           </div>
-          <span class="contact-phone">📞 7987855907</span>
         </div>
-        <div class="contact-item">
-          <div class="contact-item-info">
-            <strong>LifeLine Medical Center</strong>
-            <span>Trauma & Emergency</span>
+
+        <div class="section-card">
+          <h2>🚑 Emergency Contacts</h2>
+          <div class="contact-item">
+            <div class="contact-item-info">
+              <strong>City Care Hospital</strong>
+              <span>24/7 Emergency Services</span>
+            </div>
+            <span class="contact-phone">📞 7987855907</span>
           </div>
-          <span class="contact-phone">📞 9353055740</span>
-        </div>
-        <div class="contact-item">
-          <div class="contact-item-info">
-            <strong>Sunrise Multispeciality Hospital</strong>
-            <span>Cardiology, Neuro & More</span>
+          <div class="contact-item">
+            <div class="contact-item-info">
+              <strong>LifeLine Medical Center</strong>
+              <span>Trauma & Emergency</span>
+            </div>
+            <span class="contact-phone">📞 9353055740</span>
           </div>
-          <span class="contact-phone">📞 7305525799</span>
+          <div class="contact-item">
+            <div class="contact-item-info">
+              <strong>Sunrise Multispeciality Hospital</strong>
+              <span>Cardiology, Neuro & More</span>
+            </div>
+            <span class="contact-phone">📞 7305525799</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- MAP PAGE -->
-    <div class="page" id="page-map">
-      <div class="page-header">
-        <div>
-          <h1>📍 Live Location Map</h1>
-          <p>Real-time GPS tracking and nearby hospitals</p>
+      <!-- MAP PAGE -->
+      <div class="page" id="page-map">
+        <div class="page-header">
+          <div>
+            <h1>📍 Live Location Map</h1>
+            <p>Real-time GPS tracking and nearby hospitals</p>
+          </div>
+        </div>
+        <div class="section-card">
+          <div id="map">
+            <span>Map loads after location permission is granted. Click "Show My Location" below.</span>
+          </div>
+          <div class="btn-row" style="margin-top:16px;">
+            <button class="btn btn-primary" onclick="loadMyLocation()">📍 Show My Location</button>
+          </div>
         </div>
       </div>
-      <div class="section-card">
-        <div id="map">
-          <span>Map loads after location permission is granted. Click "Show My Location" below.</span>
-        </div>
-        <div class="btn-row" style="margin-top:16px;">
-          <button class="btn btn-primary" onclick="loadMyLocation()">📍 Show My Location</button>
-        </div>
-      </div>
-    </div>
 
-  </main>
-</div><!-- end app-shell -->
+    </main>
+  </div><!-- end app-shell -->
 
-<script>
-/* ══════════════════════════════
-   API HELPER FUNCTIONS
-══════════════════════════════ */
-const API_BASE = '/api/v1';
+  <script src="/js/config.js"></script>
+  <script>
+    /* ══════════════════════════════
+       API HELPER FUNCTIONS
+    ══════════════════════════════ */
+    const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || '/api/v1';
 
-// Get JWT token from localStorage
-function getToken() {
-  return localStorage.getItem('token');
-}
-
-// Generic API call function with authentication
-async function apiCall(endpoint, options = {}) {
-  const token = getToken();
-  if (!token) {
-    window.location.href = 'login.html';
-    return;
-  }
-
-  const config = {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...options.headers
-    }
-  };
-
-  try {
-    const response = await fetch(`${API_BASE}${endpoint}`, config);
-    
-    // Token expired or invalid
-    if (response.status === 401) {
-      localStorage.clear();
-      window.location.href = 'login.html';
-      return;
+    // Get JWT token from localStorage
+    function getToken() {
+      return localStorage.getItem('token');
     }
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'API request failed');
+    // Generic API call function with authentication
+    async function apiCall(endpoint, options = {}) {
+      const token = getToken();
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const config = {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...options.headers
+        }
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}${endpoint}`, config);
+
+        // Token expired or invalid
+        if (response.status === 401) {
+          localStorage.clear();
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'API request failed');
+        }
+
+        return data;
+      } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+      }
     }
-    
-    return data;
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
-  }
-}
 
-/* ══════════════════════════════
-   INIT
-══════════════════════════════ */
-const userName = localStorage.getItem('userName') || 'User';
-document.getElementById('sidebarName').textContent = userName;
-const rb = document.getElementById('roleBadge');
-rb.textContent = role === 'caretaker' ? '👩‍⚕️ Caretaker' : '🧓 Client';
-rb.classList.add(role);
+    /* ══════════════════════════════
+       INIT
+    ══════════════════════════════ */
+    const userName = localStorage.getItem('userName') || 'User';
+    document.getElementById('sidebarName').textContent = userName;
+    const rb = document.getElementById('roleBadge');
+    rb.textContent = role === 'caretaker' ? '👩‍⚕️ Caretaker' : '🧓 Client';
+    rb.classList.add(role);
 
-// Hero greeting
-const hour = new Date().getHours();
-document.getElementById('timeOfDay').textContent = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
-document.getElementById('heroName').textContent = userName;
-document.getElementById('heroDate').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    // Hero greeting
+    const hour = new Date().getHours();
+    document.getElementById('timeOfDay').textContent = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+    document.getElementById('heroName').textContent = userName;
+    document.getElementById('heroDate').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-/* ══════════════════════════════
-   NAVIGATION
-══════════════════════════════ */
-function showPage(id, navEl) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
+    // Fetch and display family invite code for caretakers
+    if (role === 'caretaker') {
+      apiCall('/auth/invite-code').then(res => {
+        if (res && res.data && res.data.inviteCode) {
+          const box = document.getElementById('inviteCodeBox');
+          if (box) box.style.display = 'block';
+          const codeEl = document.getElementById('sidebarInviteCode');
+          if (codeEl) codeEl.textContent = res.data.inviteCode;
+        }
+      }).catch(console.error);
+    }
 
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (navEl) navEl.classList.add('active');
-  else {
-    const match = [...document.querySelectorAll('.nav-item')]
-      .find(n => n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'"));
-    if (match) match.classList.add('active');
-  }
+    function copyInviteCode() {
+      const code = document.getElementById('sidebarInviteCode').textContent;
+      if (code && code !== '—') {
+        navigator.clipboard.writeText(code).then(() => {
+          showToast('✅ Invite code copied: ' + code);
+        }).catch(() => {
+          showToast('Code: ' + code);
+        });
+      }
+    }
 
-  closeSidebar();
+    /* ══════════════════════════════
+       NAVIGATION
+    ══════════════════════════════ */
+    function showPage(id, navEl) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
 
-  // Lazy loads with async support
-  if (id === 'meds')         loadMeds();
-  if (id === 'appointments') { updateStatuses(); loadAppointments(); initApptForm(); }
-  if (id === 'exercise')     initExercise();
-  if (id === 'gallery')      loadGallery();
-  if (id === 'home')         loadStats();
-}
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (navEl) navEl.classList.add('active');
+      else {
+        const match = [...document.querySelectorAll('.nav-item')]
+          .find(n => n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'"));
+        if (match) match.classList.add('active');
+      }
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-}
+      closeSidebar();
 
-/* ══════════════════════════════
-   STATS
-══════════════════════════════ */
-async function loadStats() {
-  try {
-    // Fetch all stats in parallel
-    const [medStats, apptStats, exStats] = await Promise.all([
-      apiCall('/medications/stats/today'),
-      apiCall('/appointments/stats/summary'),
-      apiCall('/exercises/summary')
-    ]);
+      // Lazy loads with async support
+      if (id === 'meds') loadMeds();
+      if (id === 'appointments') { updateStatuses(); loadAppointments(); initApptForm(); }
+      if (id === 'exercise') initExercise();
+      if (id === 'gallery') loadGallery();
+      if (id === 'home') loadStats();
+    }
 
-    const doneMeds = medStats.data.taken || 0;
-    const totalMeds = medStats.data.total || 0;
-    const todayAppts = apptStats.data.today || 0;
-    const exDone = exStats.data.totalStepsCompleted || 0;
-    const totalAppts = apptStats.data.total || 0;
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('show');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('show');
+    }
 
-    document.getElementById('statsRow').innerHTML = `
+    /* ══════════════════════════════
+       CARETAKER CLIENT SELECTORS
+       Inject banner above meds and appointments
+       pages so caretaker can pick a client
+    ══════════════════════════════ */
+    async function initCaretakerSelectors() {
+      if (role !== 'caretaker') return;
+
+      let clients = [];
+      try {
+        const res = await apiCall('/auth/group-members');
+        clients = (res.data && res.data.clients) || [];
+      } catch (e) {
+        console.error('Could not load group members', e);
+        return;
+      }
+
+      // ── MEDS client selector ──
+      const medPage = document.getElementById('page-meds');
+      if (medPage && !document.getElementById('medClientBanner')) {
+        const banner = makeSelectorBanner(
+          'medClientBanner', 'medClientSel', 'medClientLabel',
+          '💊 Managing medications for', clients,
+          (clientId) => {
+            selectedMedClientId = clientId || null;
+            document.getElementById('medClientLabel').textContent = clientId
+              ? `Viewing: ${document.getElementById('medClientSel').options[document.getElementById('medClientSel').selectedIndex].textContent}`
+              : '';
+            loadMeds();
+          }
+        );
+        medPage.insertBefore(banner, medPage.firstChild);
+      }
+
+      // ── APPOINTMENTS client selector ──
+      const apptPage = document.getElementById('page-appointments');
+      if (apptPage && !document.getElementById('apptClientBanner')) {
+        const banner = makeSelectorBanner(
+          'apptClientBanner', 'apptClientSel', 'apptClientLabel',
+          '📅 Managing appointments for', clients,
+          (clientId) => {
+            selectedApptClientId = clientId || null;
+            document.getElementById('apptClientLabel').textContent = clientId
+              ? `Viewing: ${document.getElementById('apptClientSel').options[document.getElementById('apptClientSel').selectedIndex].textContent}`
+              : '';
+            loadAppointments();
+          }
+        );
+        apptPage.insertBefore(banner, apptPage.firstChild);
+      }
+    }
+
+    /** Create a styled client selector banner element */
+    function makeSelectorBanner(bannerId, selId, labelId, heading, clients, onChange) {
+      const banner = document.createElement('div');
+      banner.id = bannerId;
+      banner.className = 'section-card';
+      banner.style.cssText = 'background:var(--amber-light);border-color:var(--warm-dark);margin-bottom:16px;';
+
+      const opts = clients.map(c =>
+        `<option value="${c._id}">👤 ${c.name} (${c.email})</option>`
+      ).join('');
+
+      banner.innerHTML = `
+        <h2 style="margin-bottom:10px;font-size:16px;">${heading}</h2>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <select id="${selId}"
+            style="padding:10px 14px;border:1.5px solid var(--warm-dark);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;">
+            <option value="">👥 All Family Members (Shared)</option>
+            ${opts || '<option disabled>No clients in your group yet (Share invite code)</option>'}
+          </select>
+          <span id="${labelId}" style="font-size:13px;color:var(--amber);font-weight:600;">Now viewing: All Family Members (Shared)</span>
+        </div>`;
+
+      // Attach change handler after the element is in the DOM
+      setTimeout(() => {
+        const sel = document.getElementById(selId);
+        if (sel) sel.addEventListener('change', e => onChange(e.target.value));
+      }, 0);
+
+      return banner;
+    }
+
+    /* ══════════════════════════════
+       STATS
+    ══════════════════════════════ */
+    async function loadStats() {
+      try {
+        // Fetch all stats in parallel
+        const [medStats, apptStats, exStats] = await Promise.all([
+          apiCall('/medications/stats/today'),
+          apiCall('/appointments/stats/summary'),
+          apiCall('/exercises/summary')
+        ]);
+
+        const doneMeds = medStats.data.taken || 0;
+        const totalMeds = medStats.data.total || 0;
+        const todayAppts = apptStats.data.today || 0;
+        const exDone = exStats.data.totalStepsCompleted || 0;
+        const totalAppts = apptStats.data.total || 0;
+
+        document.getElementById('statsRow').innerHTML = `
       <div class="stat-card">
         <div class="stat-card-icon">💊</div>
         <div class="stat-card-value">${doneMeds}/${totalMeds}</div>
@@ -994,37 +1427,42 @@ async function loadStats() {
         <div class="stat-card-label">Total appointments</div>
       </div>
     `;
-  } catch (error) {
-    console.error('Error loading stats:', error);
-    showToast('⚠ Failed to load statistics', true);
-  }
-}
-loadStats();
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        showToast('⚠ Failed to load statistics', true);
+      }
+    }
+    loadStats();
+    // Inject caretaker client selectors once clients are loaded
+    initCaretakerSelectors();
 
-/* ══════════════════════════════
-   MEDICATIONS
-══════════════════════════════ */
-let meds = [];
+    /* ══════════════════════════════
+       MEDICATIONS
+    ══════════════════════════════ */
+    let meds = [];
+    // selectedMedClientId: null = own data; set = caretaker viewing a specific client
+    let selectedMedClientId = null;
 
-async function loadMeds() {
-  try {
-    const response = await apiCall('/medications?activeOnly=true');
-    meds = response.data || [];
-
-    const list = document.getElementById('medList');
-    const saveBtn = document.getElementById('saveMedBtn');
-
-    if (meds.length === 0) {
-      list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No medications added yet.</p>';
-      saveBtn.style.display = 'none';
-      return;
+    /* Build ?clientId= query suffix when caretaker has selected a client */
+    function medClientQS() {
+      return selectedMedClientId ? `?clientId=${selectedMedClientId}` : '';
     }
 
-    list.innerHTML = meds.map((m) => `
+    async function loadMeds() {
+      try {
+        const response = await apiCall('/medications?activeOnly=true' + (selectedMedClientId ? `&clientId=${selectedMedClientId}` : ''));
+        meds = response.data || [];
+
+        const list = document.getElementById('medList');
+
+        if (meds.length === 0) {
+          list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No medications added yet.</p>';
+          return;
+        }
+
+        list.innerHTML = meds.map((m) => `
       <div class="med-item ${m.takenToday ? 'done' : ''}" id="medItem${m._id}">
-        ${role === 'caregiver'
-          ? `<input type="checkbox" ${m.takenToday ? 'checked' : ''} onchange="toggleMed('${m._id}', this)">`
-          : ''}
+        <input type="checkbox" ${m.takenToday ? 'checked' : ''} onchange="toggleMed('${m._id}', this)">
         <span class="med-item-name">${m.name}${m.dosage ? ` - ${m.dosage}` : ''}</span>
         <span class="status-badge ${m.takenToday ? 'status-done' : 'status-pending'}">
           ${m.takenToday ? '✔ Done' : '⏳ Pending'}
@@ -1032,116 +1470,121 @@ async function loadMeds() {
       </div>
     `).join('');
 
-    saveBtn.style.display = 'none'; // Auto-saved now, no manual save needed
-  } catch (error) {
-    console.error('Error loading medications:', error);
-    showToast('⚠ Failed to load medications', true);
-  }
-}
+      } catch (error) {
+        console.error('Error loading medications:', error);
+        showToast('⚠ Failed to load medications', true);
+      }
+    }
 
-async function toggleMed(medId, el) {
-  try {
-    const endpoint = el.checked 
-      ? `/medications/${medId}/mark-taken`
-      : `/medications/${medId}/unmark`;
-    
-    await apiCall(endpoint, { method: 'PATCH' });
-    
-    const item = document.getElementById('medItem' + medId);
-    item.classList.toggle('done', el.checked);
-    item.querySelector('.status-badge').className = 'status-badge ' + (el.checked ? 'status-done' : 'status-pending');
-    item.querySelector('.status-badge').textContent = el.checked ? '✔ Done' : '⏳ Pending';
-    
-    // Refresh stats
-    loadStats();
-  } catch (error) {
-    console.error('Error toggling medication:', error);
-    showToast('⚠ Failed to update medication', true);
-    el.checked = !el.checked; // Revert checkbox
-  }
-}
+    async function toggleMed(medId, el) {
+      try {
+        const qs = medClientQS();
+        const endpoint = el.checked
+          ? `/medications/${medId}/mark-taken${qs}`
+          : `/medications/${medId}/unmark${qs}`;
 
-async function addMedication() {
-  const input = document.getElementById("newMedInput");
-  const name = input.value.trim();
+        await apiCall(endpoint, { method: 'PATCH' });
 
-  if (!name) {
-    showToast("⚠ Enter medication name", true);
-    return;
-  }
+        const item = document.getElementById('medItem' + medId);
+        item.classList.toggle('done', el.checked);
+        item.querySelector('.status-badge').className = 'status-badge ' + (el.checked ? 'status-done' : 'status-pending');
+        item.querySelector('.status-badge').textContent = el.checked ? '✔ Done' : '⏳ Pending';
 
-  try {
-    await apiCall('/medications', {
-      method: 'POST',
-      body: JSON.stringify({ name, isActive: true })
-    });
+        loadStats();
+      } catch (error) {
+        console.error('Error toggling medication:', error);
+        showToast('⚠ Failed to update medication', true);
+        el.checked = !el.checked;
+      }
+    }
 
-    input.value = "";
-    await loadMeds(); // Refresh list
-    showToast("✅ Medication added!");
-  } catch (error) {
-    console.error('Error adding medication:', error);
-    showToast('⚠ Failed to add medication', true);
-  }
-}
+    async function addMedication() {
+      const input = document.getElementById("newMedInput");
+      const name = input.value.trim();
 
-// Note: saveMeds() function removed - now auto-saved on toggle
+      if (!name) {
+        showToast("⚠ Enter medication name", true);
+        return;
+      }
 
-/* ══════════════════════════════
-   APPOINTMENTS
-══════════════════════════════ */
-let appointments = [];
+      try {
+        await apiCall('/medications' + medClientQS(), {
+          method: 'POST',
+          body: JSON.stringify({ name, isActive: true })
+        });
 
-function initApptForm() {
-  document.getElementById('apptFormCard').style.display = role === 'caregiver' ? 'block' : 'none';
-}
+        input.value = "";
+        await loadMeds();
+        showToast("✅ Medication added!");
+      } catch (error) {
+        console.error('Error adding medication:', error);
+        showToast('⚠ Failed to add medication', true);
+      }
+    }
 
-async function saveAppointment() {
-  const title    = document.getElementById('apptTitle').value.trim();
-  const date     = document.getElementById('apptDate').value;
-  const time     = document.getElementById('apptTime').value;
-  const location = document.getElementById('apptLocation').value.trim();
-  const notes    = document.getElementById('apptNotes').value.trim();
+    /* ══════════════════════════════
+       APPOINTMENTS
+    ══════════════════════════════ */
+    let appointments = [];
+    // selectedApptClientId: null = own; set = caretaker acting for a client
+    let selectedApptClientId = null;
 
-  if (!title || !date || !time) { 
-    showToast('⚠ Please fill Title, Date and Time.', true); 
-    return; 
-  }
+    function apptClientQS() {
+      return selectedApptClientId ? `?clientId=${selectedApptClientId}` : '';
+    }
 
-  try {
-    await apiCall('/appointments', {
-      method: 'POST',
-      body: JSON.stringify({ title, date, time, location, notes })
-    });
+    function initApptForm() {
+      // Both caretaker and client can create appointments
+      document.getElementById('apptFormCard').style.display = 'block';
+    }
 
-    ['apptTitle','apptDate','apptTime','apptLocation','apptNotes'].forEach(id => 
-      document.getElementById(id).value = ''
-    );
-    
-    await loadAppointments();
-    await loadStats();
-    showToast('✅ Appointment added!');
-  } catch (error) {
-    console.error('Error saving appointment:', error);
-    showToast('⚠ Failed to save appointment', true);
-  }
-}
+    async function saveAppointment() {
+      const title = document.getElementById('apptTitle').value.trim();
+      const date = document.getElementById('apptDate').value;
+      const time = document.getElementById('apptTime').value;
+      const location = document.getElementById('apptLocation').value.trim();
+      const notes = document.getElementById('apptNotes').value.trim();
 
-async function loadAppointments() {
-  try {
-    const response = await apiCall('/appointments');
-    appointments = response.data || [];
+      if (!title || !date || !time) {
+        showToast('⚠ Please fill Title, Date and Time.', true);
+        return;
+      }
 
-    const today = new Date().toISOString().split('T')[0];
-    let todayHTML = '', upcomingHTML = '', completedHTML = '', missedHTML = '';
+      try {
+        await apiCall('/appointments' + apptClientQS(), {
+          method: 'POST',
+          body: JSON.stringify({ title, date, time, location, notes })
+        });
 
-    appointments.forEach((a) => {
-      const actions = role === 'caregiver' ? `
+        ['apptTitle', 'apptDate', 'apptTime', 'apptLocation', 'apptNotes'].forEach(id =>
+          document.getElementById(id).value = ''
+        );
+
+        await loadAppointments();
+        await loadStats();
+        showToast('✅ Appointment added!');
+      } catch (error) {
+        console.error('Error saving appointment:', error);
+        showToast('⚠ Failed to save appointment', true);
+      }
+    }
+
+    async function loadAppointments() {
+      try {
+        const response = await apiCall('/appointments' + apptClientQS());
+        appointments = response.data || [];
+
+        const today = new Date().toISOString().split('T')[0];
+        let todayHTML = '', upcomingHTML = '', completedHTML = '', missedHTML = '';
+
+        appointments.forEach((a) => {
+          // Both caretaker and client can manage appointments
+          const actions = `
         ${a.status === 'upcoming' ? `<button class="btn btn-sm btn-primary" onclick="markCompleted('${a._id}')">✔ Mark Done</button>` : ''}
         <button class="btn btn-sm btn-danger" onclick="deleteAppt('${a._id}')">🗑 Delete</button>
-      ` : '';
+      `;
 
-      const card = `
+          const card = `
         <div class="item">
           <strong>${a.title}</strong><br>
           📍 ${a.location || 'No location'} &nbsp;|&nbsp; 📅 ${a.date.split('T')[0]} &nbsp;⏰ ${a.time}<br>
@@ -1150,241 +1593,276 @@ async function loadAppointments() {
         </div>
       `;
 
-      if (a.date.startsWith(today) && a.status === 'upcoming') todayHTML += card;
-      else if (a.status === 'upcoming')   upcomingHTML  += card;
-      else if (a.status === 'completed')  completedHTML += card;
-      else if (a.status === 'missed')     missedHTML    += card;
-    });
+          if (a.date.startsWith(today) && a.status === 'upcoming') todayHTML += card;
+          else if (a.status === 'upcoming') upcomingHTML += card;
+          else if (a.status === 'completed') completedHTML += card;
+          else if (a.status === 'missed') missedHTML += card;
+        });
 
-    const sec = (label, cls, html) => html ? `
+        const sec = (label, cls, html) => html ? `
       <p style="font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;">
         <span class="status-badge ${cls}">${label}</span>
       </p>${html}` : '';
 
-    document.getElementById('todaySection').innerHTML    = sec("Today",     "status-today",   todayHTML);
-    document.getElementById('upcomingSection').innerHTML = sec("Upcoming",  "status-pending", upcomingHTML);
-    document.getElementById('completedSection').innerHTML= sec("Completed", "status-done",    completedHTML);
-    document.getElementById('missedSection').innerHTML   = sec("Missed",    "status-missed",  missedHTML);
+        document.getElementById('todaySection').innerHTML = sec("Today", "status-today", todayHTML);
+        document.getElementById('upcomingSection').innerHTML = sec("Upcoming", "status-pending", upcomingHTML);
+        document.getElementById('completedSection').innerHTML = sec("Completed", "status-done", completedHTML);
+        document.getElementById('missedSection').innerHTML = sec("Missed", "status-missed", missedHTML);
 
-    if (!appointments.length) {
-      document.getElementById('upcomingSection').innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No appointments yet.</p>';
-    }
-  } catch (error) {
-    console.error('Error loading appointments:', error);
-    showToast('⚠ Failed to load appointments', true);
-  }
-}
-
-async function markCompleted(apptId) {
-  try {
-    await apiCall(`/appointments/${apptId}/complete`, { method: 'PATCH' });
-    await loadAppointments();
-    await loadStats();
-    showToast('✅ Marked as completed!');
-  } catch (error) {
-    console.error('Error marking appointment:', error);
-    showToast('⚠ Failed to update appointment', true);
-  }
-}
-
-async function deleteAppt(apptId) {
-  if (!confirm('Delete this appointment?')) return;
-  
-  try {
-    await apiCall(`/appointments/${apptId}`, { method: 'DELETE' });
-    await loadAppointments();
-    await loadStats();
-    showToast('✅ Appointment deleted');
-  } catch (error) {
-    console.error('Error deleting appointment:', error);
-    showToast('⚠ Failed to delete appointment', true);
-  }
-}
-
-// Auto-update missed appointments on page load
-async function updateStatuses() {
-  try {
-    await apiCall('/appointments/update-missed', { method: 'POST' });
-  } catch (error) {
-    console.error('Error updating statuses:', error);
-  }
-}
-
-/* ══════════════════════════════
-   EXERCISE
-══════════════════════════════ */
-const exerciseRoutines = {
-  "🌅 Morning Stretching": [
-    "Raise arms slowly 10 times",
-    "Neck rotation clockwise 5 times",
-    "Neck rotation anti-clockwise 5 times",
-    "Shoulder rolls 10 times",
-    "Side bending 10 seconds"
-  ],
-  "🫁 Breathing Exercises": [
-    "Slow inhale for 4 seconds",
-    "Hold for 2 seconds",
-    "Exhale for 6 seconds",
-    "Repeat 10 times"
-  ],
-  "🚶 Light Walking Routine": [
-    "Walk indoors for 5 minutes",
-    "Pause and stretch",
-    "Walk for another 5 minutes"
-  ],
-  "⚖️ Balance Training": [
-    "Stand on one leg (support nearby)",
-    "Heel-to-toe walking 10 steps",
-    "Side stepping 10 times"
-  ],
-  "🏥 Physio Recommended": [
-    "Seated leg raise 10 times",
-    "Ankle rotation 10 times",
-    "Light knee bends",
-    "Shoulder mobility circles"
-  ]
-};
-
-let exerciseLog = { date: null, completed: {} };
-let currentRoutineName = '';
-
-async function initExercise() {
-  const catCard     = document.getElementById('exerciseCatCard');
-  const routineCard = document.getElementById('exerciseRoutineCard');
-  const logCard     = document.getElementById('exerciseLogCard');
-
-  routineCard.style.display = 'none';
-
-  try {
-    // Load today's exercise log from backend
-    const response = await apiCall('/exercises/log/today');
-    exerciseLog = response.data || { date: new Date().toISOString(), completed: new Map() };
-    
-    // Convert Map to object if needed
-    if (exerciseLog.completed instanceof Map) {
-      exerciseLog.completed = Object.fromEntries(exerciseLog.completed);
+        if (!appointments.length) {
+          document.getElementById('upcomingSection').innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No appointments yet.</p>';
+        }
+      } catch (error) {
+        console.error('Error loading appointments:', error);
+        showToast('⚠ Failed to load appointments', true);
+      }
     }
 
-    if (role === 'caregiver') {
-      catCard.style.display = 'block';
-      logCard.style.display = 'none';
+    async function markCompleted(apptId) {
+      try {
+        await apiCall(`/appointments/${apptId}/complete`, { method: 'PATCH' });
+        await loadAppointments();
+        await loadStats();
+        showToast('✅ Marked as completed!');
+      } catch (error) {
+        console.error('Error marking appointment:', error);
+        showToast('⚠ Failed to update appointment', true);
+      }
+    }
 
-      document.getElementById('exerciseCatList').innerHTML =
-        Object.keys(exerciseRoutines).map(name => {
-          const completedSteps = exerciseLog.completed?.[name] || [];
-          const done = completedSteps.length;
-          const total = exerciseRoutines[name].length;
-          return `
-            <div class="exercise-cat" onclick="openRoutine('${name.replace(/'/g,"\\'")}')">
-              <div class="exercise-cat-left">
-                <span class="exercise-cat-icon">${name.split(' ')[0]}</span>
-                <div>
-                  <div class="exercise-cat-name">${name.slice(2)}</div>
-                  <div class="exercise-cat-count">${done}/${total} completed today</div>
-                </div>
+    async function deleteAppt(apptId) {
+      if (!confirm('Delete this appointment?')) return;
+
+      try {
+        await apiCall(`/appointments/${apptId}`, { method: 'DELETE' });
+        await loadAppointments();
+        await loadStats();
+        showToast('✅ Appointment deleted');
+      } catch (error) {
+        console.error('Error deleting appointment:', error);
+        showToast('⚠ Failed to delete appointment', true);
+      }
+    }
+
+    // Auto-update missed appointments on page load
+    async function updateStatuses() {
+      try {
+        await apiCall('/appointments/update-missed', { method: 'POST' });
+      } catch (error) {
+        console.error('Error updating statuses:', error);
+      }
+    }
+
+    /* ══════════════════════════════
+       EXERCISE
+    ══════════════════════════════ */
+    const exerciseRoutines = {
+      "🌅 Morning Stretching": [
+        "Raise arms slowly 10 times",
+        "Neck rotation clockwise 5 times",
+        "Neck rotation anti-clockwise 5 times",
+        "Shoulder rolls 10 times",
+        "Side bending 10 seconds"
+      ],
+      "🫁 Breathing Exercises": [
+        "Slow inhale for 4 seconds",
+        "Hold for 2 seconds",
+        "Exhale for 6 seconds",
+        "Repeat 10 times"
+      ],
+      "🚶 Light Walking Routine": [
+        "Walk indoors for 5 minutes",
+        "Pause and stretch",
+        "Walk for another 5 minutes"
+      ],
+      "⚖️ Balance Training": [
+        "Stand on one leg (support nearby)",
+        "Heel-to-toe walking 10 steps",
+        "Side stepping 10 times"
+      ],
+      "🏥 Physio Recommended": [
+        "Seated leg raise 10 times",
+        "Ankle rotation 10 times",
+        "Light knee bends",
+        "Shoulder mobility circles"
+      ]
+    };
+
+    let exerciseLog = { date: null, completed: {} };
+    let currentRoutineName = '';
+    // selectedExerciseClientId: caretaker can act on behalf of a client
+    let selectedExerciseClientId = null;
+
+    function exerciseClientQS() {
+      return selectedExerciseClientId ? `?clientId=${selectedExerciseClientId}` : '';
+    }
+
+    async function initExercise() {
+      const catCard = document.getElementById('exerciseCatCard');
+      const routineCard = document.getElementById('exerciseRoutineCard');
+      const logCard = document.getElementById('exerciseLogCard');
+
+      routineCard.style.display = 'none';
+
+      // Caretaker: show client selector banner if not already present
+      if (role === 'caretaker' && !document.getElementById('exerciseClientBanner')) {
+        const banner = document.createElement('div');
+        banner.id = 'exerciseClientBanner';
+        banner.className = 'section-card';
+        banner.style.cssText = 'background:var(--amber-light);border-color:var(--warm-dark);margin-bottom:16px;';
+        banner.innerHTML = `
+          <h2 style="margin-bottom:10px;font-size:16px;">🏃 Logging exercises for</h2>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <select id="exerciseClientSel" onchange="onExerciseClientChange(this.value)"
+              style="padding:10px 14px;border:1.5px solid var(--warm-dark);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;">
+              <option value="">— My own record —</option>
+            </select>
+            <span id="exerciseClientLabel" style="font-size:13px;color:var(--amber);font-weight:600;"></span>
+          </div>`;
+        catCard.parentNode.insertBefore(banner, catCard);
+
+        // Populate client list
+        try {
+          const res = await apiCall('/auth/group-members');
+          const clients = (res.data && res.data.clients) || [];
+          const sel = document.getElementById('exerciseClientSel');
+          clients.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c._id;
+            opt.textContent = `${c.name} (${c.email})`;
+            sel.appendChild(opt);
+          });
+        } catch (e) { console.error('Could not load clients for exercise', e); }
+      }
+
+      try {
+        const response = await apiCall('/exercises/log/today' + exerciseClientQS());
+        exerciseLog = response.data || { date: new Date().toISOString(), completed: new Map() };
+
+        if (exerciseLog.completed instanceof Map) {
+          exerciseLog.completed = Object.fromEntries(exerciseLog.completed);
+        }
+
+        // Both caretaker and client see the routine-based view (same UX)
+        catCard.style.display = 'block';
+        logCard.style.display = 'none';
+
+        document.getElementById('exerciseCatList').innerHTML =
+          Object.keys(exerciseRoutines).map(name => {
+            const completedSteps = exerciseLog.completed?.[name] || [];
+            const done = completedSteps.length;
+            const total = exerciseRoutines[name].length;
+            return `
+          <div class="exercise-cat" onclick="openRoutine('${name.replace(/'/g, "\\'")}')">
+            <div class="exercise-cat-left">
+              <span class="exercise-cat-icon">${name.split(' ')[0]}</span>
+              <div>
+                <div class="exercise-cat-name">${name.slice(2)}</div>
+                <div class="exercise-cat-count">${done}/${total} completed today</div>
               </div>
-              <span class="exercise-cat-arrow">›</span>
-            </div>`;
-        }).join('');
-    } else {
-      catCard.style.display = 'none';
-      logCard.style.display = 'block';
-      loadDailyLog();
+            </div>
+            <span class="exercise-cat-arrow">›</span>
+          </div>`;
+          }).join('');
+
+      } catch (error) {
+        console.error('Error loading exercises:', error);
+        showToast('⚠ Failed to load exercises', true);
+      }
     }
-  } catch (error) {
-    console.error('Error loading exercises:', error);
-    showToast('⚠ Failed to load exercises', true);
-  }
-}
 
-function openRoutine(name) {
-  currentRoutineName = name;
-  document.getElementById('exerciseCatCard').style.display = 'none';
-  document.getElementById('exerciseRoutineCard').style.display = 'block';
-  document.getElementById('routineTitle').textContent = name;
+    function onExerciseClientChange(clientId) {
+      selectedExerciseClientId = clientId || null;
+      const label = document.getElementById('exerciseClientLabel');
+      const sel = document.getElementById('exerciseClientSel');
+      label.textContent = selectedExerciseClientId
+        ? `Viewing: ${sel.options[sel.selectedIndex].textContent}`
+        : '';
+      initExercise();
+    }
 
-  const steps = exerciseRoutines[name];
-  const done  = exerciseLog.completed?.[name] || [];
+    function openRoutine(name) {
+      currentRoutineName = name;
+      document.getElementById('exerciseCatCard').style.display = 'none';
+      document.getElementById('exerciseRoutineCard').style.display = 'block';
+      document.getElementById('routineTitle').textContent = name;
 
-  document.getElementById('routineList').innerHTML = steps.map(ex => `
-    <div class="exercise-step ${done.includes(ex) ? 'done' : ''}" id="step-${btoa(ex).replace(/=/g,'')}">
+      const steps = exerciseRoutines[name];
+      const done = exerciseLog.completed?.[name] || [];
+
+      document.getElementById('routineList').innerHTML = steps.map(ex => `
+    <div class="exercise-step ${done.includes(ex) ? 'done' : ''}" id="step-${btoa(ex).replace(/=/g, '')}">
       <input type="checkbox" ${done.includes(ex) ? 'checked' : ''}
-        onchange="toggleExercise('${name.replace(/'/g,"\\'")}', '${ex.replace(/'/g,"\\'")}', this)">
+        onchange="toggleExercise('${name.replace(/'/g, "\\'")}', '${ex.replace(/'/g, "\\'")}', this)">
       <span class="exercise-step-text">${ex}</span>
     </div>
   `).join('');
-}
-
-async function toggleExercise(cat, ex, el) {
-  let done = exerciseLog.completed?.[cat] || [];
-  if (el.checked) { 
-    if (!done.includes(ex)) done.push(ex); 
-  } else { 
-    done = done.filter(x => x !== ex); 
-  }
-  
-  if (!exerciseLog.completed) exerciseLog.completed = {};
-  exerciseLog.completed[cat] = done;
-
-  const stepId = 'step-' + btoa(ex).replace(/=/g, '');
-  document.getElementById(stepId)?.classList.toggle('done', el.checked);
-}
-
-async function saveRoutine() {
-  try {
-    const category = currentRoutineName;
-    const steps = exerciseLog.completed?.[category] || [];
-    
-    if (steps.length > 0) {
-      await apiCall('/exercises/log', {
-        method: 'POST',
-        body: JSON.stringify({
-          category,
-          steps,
-          duration: 10 // Estimate 10 minutes
-        })
-      });
     }
-    
-    showToast('✔ Exercise progress saved!');
-    await loadStats();
-    closeRoutine();
-  } catch (error) {
-    console.error('Error saving exercise:', error);
-    showToast('⚠ Failed to save exercise', true);
-  }
-}
 
-async function closeRoutine() {
-  document.getElementById('exerciseRoutineCard').style.display = 'none';
-  if (role === 'caregiver') {
-    document.getElementById('exerciseCatCard').style.display = 'block';
-    await initExercise(); // refresh counts
-  } else {
-    document.getElementById('exerciseLogCard').style.display = 'block';
-    await loadDailyLog();
-  }
-}
+    async function toggleExercise(cat, ex, el) {
+      let done = exerciseLog.completed?.[cat] || [];
+      if (el.checked) {
+        if (!done.includes(ex)) done.push(ex);
+      } else {
+        done = done.filter(x => x !== ex);
+      }
 
-async function loadDailyLog() {
-  try {
-    const response = await apiCall('/exercises/log/today');
-    const log = response.data || {};
-    const completed = log.completed || {};
-    
-    // Convert Map to object if needed
-    const completedObj = completed instanceof Map 
-      ? Object.fromEntries(completed) 
-      : completed;
-    
-    if (!Object.keys(completedObj).length) {
-      document.getElementById('logContent').innerHTML =
-        '<p style="color:var(--text-muted);font-size:14px;">No exercises completed today yet.</p>';
-      return;
+      if (!exerciseLog.completed) exerciseLog.completed = {};
+      exerciseLog.completed[cat] = done;
+
+      const stepId = 'step-' + btoa(ex).replace(/=/g, '');
+      document.getElementById(stepId)?.classList.toggle('done', el.checked);
     }
-    
-    document.getElementById('logContent').innerHTML = Object.entries(completedObj)
-      .map(([cat, steps]) => `
+
+    async function saveRoutine() {
+      try {
+        const category = currentRoutineName;
+        const steps = exerciseLog.completed?.[category] || [];
+
+        if (steps.length > 0) {
+          await apiCall('/exercises/log' + exerciseClientQS(), {
+            method: 'POST',
+            body: JSON.stringify({
+              category,
+              steps,
+              duration: 10
+            })
+          });
+        }
+
+        showToast('✔ Exercise progress saved!');
+        await loadStats();
+        closeRoutine();
+      } catch (error) {
+        console.error('Error saving exercise:', error);
+        showToast('⚠ Failed to save exercise', true);
+      }
+    }
+
+    async function closeRoutine() {
+      document.getElementById('exerciseRoutineCard').style.display = 'none';
+      document.getElementById('exerciseCatCard').style.display = 'block';
+      await initExercise();
+    }
+
+    async function loadDailyLog() {
+      try {
+        const response = await apiCall('/exercises/log/today' + exerciseClientQS());
+        const log = response.data || {};
+        const completed = log.completed || {};
+
+        const completedObj = completed instanceof Map
+          ? Object.fromEntries(completed)
+          : completed;
+
+        if (!Object.keys(completedObj).length) {
+          document.getElementById('logContent').innerHTML =
+            '<p style="color:var(--text-muted);font-size:14px;">No exercises completed today yet.</p>';
+          return;
+        }
+
+        document.getElementById('logContent').innerHTML = Object.entries(completedObj)
+          .map(([cat, steps]) => `
         <div class="item">
           <strong>${cat}</strong><br>
           <span class="status-badge status-done">✔ ${steps.length} completed</span>
@@ -1393,186 +1871,200 @@ async function loadDailyLog() {
           </ul>
         </div>
       `).join('');
-  } catch (error) {
-    console.error('Error loading daily log:', error);
-    showToast('⚠ Failed to load exercise log', true);
-  }
-}
-
-/* ══════════════════════════════
-   GALLERY
-══════════════════════════════ */
-const photos = [
-  { src: "https://cdn.pixabay.com/photo/2017/09/25/13/12/elderly-2789183_1280.jpg",    title: "Morning Walk" },
-  { src: "https://cdn.pixabay.com/photo/2017/09/17/17/44/elderly-2759204_1280.jpg",    title: "Reading Time" },
-  { src: "https://cdn.pixabay.com/photo/2016/11/14/03/16/adult-1822564_1280.jpg",       title: "Family Visit" },
-  { src: "https://cdn.pixabay.com/photo/2016/03/27/19/40/hospice-1289443_1280.jpg",     title: "Care Session" },
-  { src: "https://cdn.pixabay.com/photo/2015/02/10/20/15/man-632181_1280.jpg",          title: "Exercise Routine" },
-  { src: "https://cdn.pixabay.com/photo/2017/05/25/15/08/jogging-2343558_1280.jpg",     title: "Outdoor Activity" }
-];
-
-function loadGallery() {
-  document.getElementById('galleryGrid').innerHTML = photos.map(p => `
-    <div class="gallery-item">
-      <img src="${p.src}" alt="${p.title}" loading="lazy">
-      <div class="gallery-item-label">${p.title}</div>
-    </div>
-  `).join('');
-}
-
-/* ══════════════════════════════
-   EMERGENCY
-══════════════════════════════ */
-async function triggerEmergency() {
-  if (!navigator.geolocation) { 
-    showToast('⚠ Geolocation not supported.', true); 
-    return; 
-  }
-
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-
-    try {
-      await apiCall('/emergency/trigger', {
-        method: 'POST',
-        body: JSON.stringify({ 
-          latitude: lat, 
-          longitude: lng,
-          alertType: 'manual',
-          accuracy: pos.coords.accuracy
-        })
-      });
-      
-      showToast('🚨 Emergency location sent to all contacts!', false, 5000);
-      
-      // Switch to map and show location
-      showPage('map', null);
-      setTimeout(() => showMapAt(lat, lng), 400);
-    } catch (error) {
-      console.error('Error triggering emergency:', error);
-      showToast('⚠ Could not send alert to server', true);
+      } catch (error) {
+        console.error('Error loading daily log:', error);
+        showToast('⚠ Failed to load exercise log', true);
+      }
     }
-  }, () => {
-    showToast('⚠ Could not get location. Please allow GPS.', true);
-  });
-}
 
-/* ══════════════════════════════
-   MAP
-══════════════════════════════ */
-let map;
+    /* ══════════════════════════════
+       GALLERY
+    ══════════════════════════════ */
+    let selectedGalleryClientId = null;
 
-function loadMyLocation() {
-  if (!navigator.geolocation) { showToast('⚠ Geolocation not supported.', true); return; }
-  navigator.geolocation.getCurrentPosition(pos => {
-    showMapAt(pos.coords.latitude, pos.coords.longitude);
-  });
-}
+    function galleryClientQS() {
+      return selectedGalleryClientId ? `?clientId=${selectedGalleryClientId}` : '';
+    }
 
-function showMapAt(lat, lng) {
-  if (typeof google === 'undefined') {
-    // Fetch API key from backend
-    fetch('/api/config')
-      .then(res => res.json())
-      .then(cfg => {
-        console.log("API KEY:", cfg.googleMapsKey);
+    async function loadGallery() {
+      const grid = document.getElementById('galleryGrid');
+      grid.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Loading photos…</p>';
 
-        if (!cfg.googleMapsKey) {
-          document.getElementById('map').innerHTML =
-            '<p style="color:red;">API key missing</p>';
+      try {
+        const response = await apiCall('/gallery' + galleryClientQS());
+        const photos = response.data || [];
+
+        if (photos.length === 0) {
+          grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No photos yet.</p>';
           return;
         }
 
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.googleMapsKey}&libraries=places&callback=initMap`;
-        script.async = true;
-        script.defer = true;
+        grid.innerHTML = photos.map(p => `
+      <div class="gallery-item">
+        <img src="${p.url}" alt="${p.title}" loading="lazy">
+        <div class="gallery-item-label">${p.title}</div>
+      </div>
+    `).join('');
+      } catch (error) {
+        console.error('Error loading gallery:', error);
+        grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Failed to load photos.</p>';
+        showToast('⚠ Failed to load gallery', true);
+      }
+    }
 
-        window.initMap = function () {
-          renderMap(lat, lng);
-        };
+    /* ══════════════════════════════
+       EMERGENCY
+    ══════════════════════════════ */
+    async function triggerEmergency() {
+      if (!navigator.geolocation) {
+        showToast('⚠ Geolocation not supported.', true);
+        return;
+      }
 
-        document.head.appendChild(script);
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById('map').innerHTML =
-          '<p style="color:red;">Failed to load map</p>';
-      });
-  } else {
-    renderMap(lat, lng);
-  }
-}
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
 
-function renderMap(lat, lng) {
-  const el = document.getElementById('map');
-  el.innerHTML = '';
-  const userLoc = { lat, lng };
+        try {
+          await apiCall('/emergency/trigger', {
+            method: 'POST',
+            body: JSON.stringify({
+              latitude: lat,
+              longitude: lng,
+              alertType: 'manual',
+              accuracy: pos.coords.accuracy
+            })
+          });
 
-  map = new google.maps.Map(el, { zoom: 15, center: userLoc });
-  new google.maps.Marker({ position: userLoc, map, title: 'Patient Location' });
+          showToast('🚨 Emergency location sent to all contacts!', false, 5000);
 
-  const svc = new google.maps.places.PlacesService(map);
-  svc.nearbySearch({ location: userLoc, radius: 3000, type: ['hospital'] }, (results, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-      results.slice(0, 3).forEach(h => {
-        new google.maps.Marker({
-          position: h.geometry.location,
-          map,
-          icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-          title: h.name
-        });
+          // Switch to map and show location
+          showPage('map', null);
+          setTimeout(() => showMapAt(lat, lng), 400);
+        } catch (error) {
+          console.error('Error triggering emergency:', error);
+          showToast('⚠ Could not send alert to server', true);
+        }
+      }, () => {
+        showToast('⚠ Could not get location. Please allow GPS.', true);
       });
     }
-  });
-}
 
-/* ══════════════════════════════
-   LOGOUT
-══════════════════════════════ */
-function logout() {
-  localStorage.clear();   // 🔥 clears everything
-  window.location.href = 'login.html';
-}
+    /* ══════════════════════════════
+       MAP
+    ══════════════════════════════ */
+    let map;
 
-/* ══════════════════════════════
-   VIDEO CALL
-══════════════════════════════ */
-function openVideoCall() {
-  const userName = localStorage.getItem('userName') || 'User';
-  localStorage.setItem('callerName', userName);
-  localStorage.setItem('videoCallActive', 'yes');
-  window.location.href = 'video.html';
-}
+    function loadMyLocation() {
+      if (!navigator.geolocation) { showToast('⚠ Geolocation not supported.', true); return; }
+      navigator.geolocation.getCurrentPosition(pos => {
+        showMapAt(pos.coords.latitude, pos.coords.longitude);
+      });
+    }
 
-function joinCall() {
-  window.location.href = 'video.html';
-}
+    function showMapAt(lat, lng) {
+      if (typeof google === 'undefined') {
+        // Fetch API key from backend
+        fetch('/api/config')
+          .then(res => res.json())
+          .then(cfg => {
+            console.log("API KEY:", cfg.googleMapsKey);
 
-function checkIncomingCall() {
-  if (localStorage.getItem('videoCallActive') === 'yes') {
-    document.getElementById('incomingCallBox').style.display = 'block';
-    document.getElementById('callerNameText').innerText = localStorage.getItem('callerName') || 'User';
-  }
-}
+            if (!cfg.googleMapsKey) {
+              document.getElementById('map').innerHTML =
+                '<p style="color:red;">API key missing</p>';
+              return;
+            }
 
-setInterval(checkIncomingCall, 2000);
-window.onstorage = () => { checkIncomingCall(); };
-if (document.referrer.includes('video.html')) {
-  localStorage.removeItem('videoCallActive');
-  localStorage.removeItem('callerName');
-}
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.googleMapsKey}&libraries=places&callback=initMap`;
+            script.async = true;
+            script.defer = true;
 
-/* ══════════════════════════════
-   TOAST
-══════════════════════════════ */
-function showToast(msg, isError = false, duration = 3000) {
-  let toast = document.getElementById('toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'toast';
-    toast.style.cssText = `
+            window.initMap = function () {
+              renderMap(lat, lng);
+            };
+
+            document.head.appendChild(script);
+          })
+          .catch(err => {
+            console.error(err);
+            document.getElementById('map').innerHTML =
+              '<p style="color:red;">Failed to load map</p>';
+          });
+      } else {
+        renderMap(lat, lng);
+      }
+    }
+
+    function renderMap(lat, lng) {
+      const el = document.getElementById('map');
+      el.innerHTML = '';
+      const userLoc = { lat, lng };
+
+      map = new google.maps.Map(el, { zoom: 15, center: userLoc });
+      new google.maps.Marker({ position: userLoc, map, title: 'Patient Location' });
+
+      const svc = new google.maps.places.PlacesService(map);
+      svc.nearbySearch({ location: userLoc, radius: 3000, type: ['hospital'] }, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          results.slice(0, 3).forEach(h => {
+            new google.maps.Marker({
+              position: h.geometry.location,
+              map,
+              icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+              title: h.name
+            });
+          });
+        }
+      });
+    }
+
+    /* ══════════════════════════════
+       LOGOUT
+    ══════════════════════════════ */
+    function logout() {
+      localStorage.clear();   // 🔥 clears everything
+      window.location.href = 'login.html';
+    }
+
+    /* ══════════════════════════════
+       VIDEO CALL
+    ══════════════════════════════ */
+    function openVideoCall() {
+      const userName = localStorage.getItem('userName') || 'User';
+      localStorage.setItem('callerName', userName);
+      localStorage.setItem('videoCallActive', 'yes');
+      window.location.href = 'video.html';
+    }
+
+    function joinCall() {
+      window.location.href = 'video.html';
+    }
+
+    function checkIncomingCall() {
+      if (localStorage.getItem('videoCallActive') === 'yes') {
+        document.getElementById('incomingCallBox').style.display = 'block';
+        document.getElementById('callerNameText').innerText = localStorage.getItem('callerName') || 'User';
+      }
+    }
+
+    setInterval(checkIncomingCall, 2000);
+    window.onstorage = () => { checkIncomingCall(); };
+    if (document.referrer.includes('video.html')) {
+      localStorage.removeItem('videoCallActive');
+      localStorage.removeItem('callerName');
+    }
+
+    /* ══════════════════════════════
+       TOAST
+    ══════════════════════════════ */
+    function showToast(msg, isError = false, duration = 3000) {
+      let toast = document.getElementById('toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.style.cssText = `
       position:fixed;bottom:28px;right:28px;z-index:9999;
       padding:14px 22px;border-radius:12px;font-size:14px;font-weight:600;
       font-family:'DM Sans',sans-serif;
@@ -1580,16 +2072,17 @@ function showToast(msg, isError = false, duration = 3000) {
       transition:opacity 0.3s;
       max-width:320px;
     `;
-    document.body.appendChild(toast);
-  }
-  toast.style.background = isError ? '#FDEAEA' : '#EAF5EE';
-  toast.style.color       = isError ? '#C0392B' : '#2E7D52';
-  toast.style.border      = isError ? '1px solid #F5CECE' : '1px solid #BADDCA';
-  toast.textContent = msg;
-  toast.style.opacity = '1';
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, duration);
-}
-</script>
+        document.body.appendChild(toast);
+      }
+      toast.style.background = isError ? '#FDEAEA' : '#EAF5EE';
+      toast.style.color = isError ? '#C0392B' : '#2E7D52';
+      toast.style.border = isError ? '1px solid #F5CECE' : '1px solid #BADDCA';
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, duration);
+    }
+  </script>
 </body>
+
 </html>

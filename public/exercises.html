@@ -1,182 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exercises — Elder Care</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/shared.css">
-<style>
-  /* ─── EXERCISE CATEGORIES ─── */
-  .exercise-cat {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #F7FAF8;
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    padding: 16px 20px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .exercise-cat:hover { 
-    border-color: var(--sage-light); 
-    background: rgba(123,158,135,0.06); 
-  }
-  
-  .exercise-cat-left { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-  }
-  
-  .exercise-cat-icon { 
-    font-size: 24px; 
-  }
-  
-  .exercise-cat-name { 
-    font-weight: 600; 
-    font-size: 14.5px; 
-    color: var(--text); 
-  }
-  
-  .exercise-cat-count { 
-    font-size: 12px; 
-    color: var(--text-muted); 
-    margin-top: 2px; 
-  }
-  
-  .exercise-cat-arrow { 
-    color: var(--text-muted); 
-    font-size: 18px; 
-  }
-  
-  /* ─── EXERCISE STEPS ─── */
-  .exercise-step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 13px 16px;
-    border: 1px solid var(--border);
-    border-radius: 11px;
-    margin-bottom: 8px;
-    background: #F7FAF8;
-    transition: border-color 0.2s;
-  }
-  
-  .exercise-step.done { 
-    background: var(--green-light); 
-    border-color: rgba(58,125,84,0.2); 
-  }
-  
-  .exercise-step input[type="checkbox"] { 
-    width: 17px; 
-    height: 17px; 
-    accent-color: var(--green); 
-    cursor: pointer; 
-    flex-shrink: 0; 
-  }
-  
-  .exercise-step-text { 
-    font-size: 14px; 
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercises — Elder Care</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/shared.css">
+  <style>
+    /* ─── EXERCISE CATEGORIES ─── */
+    .exercise-cat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #F7FAF8;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .exercise-cat:hover {
+      border-color: var(--sage-light);
+      background: rgba(123, 158, 135, 0.06);
+    }
+
+    .exercise-cat-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .exercise-cat-icon {
+      font-size: 24px;
+    }
+
+    .exercise-cat-name {
+      font-weight: 600;
+      font-size: 14.5px;
+      color: var(--text);
+    }
+
+    .exercise-cat-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .exercise-cat-arrow {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    /* ─── EXERCISE STEPS ─── */
+    .exercise-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      margin-bottom: 8px;
+      background: #F7FAF8;
+      transition: border-color 0.2s;
+    }
+
+    .exercise-step.done {
+      background: var(--green-light);
+      border-color: rgba(58, 125, 84, 0.2);
+    }
+
+    .exercise-step input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--green);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .exercise-step-text {
+      font-size: 14px;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-  <a href="/home.html" class="back-button">
-    ← Back to Dashboard
-  </a>
+  <div class="container">
+    <a href="/home.html" class="back-button">
+      ← Back to Dashboard
+    </a>
 
-  <div class="page-header">
-    <div>
-      <h1>🏃 Exercise</h1>
-      <p>Daily exercise routines and progress</p>
+    <div class="page-header">
+      <div>
+        <h1>🏃 Exercise</h1>
+        <p>Daily exercise routines and progress</p>
+      </div>
     </div>
-  </div>
 
-  <div class="section-card" id="summaryCard">
-    <h2>Today's Summary</h2>
-    <div id="exerciseSummary">
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+    <div class="section-card" id="summaryCard">
+      <h2>Today's Summary</h2>
+      <div id="exerciseSummary">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Custom / Doctor Prescribed Exercise (Caretaker only) -->
+    <div id="caretakerAddExBtnWrap" style="display:none; margin-bottom:16px;">
+      <button class="btn btn-primary" onclick="toggleCustomExForm()" style="display:inline-flex;align-items:center;gap:8px;">
+        ➕ Add Doctor-Recommended Exercise
+      </button>
+    </div>
+
+    <div class="section-card" id="addCustomExCard" style="display:none; border: 1.5px dashed var(--sage-dark); background: linear-gradient(135deg, #F0F5F1, var(--white)); margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 style="font-size:18px; color:var(--sage-dark); margin:0;">🩺 Add Doctor-Recommended Exercise</h2>
+        <button onclick="toggleCustomExForm()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:14px;">
+        Add a specialized routine prescribed by your doctor, physiotherapist, or specialist.
+      </p>
+      <div class="form-row">
+        <div class="field">
+          <label>Exercise Title *</label>
+          <input type="text" id="customExTitle" placeholder="e.g. Knee Rehab & Quad Extensions">
+        </div>
+        <div class="field">
+          <label>Doctor / Clinic</label>
+          <input type="text" id="customExDoctor" placeholder="e.g. Dr. Sharma (Orthopedic)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Target Duration (Minutes)</label>
+          <input type="number" id="customExDuration" value="15" min="1" max="120">
+        </div>
+        <div class="field">
+          <label>Steps (separated by commas)</label>
+          <input type="text" id="customExSteps" placeholder="e.g. Straight leg raise 10 reps, Heel slides 10 reps, Quad contraction 5s">
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-primary" onclick="saveCustomExercise()">Save Routine</button>
+        <button class="btn btn-ghost" onclick="toggleCustomExForm()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="section-card" id="catCard">
+      <h2>Exercise Routines</h2>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">
+        Prescribed & daily wellness routines
+      </p>
+      <div id="exerciseCatList"></div>
+    </div>
+
+    <!-- Routine Detail -->
+    <div class="section-card" id="routineCard" style="display:none;">
+      <h2 id="routineTitle">—</h2>
+      <div id="routineList"></div>
+
+      <div class="form-row" style="margin-top:20px;">
+        <div class="field">
+          <label>Duration (Minutes)</label>
+          <input type="number" id="exDuration" value="20" min="1" max="180">
+        </div>
+        <div class="field">
+          <label>How did you feel?</label>
+          <select id="exFeedback">
+            <option value="Felt great 😊">Felt great 😊</option>
+            <option value="Normal / OK 🙂" selected>Normal / OK 🙂</option>
+            <option value="Felt slightly tired 😓">Felt slightly tired 😓</option>
+            <option value="A bit painful / strained 🤕">A bit painful / strained 🤕</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="field">
+          <label>Comment / Feedback Note</label>
+          <input type="text" id="exComment" placeholder='e.g. "Felt slightly tired today."'>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn btn-primary" onclick="saveRoutine()">✅ Mark Routine Completed</button>
+        <button class="btn btn-ghost" onclick="closeRoutine()">← Back</button>
       </div>
     </div>
   </div>
 
-  <div class="section-card" id="catCard">
-    <h2>Exercise Categories</h2>
-    <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">
-      Select a routine to start exercising
-    </p>
-    <div id="exerciseCatList"></div>
-  </div>
-  
-  <!-- Routine Detail -->
-  <div class="section-card" id="routineCard" style="display:none;">
-    <h2 id="routineTitle">—</h2>
-    <div id="routineList"></div>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveRoutine()">💾 Save Progress</button>
-      <button class="btn btn-ghost" onclick="closeRoutine()">← Back</button>
-    </div>
-  </div>
-</div>
+  <div id="toast"></div>
 
-<div id="toast"></div>
+  <script src="/js/config.js"></script>
+  <script src="/js/shared.js"></script>
+  <script>
+    const exerciseRoutines = {
+      "🌅 Morning Stretching": [
+        "Raise arms slowly 10 times",
+        "Neck rotation clockwise 5 times",
+        "Neck rotation anti-clockwise 5 times",
+        "Shoulder rolls 10 times",
+        "Side bending 10 seconds"
+      ],
+      "🫁 Breathing Exercises": [
+        "Slow inhale for 4 seconds",
+        "Hold for 2 seconds",
+        "Exhale for 6 seconds",
+        "Repeat 10 times"
+      ],
+      "🚶 Light Walking Routine": [
+        "Walk indoors for 5 minutes",
+        "Pause and stretch",
+        "Walk for another 5 minutes"
+      ],
+      "⚖️ Balance Training": [
+        "Stand on one leg (support nearby)",
+        "Heel-to-toe walking 10 steps",
+        "Side stepping 10 times"
+      ],
+      "🏥 Physio Recommended": [
+        "Seated leg raise 10 times",
+        "Ankle rotation 10 times",
+        "Light knee bends",
+        "Shoulder mobility circles"
+      ]
+    };
 
-<script src="/js/shared.js"></script>
-<script>
-const exerciseRoutines = {
-  "🌅 Morning Stretching": [
-    "Raise arms slowly 10 times",
-    "Neck rotation clockwise 5 times",
-    "Neck rotation anti-clockwise 5 times",
-    "Shoulder rolls 10 times",
-    "Side bending 10 seconds"
-  ],
-  "🫁 Breathing Exercises": [
-    "Slow inhale for 4 seconds",
-    "Hold for 2 seconds",
-    "Exhale for 6 seconds",
-    "Repeat 10 times"
-  ],
-  "🚶 Light Walking Routine": [
-    "Walk indoors for 5 minutes",
-    "Pause and stretch",
-    "Walk for another 5 minutes"
-  ],
-  "⚖️ Balance Training": [
-    "Stand on one leg (support nearby)",
-    "Heel-to-toe walking 10 steps",
-    "Side stepping 10 times"
-  ],
-  "🏥 Physio Recommended": [
-    "Seated leg raise 10 times",
-    "Ankle rotation 10 times",
-    "Light knee bends",
-    "Shoulder mobility circles"
-  ]
-};
+    let exerciseLog = { date: null, completed: {} };
+    let currentRoutineName = '';
+    let customExercises = [];
+    const role = getRole();
 
-let exerciseLog = { date: null, completed: {} };
-let currentRoutineName = '';
-const role = getRole();
+    function clientQS() { return ''; }
 
-async function loadSummary() {
-  try {
-    const response = await apiCall('/exercises/summary');
-    const data = response.data || {};
+    function toggleCustomExForm() {
+      const card = document.getElementById('addCustomExCard');
+      card.style.display = (card.style.display === 'none' || !card.style.display) ? 'block' : 'none';
+      if (card.style.display === 'block') {
+        card.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
 
-    document.getElementById('exerciseSummary').innerHTML = `
+    async function loadCustomExercises() {
+      try {
+        const res = await apiCall('/exercises/custom');
+        customExercises = res.data || [];
+      } catch (e) {
+        console.error('Could not load custom exercises', e);
+        customExercises = [];
+      }
+    }
+
+    async function saveCustomExercise() {
+      const title = document.getElementById('customExTitle').value.trim();
+      const doctorName = document.getElementById('customExDoctor').value.trim();
+      const targetDuration = parseInt(document.getElementById('customExDuration').value) || 15;
+      const stepsRaw = document.getElementById('customExSteps').value.trim();
+
+      if (!title) {
+        showToast('⚠ Please enter an exercise title', true);
+        return;
+      }
+
+      const steps = stepsRaw
+        ? stepsRaw.split(',').map(s => s.trim()).filter(Boolean)
+        : ['Perform 10-15 repetitions as tolerated', 'Rest for 30 seconds', 'Repeat 2 sets'];
+
+      try {
+        await apiCall('/exercises/custom', {
+          method: 'POST',
+          body: JSON.stringify({
+            title,
+            doctorName,
+            targetDuration,
+            steps
+          })
+        });
+
+        document.getElementById('customExTitle').value = '';
+        document.getElementById('customExDoctor').value = '';
+        document.getElementById('customExSteps').value = '';
+        toggleCustomExForm();
+        showToast('✅ Doctor-recommended exercise added!');
+        await loadAllExerciseData();
+      } catch (e) {
+        showToast('⚠ Failed to save custom exercise', true);
+      }
+    }
+
+    async function deleteCustomExercise(id, ev) {
+      if (ev) ev.stopPropagation();
+      if (!confirm('Are you sure you want to remove this prescribed routine?')) return;
+      try {
+        await apiCall(`/exercises/custom/${id}`, { method: 'DELETE' });
+        showToast('🗑️ Prescribed exercise removed');
+        await loadAllExerciseData();
+      } catch (e) {
+        showToast('⚠ Failed to delete exercise', true);
+      }
+    }
+
+    async function loadSummary() {
+      try {
+        const response = await apiCall('/exercises/summary');
+        const data = response.data || {};
+        document.getElementById('exerciseSummary').innerHTML = `
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
         <div class="item">
           <strong>Total Steps Completed</strong><br>
-          <span style="font-size:24px;font-weight:700;color:var(--sage-dark);">${data.totalStepsCompleted || 0}</span>
+          <span style="font-size:24px;font-weight:700;color:var(--sage-dark);">${data.totalStepsCompleted || data.totalSteps || 0}</span>
         </div>
         <div class="item">
           <strong>Total Minutes</strong><br>
@@ -188,125 +326,249 @@ async function loadSummary() {
         </div>
       </div>
     `;
-  } catch (error) {
-    console.error('Error loading summary:', error);
-    document.getElementById('exerciseSummary').innerHTML = `
-      <div class="empty-state">
-        <p>No exercise data for today</p>
-      </div>
-    `;
-  }
-}
-
-async function loadExerciseLog() {
-  try {
-    const response = await apiCall('/exercises/log/today');
-    exerciseLog = response.data || { date: new Date().toISOString(), completed: {} };
-    
-    if (exerciseLog.completed instanceof Map) {
-      exerciseLog.completed = Object.fromEntries(exerciseLog.completed);
+      } catch (error) {
+        console.error('Error loading summary:', error);
+        document.getElementById('exerciseSummary').innerHTML = `<div class="empty-state"><p>No exercise data for today</p></div>`;
+      }
     }
-    
-    renderCategories();
-  } catch (error) {
-    console.error('Error loading exercise log:', error);
-    exerciseLog = { date: new Date().toISOString(), completed: {} };
-    renderCategories();
-  }
-}
 
-function renderCategories() {
-  const html = Object.keys(exerciseRoutines).map(name => {
-    const completedSteps = exerciseLog.completed?.[name] || [];
-    const done = completedSteps.length;
-    const total = exerciseRoutines[name].length;
-    
-    return `
-      <div class="exercise-cat" onclick="openRoutine('${name.replace(/'/g,"\\'")}')">
+    async function loadExerciseLog() {
+      try {
+        const response = await apiCall('/exercises/log/today');
+        exerciseLog = response.data || { date: new Date().toISOString(), completed: {} };
+        if (exerciseLog.completed instanceof Map) {
+          exerciseLog.completed = Object.fromEntries(exerciseLog.completed);
+        }
+        renderCategories();
+      } catch (error) {
+        console.error('Error loading exercise log:', error);
+        exerciseLog = { date: new Date().toISOString(), completed: {} };
+        renderCategories();
+      }
+    }
+
+    function getAllRoutines() {
+      const routines = {};
+      // 1. Doctor recommended / Custom routines
+      (customExercises || []).forEach(cx => {
+        const key = '🩺 ' + cx.title;
+        routines[key] = {
+          steps: cx.steps || [],
+          isCustom: true,
+          id: cx._id,
+          doctorName: cx.doctorName,
+          targetDuration: cx.targetDuration || 15
+        };
+      });
+      // 2. Default preset routines
+      Object.keys(exerciseRoutines).forEach(k => {
+        routines[k] = {
+          steps: exerciseRoutines[k],
+          isCustom: false
+        };
+      });
+      return routines;
+    }
+
+    function renderCategories() {
+      const listEl = document.getElementById('exerciseCatList');
+      const allRoutines = getAllRoutines();
+
+      if (role === 'client') {
+        // Client view: Read-only monitoring with Caretaker's comments and timestamps
+        document.querySelector('.page-header h1').textContent = "🏃 Caretaker's Exercise Progress";
+        document.querySelector('.page-header p').textContent = "Caretaker's routine is the source of truth • Monitor completion & feedback";
+
+        const introBanner = `
+          <div style="background:var(--blue-light);border:1px solid #BFDBFE;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;color:#1E40AF;">
+            👀 <strong>Client Monitoring Mode:</strong> Your Caretaker controls their own routine. You can see completion times, feedback, and notes below.
+          </div>
+        `;
+
+        const cards = Object.keys(allRoutines).map(name => {
+          const r = allRoutines[name];
+          const completedSteps = exerciseLog.completed?.[name] || [];
+          const session = (exerciseLog.sessions || []).slice().reverse().find(s => s.category === name);
+          const isDone = completedSteps.length > 0 || !!session;
+
+          if (isDone) {
+            const timeStr = session?.completedAt
+              ? new Date(session.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : 'Earlier today';
+            const dur = session?.duration || r.targetDuration || 20;
+            const comment = session?.comment || session?.notes || '';
+            const feedback = session?.feedback || '';
+
+            return `
+              <div class="item" style="border-left:5px solid var(--green);background:#FAFCFA;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <strong style="font-size:15px;">${name}</strong>
+                    ${r.isCustom && r.doctorName ? `<span style="font-size:11px;color:#047857;background:#D1FAE5;padding:2px 8px;border-radius:8px;margin-left:8px;font-weight:600;">Prescribed by ${r.doctorName}</span>` : ''}
+                  </div>
+                  <span class="status-badge status-done">✅ Completed</span>
+                </div>
+                <div style="font-size:13px;color:var(--text);margin-top:6px;">
+                  Scheduled: Today • Completed at: <strong>${timeStr}</strong> • Duration: ${dur} mins
+                </div>
+                ${comment ? `
+                  <div style="background:var(--cream);border-left:3px solid var(--sage);padding:8px 12px;border-radius:6px;font-size:13px;margin-top:8px;">
+                    💬 <strong>Caretaker's comment:</strong> "${comment}"
+                  </div>` : ''}
+                ${feedback ? `<div style="font-size:12px;color:var(--text-muted);margin-top:6px;">😊 <strong>Feedback:</strong> ${feedback}</div>` : ''}
+              </div>
+            `;
+          } else {
+            return `
+              <div class="item" style="border-left:5px solid var(--amber);background:#FFFDF9;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <strong style="font-size:15px;color:var(--text);">${name}</strong>
+                    ${r.isCustom && r.doctorName ? `<span style="font-size:11px;color:#B45309;background:#FEF3C7;padding:2px 8px;border-radius:8px;margin-left:8px;font-weight:600;">Prescribed by ${r.doctorName}</span>` : ''}
+                  </div>
+                  <span class="status-badge status-pending">🟡 Not completed yet</span>
+                </div>
+                <div style="font-size:13px;color:var(--text-muted);margin-top:6px;">
+                  Scheduled for today • Pending Caretaker completion
+                </div>
+              </div>
+            `;
+          }
+        }).join('');
+
+        listEl.innerHTML = introBanner + cards;
+        return;
+      }
+
+      // Caretaker View: interactive routines
+      const html = Object.keys(allRoutines).map(name => {
+        const r = allRoutines[name];
+        const completedSteps = exerciseLog.completed?.[name] || [];
+        const session = (exerciseLog.sessions || []).slice().reverse().find(s => s.category === name);
+        const done = completedSteps.length;
+        const total = r.steps.length;
+        const isDone = done > 0 || !!session;
+
+        return `
+      <div class="exercise-cat" onclick="openRoutine('${name.replace(/'/g, "\\'")}')" style="${isDone ? 'border-left:4px solid var(--green);' : ''}">
         <div class="exercise-cat-left">
           <span class="exercise-cat-icon">${name.split(' ')[0]}</span>
           <div>
-            <div class="exercise-cat-name">${name.slice(2)}</div>
-            <div class="exercise-cat-count">${done}/${total} completed today</div>
+            <div class="exercise-cat-name" style="display:flex;align-items:center;gap:8px;">
+              <span>${name.slice(2)}</span>
+              ${r.isCustom ? `<span style="font-size:10px;background:#EAF5EE;color:#2D6A4F;padding:2px 6px;border-radius:6px;font-weight:700;">🩺 Doctor Prescribed</span>` : ''}
+            </div>
+            <div class="exercise-cat-count">
+              ${isDone ? `✅ Completed today (${session?.duration || r.targetDuration || 20}m)` : `${done}/${total} steps done`}
+              ${session?.comment ? ` • <em>"${session.comment}"</em>` : ''}
+              ${r.isCustom && r.doctorName ? ` • 👨‍⚕️ ${r.doctorName}` : ''}
+            </div>
           </div>
         </div>
-        <span class="exercise-cat-arrow">›</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${r.isCustom ? `<button onclick="deleteCustomExercise('${r.id}', event)" title="Delete routine" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px;">🗑️</button>` : ''}
+          <span class="exercise-cat-arrow">›</span>
+        </div>
       </div>
     `;
-  }).join('');
-  
-  document.getElementById('exerciseCatList').innerHTML = html;
-}
+      }).join('');
+      listEl.innerHTML = html;
+    }
 
-function openRoutine(name) {
-  currentRoutineName = name;
-  document.getElementById('catCard').style.display = 'none';
-  document.getElementById('routineCard').style.display = 'block';
-  document.getElementById('summaryCard').style.display = 'none';
-  document.getElementById('routineTitle').textContent = name;
+    function openRoutine(name) {
+      if (role === 'client') return; // Client cannot edit routine
+      currentRoutineName = name;
+      const allRoutines = getAllRoutines();
+      const routine = allRoutines[name] || { steps: [] };
 
-  const steps = exerciseRoutines[name];
-  const done = exerciseLog.completed?.[name] || [];
+      document.getElementById('catCard').style.display = 'none';
+      document.getElementById('routineCard').style.display = 'block';
+      document.getElementById('summaryCard').style.display = 'none';
+      if (document.getElementById('caretakerAddExBtnWrap')) {
+        document.getElementById('caretakerAddExBtnWrap').style.display = 'none';
+      }
 
-  document.getElementById('routineList').innerHTML = steps.map(ex => `
-    <div class="exercise-step ${done.includes(ex) ? 'done' : ''}" id="step-${btoa(ex).replace(/=/g,'')}">
+      document.getElementById('routineTitle').textContent = name;
+      if (routine.targetDuration) {
+        document.getElementById('exDuration').value = routine.targetDuration;
+      }
+
+      const steps = routine.steps || [];
+      const done = exerciseLog.completed?.[name] || [];
+      document.getElementById('routineList').innerHTML = steps.map(ex => `
+    <div class="exercise-step ${done.includes(ex) ? 'done' : ''}" id="step-${btoa(encodeURIComponent(ex)).replace(/=/g, '')}">
       <input type="checkbox" ${done.includes(ex) ? 'checked' : ''}
-        onchange="toggleExercise('${name.replace(/'/g,"\\'")}', '${ex.replace(/'/g,"\\'")}', this)">
+        onchange="toggleExercise('${name.replace(/'/g, "\\'")}', '${ex.replace(/'/g, "\\'")}', this)">
       <span class="exercise-step-text">${ex}</span>
     </div>
   `).join('');
-}
-
-function toggleExercise(cat, ex, el) {
-  let done = exerciseLog.completed?.[cat] || [];
-  if (el.checked) { 
-    if (!done.includes(ex)) done.push(ex); 
-  } else { 
-    done = done.filter(x => x !== ex); 
-  }
-  
-  if (!exerciseLog.completed) exerciseLog.completed = {};
-  exerciseLog.completed[cat] = done;
-
-  const stepId = 'step-' + btoa(ex).replace(/=/g, '');
-  document.getElementById(stepId)?.classList.toggle('done', el.checked);
-}
-
-async function saveRoutine() {
-  try {
-    const category = currentRoutineName;
-    const steps = exerciseLog.completed?.[category] || [];
-    
-    if (steps.length > 0) {
-      await apiCall('/exercises/log', {
-        method: 'POST',
-        body: JSON.stringify({
-          category,
-          steps,
-          duration: 10
-        })
-      });
     }
-    
-    showToast('✔ Exercise progress saved!');
-    closeRoutine();
-    loadSummary();
-  } catch (error) {
-    console.error('Error saving exercise:', error);
-    showToast('⚠ Failed to save exercise', true);
-  }
-}
 
-function closeRoutine() {
-  document.getElementById('routineCard').style.display = 'none';
-  document.getElementById('catCard').style.display = 'block';
-  document.getElementById('summaryCard').style.display = 'block';
-  loadExerciseLog();
-}
+    function toggleExercise(cat, ex, el) {
+      let done = exerciseLog.completed?.[cat] || [];
+      if (el.checked) { if (!done.includes(ex)) done.push(ex); }
+      else { done = done.filter(x => x !== ex); }
+      if (!exerciseLog.completed) exerciseLog.completed = {};
+      exerciseLog.completed[cat] = done;
+      const stepId = 'step-' + btoa(encodeURIComponent(ex)).replace(/=/g, '');
+      document.getElementById(stepId)?.classList.toggle('done', el.checked);
+    }
 
-loadSummary();
-loadExerciseLog();
-</script>
+    async function saveRoutine() {
+      try {
+        const category = currentRoutineName;
+        const allRoutines = getAllRoutines();
+        const routine = allRoutines[category] || { steps: [] };
+        const steps = exerciseLog.completed?.[category] || routine.steps || ['Completed routine'];
+        const duration = parseInt(document.getElementById('exDuration').value) || 20;
+        const feedback = document.getElementById('exFeedback').value || '';
+        const comment = document.getElementById('exComment').value.trim() || '';
+
+        await apiCall('/exercises/log', {
+          method: 'POST',
+          body: JSON.stringify({
+            category,
+            steps: steps.length > 0 ? steps : ['Completed full routine'],
+            duration,
+            comment,
+            feedback,
+            notes: comment
+          })
+        });
+
+        showToast('✅ Exercise routine completed & recorded!');
+        closeRoutine();
+        loadSummary();
+      } catch (error) {
+        console.error('Error saving exercise:', error);
+        showToast('⚠ Failed to save exercise', true);
+      }
+    }
+
+    function closeRoutine() {
+      document.getElementById('routineCard').style.display = 'none';
+      document.getElementById('catCard').style.display = 'block';
+      document.getElementById('summaryCard').style.display = 'block';
+      if (role === 'caretaker') {
+        const btn = document.getElementById('caretakerAddExBtnWrap');
+        if (btn) btn.style.display = 'block';
+      }
+      loadExerciseLog();
+    }
+
+    async function loadAllExerciseData() {
+      await Promise.all([loadCustomExercises(), loadSummary(), loadExerciseLog()]);
+    }
+
+    // Role-specific init
+    if (role === 'caretaker') {
+      const btn = document.getElementById('caretakerAddExBtnWrap');
+      if (btn) btn.style.display = 'block';
+    }
+
+    loadAllExerciseData();
+  </script>
 
 </body>
+
 </html>

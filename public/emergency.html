@@ -1,987 +1,1592 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Emergency — Elder Care</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Emergency — Elder Care</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  :root {
-    --sage: #7B9E87;
-    --sage-light: #A8C5B0;
-    --sage-dark: #4A7259;
-    --cream: #FAF7F2;
-    --text: #2D3A2E;
-    --text-muted: #6B7A6C;
-    --white: #ffffff;
-    --border: #E2E8E3;
-    --red: #D94F4F;
-    --red-dark: #A93232;
-    --red-light: #FDEAEA;
-    --green: #3A7D54;
-    --green-light: #EAF5EE;
-    --amber: #C07A2A;
-    --amber-light: #FEF3E2;
-    --blue: #3B6EA5;
-    --blue-light: #EBF2FA;
-    --shadow-sm: 0 2px 8px rgba(45,58,46,0.07);
-    --shadow: 0 8px 32px rgba(45,58,46,0.1);
-    --radius: 20px;
-  }
+    :root {
+      --sage: #7B9E87;
+      --sage-light: #A8C5B0;
+      --sage-dark: #4A7259;
+      --cream: #FAF7F2;
+      --text: #2D3A2E;
+      --text-muted: #6B7A6C;
+      --white: #ffffff;
+      --border: #E2E8E3;
+      --red: #D94F4F;
+      --red-dark: #A93232;
+      --red-light: #FDEAEA;
+      --green: #3A7D54;
+      --green-light: #EAF5EE;
+      --amber: #C07A2A;
+      --amber-light: #FEF3E2;
+      --blue: #3B6EA5;
+      --blue-light: #EBF2FA;
+      --shadow-sm: 0 2px 8px rgba(45, 58, 46, 0.07);
+      --shadow: 0 8px 32px rgba(45, 58, 46, 0.1);
+      --radius: 20px;
+    }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 28px 24px;
-    max-width: 720px;
-    margin: 0 auto;
-  }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 24px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
 
-  /* ── PAGE HEADER ── */
-  .page-header {
-    margin-bottom: 24px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .page-header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 30px;
-    color: var(--text);
-    line-height: 1.2;
-  }
-  .page-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-  /* ── BACK BUTTON ── */
-  .back-button {
-    display: inline-block;
-    padding: 10px 16px;
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    transition: all 0.2s;
-  }
-  .back-button:hover {
-    background: var(--sage-light);
-    color: white;
-    border-color: var(--sage-light);
-  }
+    .page-header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 30px;
+      color: var(--text);
+      line-height: 1.2;
+    }
 
-  /* ── STATUS HERO ── */
-.status-hero {
-  background: var(--white);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  padding: 32px 24px;
-  text-align: center;
-  margin-bottom: 20px;
-  transition: background 0.3s, border-color 0.3s;
-}
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
 
-/* background states */
-.status-hero.safe {
-  background: #EAF5EE;
-  border-color: rgba(58,125,84,0.2);
-}
+    /* ── BACK BUTTON ── */
+    .back-button {
+      display: inline-block;
+      padding: 10px 16px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
 
-.status-hero.warning {
-  background: #FEF3E2;
-  border-color: rgba(192,122,42,0.2);
-}
+    .back-button:hover {
+      background: var(--sage-light);
+      color: white;
+      border-color: var(--sage-light);
+    }
 
-.status-hero.danger {
-  background: #FDEAEA;
-  border-color: rgba(217,79,79,0.25);
-}
+    /* ── STATUS HERO ── */
+    .status-hero {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 32px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: background 0.3s, border-color 0.3s;
+    }
 
-/* text */
-.status-simple {
-  text-align: center;
-}
+    /* background states */
+    .status-hero.safe {
+      background: #EAF5EE;
+      border-color: rgba(58, 125, 84, 0.2);
+    }
 
-.status-label {
-  font-family: 'DM Serif Display', serif;
-  font-size: 24px;
-  margin-bottom: 6px;
-}
+    .status-hero.warning {
+      background: #FEF3E2;
+      border-color: rgba(192, 122, 42, 0.2);
+    }
 
-/* colors */
-.status-label.safe {
-  color: var(--green);
-}
+    .status-hero.danger {
+      background: #FDEAEA;
+      border-color: rgba(217, 79, 79, 0.25);
+    }
 
-.status-label.warning {
-  color: var(--amber);
-}
+    /* text */
+    .status-simple {
+      text-align: center;
+    }
 
-.status-label.danger {
-  color: var(--red);
-}
+    .status-label {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
 
-.status-sub {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-  /* ── CARDS ── */
-  .card {
-    background: var(--white);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    padding: 24px 26px;
-    margin-bottom: 16px;
-  }
-  .card-title {
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .card-title-icon { font-size: 20px; }
+    /* colors */
+    .status-label.safe {
+      color: var(--green);
+    }
 
-  /* ── DETECTION MODULES ── */
-  .module-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .module-tile {
-    background: #F7FAF8;
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    padding: 16px 14px;
-    position: relative;
-    transition: all 0.2s;
-  }
-  .module-tile.active   { border-color: var(--sage-light);  background: rgba(123,158,135,0.07); }
-  .module-tile.alerting { border-color: var(--red);         background: var(--red-light); animation: tileFlash 0.8s ease infinite; }
-  @keyframes tileFlash {
-    0%,100% { background: var(--red-light); }
-    50%     { background: #fff0f0; }
-  }
+    .status-label.warning {
+      color: var(--amber);
+    }
 
-  .module-tile-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 8px;
-  }
-  .module-tile-name { font-size: 12.5px; font-weight: 700; color: var(--text); }
-  .module-tile-icon { font-size: 22px; }
+    .status-label.danger {
+      color: var(--red);
+    }
 
-  .module-tile-value {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 2px;
-  }
-  .module-tile-unit { font-size: 11px; color: var(--text-muted); }
+    .status-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
 
-  .indicator-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 5px;
-    background: #ccc;
-  }
-  .indicator-dot.on  { background: var(--green); box-shadow: 0 0 6px rgba(58,125,84,0.5); animation: dotPulse 2s infinite; }
-  .indicator-dot.warn{ background: var(--amber); }
-  .indicator-dot.off { background: #ccc; }
-  @keyframes dotPulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+    /* ── CARDS ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 24px 26px;
+      margin-bottom: 16px;
+    }
 
-  /* ── TOGGLE SWITCH ── */
-  .toggle-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
-  .toggle-row-left { flex: 1; }
-  .toggle-row-label { font-size: 14px; font-weight: 600; color: var(--text); }
-  .toggle-row-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
 
-  .toggle-switch {
-    position: relative; width: 44px; height: 24px; flex-shrink: 0;
-  }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider {
-    position: absolute; inset: 0;
-    background: #D8DFD9;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: 0.25s;
-  }
-  .toggle-slider::before {
-    content: '';
-    position: absolute;
-    width: 18px; height: 18px;
-    left: 3px; top: 3px;
-    background: white;
-    border-radius: 50%;
-    transition: 0.25s;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  }
-  input:checked + .toggle-slider { background: var(--sage-dark); }
-  input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .card-title-icon {
+      font-size: 20px;
+    }
 
-  /* ── INACTIVITY SLIDER ── */
-  .range-wrap { margin-top: 10px; }
-  .range-wrap input[type="range"] {
-    width: 100%;
-    accent-color: var(--sage-dark);
-    margin: 8px 0;
-  }
-  .range-labels { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-muted); }
+    /* ── DETECTION MODULES ── */
+    .module-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
 
-  /* ── COUNTDOWN ── */
-  .countdown-bar-wrap {
-    margin-top: 14px;
-    background: #F0F5F1;
-    border-radius: 50px;
-    height: 8px;
-    overflow: hidden;
-  }
-  .countdown-bar {
-    height: 100%;
-    border-radius: 50px;
-    background: linear-gradient(90deg, var(--sage-dark), var(--sage-light));
-    transition: width 1s linear, background 0.5s;
-    width: 100%;
-  }
-  .countdown-bar.danger { background: linear-gradient(90deg, var(--red-dark), var(--red)); }
-  .countdown-text { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; text-align: center; }
+    .module-tile {
+      background: #F7FAF8;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 14px;
+      position: relative;
+      transition: all 0.2s;
+    }
 
-  /* ── SOS BUTTON ── */
-  .sos-btn {
-    width: 100%;
-    padding: 20px;
-    background: linear-gradient(135deg, var(--red-dark), var(--red));
-    color: white;
-    border: none;
-    border-radius: 16px;
-    font-size: 18px;
-    font-weight: 700;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    box-shadow: 0 8px 28px rgba(217,79,79,0.4);
-    transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    animation: sosPulse 2.5s ease infinite;
-  }
-  @keyframes sosPulse {
-    0%,100%{ box-shadow: 0 8px 28px rgba(217,79,79,0.4); }
-    50%    { box-shadow: 0 8px 40px rgba(217,79,79,0.65); }
-  }
-  .sos-btn:hover { transform: scale(1.02); }
-  .sos-btn:active { transform: scale(0.98); }
+    .module-tile.active {
+      border-color: var(--sage-light);
+      background: rgba(123, 158, 135, 0.07);
+    }
 
-  /* ── CANCEL COUNTDOWN ── */
-  .cancel-overlay {
-    display: none;
-    position: fixed; inset: 0; z-index: 9999;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    align-items: center; justify-content: center;
-  }
-  .cancel-overlay.show { display: flex; }
-  .cancel-box {
-    background: var(--white);
-    border-radius: 24px;
-    padding: 36px 32px;
-    text-align: center;
-    max-width: 340px;
-    width: 90%;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.25);
-    animation: boxPop 0.3s cubic-bezier(0.16,1,0.3,1);
-  }
-  @keyframes boxPop { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
-  .cancel-box-icon { font-size: 56px; margin-bottom: 12px; }
-  .cancel-box h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px; color: var(--red);
-    margin-bottom: 8px;
-  }
-  .cancel-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
-  .cancel-countdown-num {
-    font-family: 'DM Serif Display', serif;
-    font-size: 64px;
-    color: var(--red);
-    line-height: 1;
-    margin-bottom: 20px;
-    animation: numPop 1s ease infinite;
-  }
-  @keyframes numPop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+    .module-tile.alerting {
+      border-color: var(--red);
+      background: var(--red-light);
+      animation: tileFlash 0.8s ease infinite;
+    }
 
-  .btn-cancel-alert {
-    width: 100%;
-    padding: 15px;
-    background: var(--green-light);
-    color: var(--green);
-    border: 2px solid rgba(58,125,84,0.3);
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 700;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 10px;
-  }
-  .btn-cancel-alert:hover { background: #D4EED9; }
+    @keyframes tileFlash {
 
-  /* ── ALERT LOG ── */
-  .log-entry {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13.5px;
-  }
-  .log-entry:last-child { border-bottom: none; }
-  .log-entry-icon {
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-  .log-entry-icon.fall     { background: var(--red-light); }
-  .log-entry-icon.inactive { background: var(--amber-light); }
-  .log-entry-icon.manual   { background: var(--blue-light); }
-  .log-entry-icon.safe     { background: var(--green-light); }
-  .log-entry-info { flex: 1; }
-  .log-entry-type { font-weight: 600; color: var(--text); }
-  .log-entry-time { font-size: 11.5px; color: var(--text-muted); }
+      0%,
+      100% {
+        background: var(--red-light);
+      }
 
-  /* ── CONTACTS ── */
-  .contact-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 13px 16px;
-    background: var(--red-light);
-    border: 1px solid #F5CECE;
-    border-radius: 12px;
-    margin-bottom: 8px;
-  }
-  .contact-row strong { font-size: 14px; display: block; }
-  .contact-row span { font-size: 12.5px; color: var(--text-muted); }
-  .contact-phone { font-size: 15px; font-weight: 700; color: var(--red); }
+      50% {
+        background: #fff0f0;
+      }
+    }
 
-  /* ── TOAST ── */
-  #toast {
-    position: fixed; bottom: 24px; right: 24px; z-index: 9000;
-    padding: 14px 20px; border-radius: 12px;
-    font-size: 14px; font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-    opacity: 0; transition: opacity 0.3s;
-    max-width: 300px; pointer-events: none;
-  }
+    .module-tile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
 
-  @media (max-width: 480px) {
-    body { padding: 20px 14px; }
-    .module-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-    .module-tile-value { font-size: 22px; }
-  }
-</style>
+    .module-tile-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .module-tile-icon {
+      font-size: 22px;
+    }
+
+    .module-tile-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .module-tile-unit {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+      background: #ccc;
+    }
+
+    .indicator-dot.on {
+      background: var(--green);
+      box-shadow: 0 0 6px rgba(58, 125, 84, 0.5);
+      animation: dotPulse 2s infinite;
+    }
+
+    .indicator-dot.warn {
+      background: var(--amber);
+    }
+
+    .indicator-dot.off {
+      background: #ccc;
+    }
+
+    @keyframes dotPulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.4
+      }
+    }
+
+    /* ── TOGGLE SWITCH ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .toggle-row-left {
+      flex: 1;
+    }
+
+    .toggle-row-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .toggle-row-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #D8DFD9;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.25s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    input:checked+.toggle-slider {
+      background: var(--sage-dark);
+    }
+
+    input:checked+.toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    /* ── INACTIVITY SLIDER ── */
+    .range-wrap {
+      margin-top: 10px;
+    }
+
+    .range-wrap input[type="range"] {
+      width: 100%;
+      accent-color: var(--sage-dark);
+      margin: 8px 0;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* ── COUNTDOWN ── */
+    .countdown-bar-wrap {
+      margin-top: 14px;
+      background: #F0F5F1;
+      border-radius: 50px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .countdown-bar {
+      height: 100%;
+      border-radius: 50px;
+      background: linear-gradient(90deg, var(--sage-dark), var(--sage-light));
+      transition: width 1s linear, background 0.5s;
+      width: 100%;
+    }
+
+    .countdown-bar.danger {
+      background: linear-gradient(90deg, var(--red-dark), var(--red));
+    }
+
+    .countdown-text {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    /* ── SOS BUTTON ── */
+    .sos-btn {
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--red-dark), var(--red));
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 8px 28px rgba(217, 79, 79, 0.4);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      animation: sosPulse 2.5s ease infinite;
+    }
+
+    @keyframes sosPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 8px 28px rgba(217, 79, 79, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 8px 40px rgba(217, 79, 79, 0.65);
+      }
+    }
+
+    .sos-btn:hover {
+      transform: scale(1.02);
+    }
+
+    .sos-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* ── CANCEL COUNTDOWN ── */
+    .cancel-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cancel-overlay.show {
+      display: flex;
+    }
+
+    .cancel-box {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 36px 32px;
+      text-align: center;
+      max-width: 340px;
+      width: 90%;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+      animation: boxPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes boxPop {
+      from {
+        transform: scale(0.85);
+        opacity: 0
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .cancel-box-icon {
+      font-size: 56px;
+      margin-bottom: 12px;
+    }
+
+    .cancel-box h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+
+    .cancel-box p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .cancel-countdown-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 64px;
+      color: var(--red);
+      line-height: 1;
+      margin-bottom: 20px;
+      animation: numPop 1s ease infinite;
+    }
+
+    @keyframes numPop {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      50% {
+        transform: scale(1.08)
+      }
+    }
+
+    .btn-cancel-alert {
+      width: 100%;
+      padding: 15px;
+      background: var(--green-light);
+      color: var(--green);
+      border: 2px solid rgba(58, 125, 84, 0.3);
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 10px;
+    }
+
+    .btn-cancel-alert:hover {
+      background: #D4EED9;
+    }
+
+    /* ── ALERT LOG ── */
+    .log-entry {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-entry-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .log-entry-icon.fall {
+      background: var(--red-light);
+    }
+
+    .log-entry-icon.inactive {
+      background: var(--amber-light);
+    }
+
+    .log-entry-icon.manual {
+      background: var(--blue-light);
+    }
+
+    .log-entry-icon.safe {
+      background: var(--green-light);
+    }
+
+    .log-entry-info {
+      flex: 1;
+    }
+
+    .log-entry-type {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .log-entry-time {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* ── CONTACTS ── */
+    .contact-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px;
+      background: var(--red-light);
+      border: 1px solid #F5CECE;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .contact-row strong {
+      font-size: 14px;
+      display: block;
+    }
+
+    .contact-row span {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .contact-phone {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9000;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transition: opacity 0.3s;
+      max-width: 300px;
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 20px 14px;
+      }
+
+      .module-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .module-tile-value {
+        font-size: 22px;
+      }
+    }
+    /* ── CANCEL / COUNTDOWN OVERLAY MODAL ── */
+    .cancel-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(30, 8, 8, 0.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .cancel-overlay.show {
+      display: flex !important;
+    }
+
+    .cancel-box {
+      background: #FFFFFF;
+      border-radius: 28px;
+      padding: 36px 28px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      border: 3px solid var(--red);
+      box-shadow: 0 24px 70px rgba(217, 79, 79, 0.4);
+      animation: alertPop 0.25s ease-out;
+    }
+
+    @keyframes alertPop {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .cancel-box-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #FFF0F0;
+      border: 2px solid #F5CECE;
+      font-size: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      animation: pulseRed 1.2s infinite;
+    }
+
+    @keyframes pulseRed {
+      0% { box-shadow: 0 0 0 0 rgba(217, 79, 79, 0.5); }
+      70% { box-shadow: 0 0 0 18px rgba(217, 79, 79, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(217, 79, 79, 0); }
+    }
+
+    .cancel-box h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px;
+      color: var(--red-dark);
+      margin: 0 0 8px;
+    }
+
+    .cancel-box p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0 0 16px;
+    }
+
+    .cancel-countdown-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 56px;
+      font-weight: 800;
+      color: var(--red);
+      line-height: 1;
+      margin: 12px 0 20px;
+    }
+
+    .btn-cancel-alert {
+      width: 100%;
+      padding: 14px;
+      background: var(--sage-dark);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 14px rgba(46, 125, 82, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-cancel-alert:hover {
+      background: #256643;
+      transform: translateY(-1px);
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- Cancel / Countdown Overlay -->
-<div class="cancel-overlay" id="cancelOverlay">
-  <div class="cancel-box">
-    <div class="cancel-box-icon" id="overlayIcon">⚠️</div>
-    <h2 id="overlayTitle">Alert Detected!</h2>
-    <p id="overlayDesc">Sending emergency alert in…</p>
-    <div class="cancel-countdown-num" id="overlayCountdown">10</div>
-    <button class="btn-cancel-alert" onclick="cancelAlert()">✋ I'm OK — Cancel Alert</button>
-    <button onclick="sendNow()" style="width:100%;padding:12px;background:var(--red);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;">
-      🚨 Send Alert Now
+  <!-- Cancel / Countdown Overlay -->
+  <div class="cancel-overlay" id="cancelOverlay">
+    <div class="cancel-box">
+      <div class="cancel-box-icon" id="overlayIcon">🚨</div>
+      <h2 id="overlayTitle">Alert Detected!</h2>
+      <p id="overlayDesc">Sending emergency alert in…</p>
+      <div class="cancel-countdown-num" id="overlayCountdown">10</div>
+      <button class="btn-cancel-alert" onclick="cancelAlert()">✋ I'm OK — Cancel Alert</button>
+      <button onclick="sendNow()"
+        style="width:100%;padding:12px;background:var(--red);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;">
+        🚨 Send Alert Now
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE -->
+  <a href="/home.html" class="back-button">
+    ← Back to Dashboard
+  </a>
+
+  <!-- ACTIVE ALERT BANNER (Prominent when an SOS is triggered) -->
+  <div id="activeAlertBanner" style="display:none; margin-bottom: 20px; padding: 20px; background: #FFF0F0; border: 2px solid var(--red); border-radius: 16px; box-shadow: 0 6px 20px rgba(217,79,79,0.25);">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+      <span style="font-size: 26px;">🚨</span>
+      <h2 style="font-size: 19px; color: var(--red-dark); font-weight: 800; margin: 0;">ACTIVE EMERGENCY ALERT!</h2>
+    </div>
+    <p id="activeAlertDesc" style="font-size: 14px; color: var(--text); margin-bottom: 14px; font-weight: 500;"></p>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a id="activeAlertCallBtn" href="/video.html" style="padding: 10px 16px; background: var(--red); color: #fff; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 13.5px; display: inline-flex; align-items: center; gap: 6px;">
+        📹 Call Caretaker Now
+      </a>
+      <a id="activeAlertLocationBtn" href="#" target="_blank" style="display:none; padding: 10px 16px; background: var(--blue); color: #fff; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 13.5px; align-items: center; gap: 6px;">
+        📍 View Location
+      </a>
+      <button id="activeAlertResolveBtn" style="padding: 10px 16px; background: var(--sage-dark); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 13.5px; cursor: pointer;">
+        ✅ Acknowledge & Mark Resolved
+      </button>
+    </div>
+  </div>
+
+  <!-- MANUAL SOS - MOVED TO TOP -->
+  <div class="card" id="sosCard" style="border: 2px solid var(--red); box-shadow: 0 8px 28px rgba(217,79,79,0.2);">
+    <div class="card-title"><span class="card-title-icon">🆘</span> <span id="sosCardTitle">Manual SOS</span></div>
+    <p id="sosCardDesc" style="font-size:13.5px;color:var(--text-muted);margin-bottom:16px;">
+      Press once to trigger emergency. A 10-second cancel window will appear before sending to your family.
+    </p>
+    <button class="sos-btn" id="manualSosBtn" onclick="triggerAlert('manual')">
+      🚨 SEND EMERGENCY ALERT
     </button>
   </div>
-</div>
 
-<!-- PAGE -->
-<a href="/home.html" class="back-button">
-  ← Back to Dashboard
-</a>
+  <div class="page-header">
+    <div>
+      <h1>🛡️ Smart Emergency</h1>
+      <p>Automatic detection · Fall sensor · Inactivity monitor</p>
+    </div>
+  </div>
 
-<!-- MANUAL SOS - MOVED TO TOP -->
-<div class="card" style="border: 2px solid var(--red); box-shadow: 0 8px 28px rgba(217,79,79,0.2);">
-  <div class="card-title"><span class="card-title-icon">🆘</span> Manual SOS</div>
-  <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:16px;">
-    Press once to trigger emergency. A 10-second cancel window will appear (if enabled).
-  </p>
-  <button class="sos-btn" onclick="triggerAlert('manual')">
-    🚨 SEND EMERGENCY ALERT
+  <div class="status-hero safe" id="statusBox">
+
+    <div class="status-simple">
+      <h2 id="statusText" class="status-label safe">🟢 All Clear</h2>
+      <p id="statusSub" class="status-sub">
+        Monitoring active • No alerts detected
+      </p>
+    </div>
+
+  </div>
+  <button onclick="enableSensors()"
+    style="margin-bottom:15px;padding:10px;border-radius:10px;background:#4A7259;color:white;">
+    📱 Enable Motion Detection
   </button>
-</div>
-
-<div class="page-header">
-  <div>
-    <h1>🛡️ Smart Emergency</h1>
-    <p>Automatic detection · Fall sensor · Inactivity monitor</p>
-  </div>
-</div>
-
-<div class="status-hero safe" id="statusBox">
-
-  <div class="status-simple">
-    <h2 id="statusText" class="status-label safe">🟢 All Clear</h2>
-    <p id="statusSub" class="status-sub">
-      Monitoring active • No alerts detected
-    </p>
-  </div>
-
-</div>
-<button onclick="enableSensors()" style="margin-bottom:15px;padding:10px;border-radius:10px;background:#4A7259;color:white;">
-📱 Enable Motion Detection
-</button>
-<!-- LIVE SENSOR TILES -->
-<div class="card">
-  <div class="card-title"><span class="card-title-icon">📡</span> Live Sensor Readings</div>
-  <div class="module-grid">
-    <div class="module-tile" id="tileFall">
-      <div class="module-tile-header">
-        <span class="module-tile-name">📱 Motion</span>
-        <span class="indicator-dot off" id="fallDot"></span>
+  <!-- LIVE SENSOR TILES -->
+  <div class="card">
+    <div class="card-title"><span class="card-title-icon">📡</span> Live Sensor Readings</div>
+    <div class="module-grid">
+      <div class="module-tile" id="tileFall">
+        <div class="module-tile-header">
+          <span class="module-tile-name">📱 Motion</span>
+          <span class="indicator-dot off" id="fallDot"></span>
+        </div>
+        <div class="module-tile-value" id="fallValue">—</div>
+        <div class="module-tile-unit">acceleration (m/s²)</div>
       </div>
-      <div class="module-tile-value" id="fallValue">—</div>
-      <div class="module-tile-unit">acceleration (m/s²)</div>
-    </div>
-    <div class="module-tile" id="tileInactive">
-      <div class="module-tile-header">
-        <span class="module-tile-name">⏱ Inactivity</span>
-        <span class="indicator-dot off" id="inactiveDot"></span>
+      <div class="module-tile" id="tileInactive">
+        <div class="module-tile-header">
+          <span class="module-tile-name">⏱ Inactivity</span>
+          <span class="indicator-dot off" id="inactiveDot"></span>
+        </div>
+        <div class="module-tile-value" id="inactiveValue">0</div>
+        <div class="module-tile-unit">seconds still</div>
       </div>
-      <div class="module-tile-value" id="inactiveValue">0</div>
-      <div class="module-tile-unit">seconds still</div>
-    </div>
-    <div class="module-tile" id="tileShake">
-      <div class="module-tile-header">
-        <span class="module-tile-name">🌀 Shake</span>
-        <span class="indicator-dot off" id="shakeDot"></span>
+      <div class="module-tile" id="tileShake">
+        <div class="module-tile-header">
+          <span class="module-tile-name">🌀 Shake</span>
+          <span class="indicator-dot off" id="shakeDot"></span>
+        </div>
+        <div class="module-tile-value" id="shakeValue">0</div>
+        <div class="module-tile-unit">events today</div>
       </div>
-      <div class="module-tile-value" id="shakeValue">0</div>
-      <div class="module-tile-unit">events today</div>
-    </div>
-    <div class="module-tile" id="tileHeartbeat">
-      <div class="module-tile-header">
-        <span class="module-tile-name">❤️ Heartbeat</span>
-        <span class="indicator-dot off" id="heartDot"></span>
+      <div class="module-tile" id="tileHeartbeat">
+        <div class="module-tile-header">
+          <span class="module-tile-name">❤️ Heartbeat</span>
+          <span class="indicator-dot off" id="heartDot"></span>
+        </div>
+        <div class="module-tile-value" id="heartValue">—</div>
+        <div class="module-tile-unit">app alive ping</div>
       </div>
-      <div class="module-tile-value" id="heartValue">—</div>
-      <div class="module-tile-unit">app alive ping</div>
+    </div>
+
+    <!-- Inactivity Progress -->
+    <div id="inactivityProgress" style="margin-top:4px;">
+      <div class="countdown-bar-wrap">
+        <div class="countdown-bar" id="inactivityBar"></div>
+      </div>
+      <div class="countdown-text" id="inactivityText">Monitoring inactivity…</div>
     </div>
   </div>
 
-  <!-- Inactivity Progress -->
-  <div id="inactivityProgress" style="margin-top:4px;">
-    <div class="countdown-bar-wrap">
-      <div class="countdown-bar" id="inactivityBar"></div>
+  <!-- DETECTION SETTINGS -->
+  <div class="card">
+    <div class="card-title"><span class="card-title-icon">⚙️</span> Detection Settings</div>
+
+    <div class="toggle-row">
+      <div class="toggle-row-left">
+        <div class="toggle-row-label">Fall Detection</div>
+        <div class="toggle-row-desc">Triggers on sudden acceleration spike (phone in pocket)</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="fallToggle" checked onchange="toggleFall(this)">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
-    <div class="countdown-text" id="inactivityText">Monitoring inactivity…</div>
-  </div>
-</div>
 
-<!-- DETECTION SETTINGS -->
-<div class="card">
-  <div class="card-title"><span class="card-title-icon">⚙️</span> Detection Settings</div>
-
-  <div class="toggle-row">
-    <div class="toggle-row-left">
-      <div class="toggle-row-label">Fall Detection</div>
-      <div class="toggle-row-desc">Triggers on sudden acceleration spike (phone in pocket)</div>
+    <div class="toggle-row">
+      <div class="toggle-row-left">
+        <div class="toggle-row-label">Inactivity Alert</div>
+        <div class="toggle-row-desc">Alert if no phone movement for X minutes</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="inactivityToggle" checked onchange="toggleInactivity(this)">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
-    <label class="toggle-switch">
-      <input type="checkbox" id="fallToggle" checked onchange="toggleFall(this)">
-      <span class="toggle-slider"></span>
-    </label>
-  </div>
 
-  <div class="toggle-row">
-    <div class="toggle-row-left">
-      <div class="toggle-row-label">Inactivity Alert</div>
-      <div class="toggle-row-desc">Alert if no phone movement for X minutes</div>
+    <div class="range-wrap" id="inactivityRangeWrap">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:13px;font-weight:600;color:var(--text);">Alert threshold</span>
+        <span style="font-size:15px;font-weight:700;color:var(--sage-dark);" id="thresholdLabel">3 min</span>
+      </div>
+      <input type="range" min="1" max="10" value="3" id="thresholdRange" oninput="updateThreshold(this.value)">
+      <div class="range-labels"><span>1 min</span><span>5 min</span><span>10 min</span></div>
     </div>
-    <label class="toggle-switch">
-      <input type="checkbox" id="inactivityToggle" checked onchange="toggleInactivity(this)">
-      <span class="toggle-slider"></span>
-    </label>
-  </div>
 
-  <div class="range-wrap" id="inactivityRangeWrap">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <span style="font-size:13px;font-weight:600;color:var(--text);">Alert threshold</span>
-      <span style="font-size:15px;font-weight:700;color:var(--sage-dark);" id="thresholdLabel">3 min</span>
+    <div class="toggle-row" style="margin-top:10px;">
+      <div class="toggle-row-left">
+        <div class="toggle-row-label">10-Second Cancel Window</div>
+        <div class="toggle-row-desc">Show countdown before sending — patient can cancel if false alarm</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="cancelWindowToggle" checked>
+        <span class="toggle-slider"></span>
+      </label>
     </div>
-    <input type="range" min="1" max="10" value="3" id="thresholdRange" oninput="updateThreshold(this.value)">
-    <div class="range-labels"><span>1 min</span><span>5 min</span><span>10 min</span></div>
   </div>
 
-  <div class="toggle-row" style="margin-top:10px;">
-    <div class="toggle-row-left">
-      <div class="toggle-row-label">10-Second Cancel Window</div>
-      <div class="toggle-row-desc">Show countdown before sending — patient can cancel if false alarm</div>
+  <!-- ALERT LOG -->
+  <div class="card">
+    <div class="card-title"><span class="card-title-icon">📋</span> Alert History</div>
+    <div id="alertLog">
+      <p style="font-size:13.5px;color:var(--text-muted);">No alerts recorded yet.</p>
     </div>
-    <label class="toggle-switch">
-      <input type="checkbox" id="cancelWindowToggle" checked>
-      <span class="toggle-slider"></span>
-    </label>
   </div>
-</div>
 
-<!-- ALERT LOG -->
-<div class="card">
-  <div class="card-title"><span class="card-title-icon">📋</span> Alert History</div>
-  <div id="alertLog">
-    <p style="font-size:13.5px;color:var(--text-muted);">No alerts recorded yet.</p>
+  <!-- EMERGENCY CONTACTS -->
+  <div class="card">
+    <div class="card-title"><span class="card-title-icon">🚑</span> Emergency Contacts</div>
+    <div class="contact-row">
+      <div><strong>City Care Hospital</strong><span>24/7 Emergency</span></div>
+      <span class="contact-phone">📞 7987855907</span>
+    </div>
+    <div class="contact-row">
+      <div><strong>LifeLine Medical Center</strong><span>Trauma & Emergency</span></div>
+      <span class="contact-phone">📞 9353055740</span>
+    </div>
+    <div class="contact-row">
+      <div><strong>Sunrise Multispeciality</strong><span>Cardiology, Neuro & More</span></div>
+      <span class="contact-phone">📞 7305525799</span>
+    </div>
   </div>
-</div>
 
-<!-- EMERGENCY CONTACTS -->
-<div class="card">
-  <div class="card-title"><span class="card-title-icon">🚑</span> Emergency Contacts</div>
-  <div class="contact-row">
-    <div><strong>City Care Hospital</strong><span>24/7 Emergency</span></div>
-    <span class="contact-phone">📞 7987855907</span>
-  </div>
-  <div class="contact-row">
-    <div><strong>LifeLine Medical Center</strong><span>Trauma & Emergency</span></div>
-    <span class="contact-phone">📞 9353055740</span>
-  </div>
-  <div class="contact-row">
-    <div><strong>Sunrise Multispeciality</strong><span>Cardiology, Neuro & More</span></div>
-    <span class="contact-phone">📞 7305525799</span>
-  </div>
-</div>
+  <!-- TOAST -->
+  <div id="toast"></div>
 
-<!-- TOAST -->
-<div id="toast"></div>
+  <script src="/js/config.js"></script>
+  <script src="/js/shared.js"></script>
+  <script>
+    /* ════════════════════════════════════
+       STATE
+    ════════════════════════════════════ */
+    let fallDetectionEnabled = true;
+    let inactivityEnabled = true;
+    let inactivityThresholdMins = 3;
+    let cancelWindowEnabled = true;
 
-<script>
-/* ════════════════════════════════════
-   STATE
-════════════════════════════════════ */
-let fallDetectionEnabled    = true;
-let inactivityEnabled       = true;
-let inactivityThresholdMins = 3;
-let cancelWindowEnabled     = true;
+    let lastMotionTime = Date.now();
+    let inactiveSeconds = 0;
+    let shakeCount = 0;
+    let heartbeatCount = 0;
 
-let lastMotionTime   = Date.now();
-let inactiveSeconds  = 0;
-let shakeCount       = 0;
-let heartbeatCount   = 0;
+    let alertPending = false;
+    let cancelCountdown = 5;
+    let cancelTimer = null;
+    let alertType = '';
+    let alertLog = [];
 
-let alertPending     = false;
-let cancelCountdown  = 10;
-let cancelTimer      = null;
-let alertType        = '';
-let alertLog         = [];
+    /* ════════════════════════════════════
+       FALL DETECTION via DeviceMotion
+    ════════════════════════════════════ */
+    let fallEnabled = true;
 
-/* ════════════════════════════════════
-   FALL DETECTION via DeviceMotion
-════════════════════════════════════ */
-let fallEnabled = true;
+    function startFallDetection() {
+      // iOS 13+ requires explicit permission
+      if (typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission()
+          .then(r => { if (r === 'granted') listenMotion(); else useMockMotion(); })
+          .catch(() => useMockMotion());
+        return;
+      }
 
-function startFallDetection() {
-  // iOS 13+ requires explicit permission
-  if (typeof DeviceMotionEvent !== 'undefined' &&
-      typeof DeviceMotionEvent.requestPermission === 'function') {
-    DeviceMotionEvent.requestPermission()
-      .then(r => { if (r === 'granted') listenMotion(); else useMockMotion(); })
-      .catch(() => useMockMotion());
-    return;
-  }
+      // Try real DeviceMotion first — if no event fires in 1s, fall back to mouse tracker
+      let gotRealMotion = false;
+      const testHandler = () => { gotRealMotion = true; };
+      window.addEventListener('devicemotion', testHandler, { once: true });
 
-  // Try real DeviceMotion first — if no event fires in 1s, fall back to mouse tracker
-  let gotRealMotion = false;
-  const testHandler = () => { gotRealMotion = true; };
-  window.addEventListener('devicemotion', testHandler, { once: true });
-
-  setTimeout(() => {
-    if (!gotRealMotion) {
-      useMockMotion(); // desktop — use mouse speed
-    } else {
-      listenMotion();  // real phone — use accelerometer
-    }
-  }, 1000);
-}
-
-function listenMotion() {
-
-  document.getElementById('fallDot').className = 'indicator-dot on';
-
-  window.addEventListener('devicemotion', e => {
-
-    let acc = e.accelerationIncludingGravity;
-
-    // 🔥 fallback if null
-    if (!acc) {
-      document.getElementById('fallValue').textContent = "No sensor";
-      return;
+      setTimeout(() => {
+        if (!gotRealMotion) {
+          useMockMotion(); // desktop — use mouse speed
+        } else {
+          listenMotion();  // real phone — use accelerometer
+        }
+      }, 1000);
     }
 
-    let x = acc.x || 0;
-    let y = acc.y || 0;
-    let z = acc.z || 0;
+    function listenMotion() {
 
-    let magnitude = Math.sqrt(x*x + y*y + z*z);
+      document.getElementById('fallDot').className = 'indicator-dot on';
 
-    document.getElementById('fallValue').textContent = magnitude.toFixed(1);
+      window.addEventListener('devicemotion', e => {
 
-    // movement detected
-    if (magnitude > 2) {
+        let acc = e.accelerationIncludingGravity;
+
+        // 🔥 fallback if null
+        if (!acc) {
+          document.getElementById('fallValue').textContent = "No sensor";
+          return;
+        }
+
+        let x = acc.x || 0;
+        let y = acc.y || 0;
+        let z = acc.z || 0;
+
+        let magnitude = Math.sqrt(x * x + y * y + z * z);
+
+        document.getElementById('fallValue').textContent = magnitude.toFixed(1);
+
+        // movement detected
+        if (magnitude > 2) {
+          lastMotionTime = Date.now();
+        }
+
+        // shake detection
+        if (magnitude > 18) {
+          shakeCount++;
+          document.getElementById('shakeValue').textContent = shakeCount;
+
+          if (magnitude > 18 && fallDetectionEnabled) {
+            triggerAlert('fall');
+          }
+        }
+
+      });
+    }
+    // Desktop fallback — tracks real mouse/pointer speed as "acceleration"
+    function useMockMotion() {
+      document.getElementById('fallDot').className = 'indicator-dot on';
+      document.getElementById('fallValue').textContent = '0.0';
+
+      let lastX = null, lastY = null, lastT = null;
+      let smoothed = 0;
+
+      document.addEventListener('mousemove', e => {
+        const now = Date.now();
+        if (lastX !== null) {
+          const dt = Math.max(now - lastT, 1);
+          const dx = e.clientX - lastX;
+          const dy = e.clientY - lastY;
+          const speed = Math.sqrt(dx * dx + dy * dy) / dt * 10; // scale to m/s²-like units
+          smoothed = smoothed * 0.7 + speed * 0.3; // exponential smoothing
+
+          document.getElementById('fallValue').textContent = smoothed.toFixed(1);
+
+          // Any movement = patient is active
+          if (smoothed > 0.5) lastMotionTime = Date.now();
+
+          // Fast shake (rapid mouse movement) = simulated fall
+          if (smoothed > 30 && fallDetectionEnabled) {
+            shakeCount++;
+            document.getElementById('shakeValue').textContent = shakeCount;
+            document.getElementById('shakeDot').className = 'indicator-dot warn';
+            document.getElementById('tileFall').classList.add('alerting');
+            setTimeout(() => document.getElementById('tileFall').classList.remove('alerting'), 2000);
+            if (smoothed > 40) triggerAlert('fall');
+          }
+        }
+        lastX = e.clientX; lastY = e.clientY; lastT = now;
+      });
+
+      // Touch devices without DeviceMotion (Android browser)
+      document.addEventListener('touchmove', e => {
+        lastMotionTime = Date.now();
+        document.getElementById('fallValue').textContent = '~moving';
+      }, { passive: true });
+    }
+
+    function enableSensors() {
+
+      if (typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function') {
+
+        DeviceMotionEvent.requestPermission()
+          .then(response => {
+            if (response === 'granted') {
+              listenMotion();
+              alert("Sensors enabled!");
+            } else {
+              alert("Permission denied");
+            }
+          });
+
+      } else {
+        // Android / normal case
+        listenMotion();
+        alert("Sensors enabled!");
+      }
+    }
+
+    /* ════════════════════════════════════
+       INACTIVITY MONITOR
+    ════════════════════════════════════ */
+    setInterval(() => {
+      if (!inactivityEnabled) { inactiveSeconds = 0; return; }
+
+      const elapsed = Math.floor((Date.now() - lastMotionTime) / 1000);
+      inactiveSeconds = elapsed;
+      document.getElementById('inactiveValue').textContent = elapsed;
+
+      const thresholdSecs = inactivityThresholdMins * 60;
+      const pct = Math.max(0, 100 - (elapsed / thresholdSecs * 100));
+      const bar = document.getElementById('inactivityBar');
+      bar.style.width = pct + '%';
+
+      if (pct < 25) bar.classList.add('danger');
+      else bar.classList.remove('danger');
+
+      const remaining = Math.max(0, thresholdSecs - elapsed);
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      document.getElementById('inactivityText').textContent =
+        elapsed < thresholdSecs
+          ? `Alert in ${mins}m ${secs}s if no movement detected`
+          : 'Inactivity threshold exceeded';
+
+      document.getElementById('tileInactive').classList.toggle('alerting', elapsed >= thresholdSecs);
+      document.getElementById('inactiveDot').className = elapsed > 30 ? 'indicator-dot warn' : 'indicator-dot on';
+
+      if (elapsed >= thresholdSecs && !alertPending && inactivityEnabled) {
+        triggerAlert('inactive');
+      }
+
+      updateStatus();
+    }, 1000);
+
+    /* ════════════════════════════════════
+       HEARTBEAT (app alive ping)
+    ════════════════════════════════════ */
+    setInterval(() => {
+      heartbeatCount++;
+      // Heartbeat tile removed from UI — just keep counter alive
+    }, 5000);
+
+    /* ════════════════════════════════════
+       STATUS UPDATE
+    ════════════════════════════════════ */
+    function updateStatus() {
+      const hero = document.querySelector('.status-hero');
+      const label = document.getElementById('statusText') || document.getElementById('statusLabel');
+      const sub = document.getElementById('statusSub');
+
+      const thresholdSecs = inactivityThresholdMins * 60;
+      const warningAt = thresholdSecs * 0.75;
+
+      if (!hero || !label || !sub) return;
+
+      // Remove old state classes from hero
+      hero.classList.remove('safe', 'warning', 'danger');
+
+      if (alertPending) {
+        hero.classList.add('danger');
+        label.className = 'status-label danger';
+        label.textContent = '🚨 ALERT TRIGGERED';
+        sub.textContent = 'Sending emergency notification…';
+      } else if (inactiveSeconds > warningAt) {
+        hero.classList.add('warning');
+        label.className = 'status-label warning';
+        label.textContent = '⚠️ Low Activity';
+        sub.textContent = `No movement for ${Math.floor(inactiveSeconds / 60)}m ${inactiveSeconds % 60}s`;
+      } else {
+        hero.classList.add('safe');
+        label.className = 'status-label safe';
+        label.textContent = '🟢 All Clear';
+        sub.textContent = 'Monitoring active · No alerts detected';
+      }
+    }
+
+    /* ════════════════════════════════════
+       ALERT TRIGGER + 10-SECOND CANCEL WINDOW
+    ════════════════════════════════════ */
+    function playCountdownBeep(isUrgent) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!window._audioCtx) window._audioCtx = new AudioCtx();
+        if (window._audioCtx.state === 'suspended') window._audioCtx.resume();
+        const now = window._audioCtx.currentTime;
+        const osc = window._audioCtx.createOscillator();
+        const gain = window._audioCtx.createGain();
+        osc.type = isUrgent ? 'sawtooth' : 'sine';
+        osc.frequency.setValueAtTime(isUrgent ? 880 : 520, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.connect(gain);
+        gain.connect(window._audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } catch (e) {}
+    }
+
+    function triggerAlert(type) {
+      if (alertPending) return;
+      alertPending = true;
+      alertType = type || 'manual';
+
+      const userRole = localStorage.getItem('role') || 'client';
+      const titles = {
+        fall: '⚠️ Fall Detected!',
+        inactive: '⏱ No Movement Detected',
+        manual: userRole === 'caretaker' ? '🚨 Emergency SOS Broadcast' : '🚨 Manual SOS Triggered'
+      };
+      const descs = {
+        fall: 'A sudden fall may have occurred. Sending alert in…',
+        inactive: `No phone movement for ${inactivityThresholdMins} minutes. Sending alert in…`,
+        manual: userRole === 'caretaker'
+          ? 'Broadcasting emergency alert to family & client in…'
+          : 'Manual emergency alert requested. Sending alert to your family in…'
+      };
+
+      const cancelToggle = document.getElementById('cancelWindowToggle');
+      const isCancelEnabled = cancelToggle ? cancelToggle.checked : true;
+
+      updateStatus();
+
+      if (isCancelEnabled) {
+        const iconEl = document.getElementById('overlayIcon');
+        const titleEl = document.getElementById('overlayTitle');
+        const descEl = document.getElementById('overlayDesc');
+        const cntEl = document.getElementById('overlayCountdown');
+        const ov = document.getElementById('cancelOverlay');
+
+        if (iconEl) iconEl.textContent = type === 'fall' ? '⚠️' : type === 'inactive' ? '⏱' : '🚨';
+        if (titleEl) titleEl.textContent = titles[type] || '🚨 Emergency Alert';
+        if (descEl) descEl.textContent = descs[type] || 'Sending emergency alert in…';
+        if (cntEl) cntEl.textContent = '10';
+
+        if (ov) {
+          ov.classList.add('show');
+          ov.style.display = 'flex';
+        }
+
+        cancelCountdown = 10;
+        clearInterval(cancelTimer);
+        playCountdownBeep(false);
+
+        cancelTimer = setInterval(() => {
+          cancelCountdown--;
+          if (cntEl) cntEl.textContent = cancelCountdown;
+          if (cancelCountdown > 0) {
+            playCountdownBeep(cancelCountdown <= 3);
+          } else {
+            clearInterval(cancelTimer);
+            if (ov) {
+              ov.classList.remove('show');
+              ov.style.display = 'none';
+            }
+            sendAlert(type);
+          }
+        }, 1000);
+      } else {
+        sendAlert(type);
+      }
+    }
+
+    function cancelAlert() {
+      clearInterval(cancelTimer);
+      alertPending = false;
+      lastMotionTime = Date.now(); // reset inactivity
+      inactiveSeconds = 0;
+      const ov = document.getElementById('cancelOverlay');
+      if (ov) {
+        ov.classList.remove('show');
+        ov.style.display = 'none';
+      }
+      updateStatus();
+      addLogEntry('safe', "✋ Alert cancelled — user confirmed OK");
+      showToast("✅ Alert cancelled. Glad you're OK!");
+    }
+
+    function sendNow() {
+      clearInterval(cancelTimer);
+      const ov = document.getElementById('cancelOverlay');
+      if (ov) {
+        ov.classList.remove('show');
+        ov.style.display = 'none';
+      }
+      sendAlert(alertType || 'manual');
+    }
+
+    function sendAlert(type) {
+      alertPending = false;
+      updateStatus();
+
+      const labels = { fall: 'Fall Detected', inactive: 'Inactivity Alert', manual: 'Manual SOS' };
+      addLogEntry(type, labels[type] || 'Emergency Alert');
+
+      let dispatched = false;
+      const doSend = (lat, lng) => {
+        if (dispatched) return;
+        dispatched = true;
+        sendToServer(lat, lng, type);
+      };
+
+      // Fast dispatch fallback so slow GPS never delays sending
+      const fallbackTimer = setTimeout(() => doSend(null, null), 1500);
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            clearTimeout(fallbackTimer);
+            doSend(pos.coords.latitude, pos.coords.longitude);
+          },
+          () => {
+            clearTimeout(fallbackTimer);
+            doSend(null, null);
+          },
+          { timeout: 1500, maximumAge: 60000 }
+        );
+      } else {
+        clearTimeout(fallbackTimer);
+        doSend(null, null);
+      }
+    }
+
+    async function sendToServer(lat, lng, type) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showToast('⚠ Please log in to trigger an emergency alert', true);
+        alertPending = false;
+        updateStatus();
+        return;
+      }
+      const payload = { latitude: lat, longitude: lng, alertType: type };
+
+      try {
+        const res = await fetch(`${(window.APP_CONFIG && window.APP_CONFIG.API_BASE) || '/api/v1'}/emergency/trigger`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+
+        const resData = await res.json();
+        if (!res.ok) {
+          throw new Error(resData.message || 'Failed to dispatch alert');
+        }
+
+        showToast('🚨 Emergency alert sent to family & contacts!', false, 4000);
+        if (typeof loadAlertHistory === 'function') loadAlertHistory();
+
+        // Immediately show the emergency siren modal on this device!
+        if (resData && resData.data && typeof showActiveEmergencyModal === 'function') {
+          showActiveEmergencyModal(resData.data);
+        }
+      } catch (err) {
+        console.error('Send alert error:', err);
+        showToast(`⚠ ${err.message || 'Could not reach server'}`, true, 5000);
+      } finally {
+        alertPending = false;
+        updateStatus();
+      }
+
+      // Reset inactivity after alert
+      lastMotionTime = Date.now();
+      inactiveSeconds = 0;
+    }
+
+    /* ════════════════════════════════════
+       ALERT RESOLUTION & LOG
+    ════════════════════════════════════ */
+    async function resolveCurrentAlert(alertId) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const res = await fetch(
+          `${(window.APP_CONFIG && window.APP_CONFIG.API_BASE) || '/api/v1'}/emergency/alerts/${alertId}/resolve`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ notes: 'Acknowledged and resolved' })
+          }
+        );
+        if (res.ok) {
+          showToast('✅ Emergency alert marked as resolved!');
+          if (typeof hideActiveEmergencyModal === 'function') {
+            hideActiveEmergencyModal(true);
+          }
+          try {
+            sessionStorage.removeItem('dismissed_emergency_' + alertId);
+          } catch(e) {}
+          loadAlertHistory();
+        } else {
+          showToast('⚠ Failed to resolve alert', true);
+        }
+      } catch (e) {
+        showToast('⚠ Error resolving alert', true);
+      }
+    }
+
+    function addLogEntry(type, label) {
+      const iconMap = { fall: '⚠️', inactive: '⏱', manual: '🚨', safe: '✅' };
+      const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+      alertLog.unshift({ type, label, time: now });
+      if (alertLog.length > 20) alertLog.pop();
+
+      renderAlertLog();
+    }
+
+    function renderAlertLog() {
+      const iconMap = { fall: '⚠️', inactive: '⏱', manual: '🚨', safe: '✅', other: '📋' };
+      const logEl = document.getElementById('alertLog');
+      if (!alertLog.length) {
+        logEl.innerHTML = '<p style="font-size:13.5px;color:var(--text-muted);">No alerts recorded yet.</p>';
+        return;
+      }
+      logEl.innerHTML = alertLog.map(e => `
+    <div class="log-entry" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="log-entry-icon ${e.type}">
+          ${iconMap[e.type] || '📋'}
+        </div>
+        <div class="log-entry-info">
+          <div class="log-entry-type" style="font-weight:600;font-size:14px;">${e.label}</div>
+          <div class="log-entry-time" style="font-size:12px;color:var(--text-muted);">${e.time}</div>
+        </div>
+      </div>
+      ${e.status === 'triggered' && e.id ? `
+        <button onclick="resolveCurrentAlert('${e.id}')" style="padding:6px 12px;background:var(--sage-dark);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+          Resolve
+        </button>
+      ` : ''}
+    </div>
+  `).join('');
+    }
+
+    /* Load persisted alert history from the backend */
+    async function loadAlertHistory() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const res = await fetch(
+          `${(window.APP_CONFIG && window.APP_CONFIG.API_BASE) || '/api/v1'}/emergency/alerts?limit=20`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const alerts = data.data || [];
+
+        // Check for active triggered alert
+        const activeAlert = alerts.find(a => a.status === 'triggered');
+        const bannerEl = document.getElementById('activeAlertBanner') || document.getElementById('childActiveAlertBanner');
+        if (bannerEl) {
+          if (activeAlert) {
+            bannerEl.style.display = 'block';
+            const alertTypeStr = activeAlert.alertType === 'fall' ? 'Fall Detected' : (activeAlert.alertType === 'inactive' ? 'Inactivity Alert' : 'Manual SOS');
+            const who = activeAlert.triggeredByName 
+              ? `${activeAlert.triggeredByName} (${activeAlert.triggeredByRole === 'caretaker' ? 'Caretaker' : 'Client'})` 
+              : (activeAlert.triggeredByRole === 'caretaker' ? 'Caretaker' : 'Client');
+            document.getElementById('activeAlertDesc').textContent = `🚨 ${alertTypeStr} triggered by ${who} at ${new Date(activeAlert.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Check immediately!`;
+
+            const locBtn = document.getElementById('activeAlertLocationBtn');
+            if (activeAlert.latitude && activeAlert.longitude) {
+              locBtn.style.display = 'inline-flex';
+              locBtn.href = `https://www.google.com/maps?q=${activeAlert.latitude},${activeAlert.longitude}`;
+            } else {
+              locBtn.style.display = 'none';
+            }
+
+            const isCaretaker = (localStorage.getItem('role') || 'client') === 'caretaker';
+            const bannerCallBtn = document.getElementById('activeAlertCallBtn');
+            if (bannerCallBtn) {
+              bannerCallBtn.textContent = isCaretaker ? '📹 Call Client Now' : '📹 Call Caretaker Now';
+            }
+
+            const resolveBtn = document.getElementById('activeAlertResolveBtn');
+            if (resolveBtn) {
+              resolveBtn.onclick = () => resolveCurrentAlert(activeAlert._id);
+            }
+          } else {
+            bannerEl.style.display = 'none';
+          }
+        }
+
+        // Merge backend alerts into the local log array (prepend, newest first)
+        const typeLabels = { fall: 'Fall Detected', inactive: 'Inactivity Alert', manual: 'Manual SOS', other: 'Emergency Alert' };
+        const statusLabels = { resolved: ' ✓ Resolved', cancelled: ' ✓ Cancelled', 'false-alarm': ' (False Alarm)', triggered: ' 🚨 ACTIVE' };
+
+        const backendEntries = alerts.map(a => ({
+          id: a._id,
+          status: a.status,
+          type: a.alertType || 'other',
+          label: (typeLabels[a.alertType] || 'Emergency Alert') + (statusLabels[a.status] || ''),
+          time: new Date(a.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+        }));
+
+        // Replace local log with backend data (backend is source of truth)
+        alertLog = backendEntries;
+        renderAlertLog();
+      } catch (e) {
+        console.error('Could not load alert history', e);
+      }
+    }
+
+    /* ════════════════════════════════════
+       SETTINGS TOGGLES
+    ════════════════════════════════════ */
+    function toggleFall(el) {
+      fallEnabled = fallDetectionEnabled = el.checked;
+      showToast(el.checked ? '✅ Fall detection enabled' : '⚠ Fall detection disabled', !el.checked);
+    }
+    function toggleInactivity(el) {
+      inactivityEnabled = el.checked;
+      document.getElementById('inactivityRangeWrap').style.opacity = el.checked ? '1' : '0.4';
+      showToast(el.checked ? '✅ Inactivity monitoring enabled' : '⚠ Inactivity monitoring disabled', !el.checked);
+      if (el.checked) lastMotionTime = Date.now();
+    }
+    function updateThreshold(val) {
+      inactivityThresholdMins = parseInt(val);
+      document.getElementById('thresholdLabel').textContent = val + ' min';
       lastMotionTime = Date.now();
     }
 
-    // shake detection
-    if (magnitude > 18) {
-      shakeCount++;
-      document.getElementById('shakeValue').textContent = shakeCount;
-
-      if (magnitude > 18 && fallDetectionEnabled) {
-        triggerAlert('fall');
-      }
+    /* ════════════════════════════════════
+       TOAST
+    ════════════════════════════════════ */
+    function showToast(msg, isError = false, dur = 3000) {
+      const t = document.getElementById('toast');
+      t.style.background = isError ? '#FDEAEA' : '#EAF5EE';
+      t.style.color = isError ? '#C0392B' : '#2E7D52';
+      t.style.border = isError ? '1px solid #F5CECE' : '1px solid #BADDCA';
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(t._t);
+      t._t = setTimeout(() => { t.style.opacity = '0'; }, dur);
     }
 
-  });
-}
-// Desktop fallback — tracks real mouse/pointer speed as "acceleration"
-function useMockMotion() {
-  document.getElementById('fallDot').className = 'indicator-dot on';
-  document.getElementById('fallValue').textContent = '0.0';
-
-  let lastX = null, lastY = null, lastT = null;
-  let smoothed = 0;
-
-  document.addEventListener('mousemove', e => {
-    const now = Date.now();
-    if (lastX !== null) {
-      const dt = Math.max(now - lastT, 1);
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-      const speed = Math.sqrt(dx*dx + dy*dy) / dt * 10; // scale to m/s²-like units
-      smoothed = smoothed * 0.7 + speed * 0.3; // exponential smoothing
-
-      document.getElementById('fallValue').textContent = smoothed.toFixed(1);
-
-      // Any movement = patient is active
-      if (smoothed > 0.5) lastMotionTime = Date.now();
-
-      // Fast shake (rapid mouse movement) = simulated fall
-      if (smoothed > 30 && fallDetectionEnabled) {
-        shakeCount++;
-        document.getElementById('shakeValue').textContent = shakeCount;
-        document.getElementById('shakeDot').className = 'indicator-dot warn';
-        document.getElementById('tileFall').classList.add('alerting');
-        setTimeout(() => document.getElementById('tileFall').classList.remove('alerting'), 2000);
-        if (smoothed > 40) triggerAlert('fall');
+    /* ════════════════════════════════════
+       BOOT
+    ════════════════════════════════════ */
+    window.addEventListener('DOMContentLoaded', () => {
+      // Role-specific setup
+      const userRole = localStorage.getItem('role') || 'client';
+      const callBtn = document.getElementById('activeAlertCallBtn');
+      const sosTitle = document.getElementById('sosCardTitle');
+      const sosDesc = document.getElementById('sosCardDesc');
+      if (userRole === 'client') {
+        if (sosTitle) sosTitle.textContent = 'Manual SOS Alert';
+        if (sosDesc) sosDesc.textContent = 'Press once to trigger emergency. A 10-second cancel window will appear before sending to your family.';
+        if (callBtn) callBtn.textContent = '📹 Call Caretaker Now';
+      } else {
+        if (sosTitle) sosTitle.textContent = 'Emergency SOS Broadcast';
+        if (sosDesc) sosDesc.textContent = 'Trigger an emergency broadcast for your client and family. A 10-second cancel window will appear before dispatching.';
+        if (callBtn) callBtn.textContent = '📹 Call Client Now';
       }
-    }
-    lastX = e.clientX; lastY = e.clientY; lastT = now;
-  });
 
-  // Touch devices without DeviceMotion (Android browser)
-  document.addEventListener('touchmove', e => {
-    lastMotionTime = Date.now();
-    document.getElementById('fallValue').textContent = '~moving';
-  }, { passive: true });
-}
+      // Load persisted alert history from backend on page open and poll every 5s
+      loadAlertHistory();
+      setInterval(loadAlertHistory, 5000);
 
-function enableSensors() {
+      /*startFallDetection();*/
 
-  if (typeof DeviceMotionEvent !== 'undefined' &&
-      typeof DeviceMotionEvent.requestPermission === 'function') {
+      // Also listen for device shake via orientation (fallback)
+      let lastX, lastY, lastZ, lastShakeTime = 0;
+      window.addEventListener('devicemotion', e => {
+        const a = e.accelerationIncludingGravity;
+        if (!a) return;
+        const now = Date.now();
+        if (now - lastShakeTime < 500) return;
 
-    DeviceMotionEvent.requestPermission()
-      .then(response => {
-        if (response === 'granted') {
-          listenMotion();
-          alert("Sensors enabled!");
-        } else {
-          alert("Permission denied");
+        if (lastX !== undefined) {
+          const delta = Math.abs(a.x - lastX) + Math.abs(a.y - lastY) + Math.abs(a.z - lastZ);
+          if (delta > 30) {
+            lastShakeTime = now;
+            lastMotionTime = now;
+          }
         }
+        lastX = a.x; lastY = a.y; lastZ = a.z;
       });
-
-  } else {
-    // Android / normal case
-    listenMotion();
-    alert("Sensors enabled!");
-  }
-}
-
-/* ════════════════════════════════════
-   INACTIVITY MONITOR
-════════════════════════════════════ */
-setInterval(() => {
-  if (!inactivityEnabled) { inactiveSeconds = 0; return; }
-
-  const elapsed   = Math.floor((Date.now() - lastMotionTime) / 1000);
-  inactiveSeconds = elapsed;
-  document.getElementById('inactiveValue').textContent = elapsed;
-
-  const thresholdSecs = inactivityThresholdMins * 60;
-  const pct = Math.max(0, 100 - (elapsed / thresholdSecs * 100));
-  const bar = document.getElementById('inactivityBar');
-  bar.style.width = pct + '%';
-
-  if (pct < 25) bar.classList.add('danger');
-  else          bar.classList.remove('danger');
-
-  const remaining = Math.max(0, thresholdSecs - elapsed);
-  const mins = Math.floor(remaining / 60);
-  const secs = remaining % 60;
-  document.getElementById('inactivityText').textContent =
-    elapsed < thresholdSecs
-      ? `Alert in ${mins}m ${secs}s if no movement detected`
-      : 'Inactivity threshold exceeded';
-
-  document.getElementById('tileInactive').classList.toggle('alerting', elapsed >= thresholdSecs);
-  document.getElementById('inactiveDot').className = elapsed > 30 ? 'indicator-dot warn' : 'indicator-dot on';
-
-  if (elapsed >= thresholdSecs && !alertPending && inactivityEnabled) {
-    triggerAlert('inactive');
-  }
-
-  updateStatus();
-}, 1000);
-
-/* ════════════════════════════════════
-   HEARTBEAT (app alive ping)
-════════════════════════════════════ */
-setInterval(() => {
-  heartbeatCount++;
-  // Heartbeat tile removed from UI — just keep counter alive
-}, 5000);
-
-/* ════════════════════════════════════
-   STATUS UPDATE
-════════════════════════════════════ */
-function updateStatus() {
-  const hero  = document.querySelector('.status-hero');
-  const label = document.getElementById('statusLabel');
-  const sub   = document.getElementById('statusSub');
-
-  const thresholdSecs = inactivityThresholdMins * 60;
-  const warningAt     = thresholdSecs * 0.75;
-
-  // Remove old state classes from hero
-  hero.classList.remove('safe','warning','danger');
-
-  if (alertPending) {
-    hero.classList.add('danger');
-    label.className = 'status-label danger';
-    label.textContent = '🚨 ALERT TRIGGERED';
-    sub.textContent = 'Sending emergency notification…';
-  } else if (inactiveSeconds > warningAt) {
-    hero.classList.add('warning');
-    label.className = 'status-label warning';
-    label.textContent = '⚠️ Low Activity';
-    sub.textContent = `No movement for ${Math.floor(inactiveSeconds/60)}m ${inactiveSeconds%60}s`;
-  } else {
-    hero.classList.add('safe');
-    label.className = 'status-label safe';
-    label.textContent = '🟢 All Clear';
-    sub.textContent = 'Monitoring active · No alerts detected';
-  }
-}
-
-/* ════════════════════════════════════
-   ALERT TRIGGER + CANCEL WINDOW
-════════════════════════════════════ */
-function triggerAlert(type) {
-  if (alertPending) return;
-  alertPending = true;
-  alertType    = type;
-
-  const titles = {
-    fall:     '⚠️ Fall Detected!',
-    inactive: '⏱ No Movement Detected',
-    manual:   '🚨 Manual SOS'
-  };
-  const descs = {
-    fall:     'A sudden fall may have occurred. Sending alert in…',
-    inactive: `No phone movement for ${inactivityThresholdMins} minutes. Sending alert in…`,
-    manual:   'Manual emergency alert triggered. Sending in…'
-  };
-
-  if (cancelWindowEnabled) {
-    document.getElementById('overlayIcon').textContent    = type === 'fall' ? '⚠️' : type === 'inactive' ? '⏱' : '🚨';
-    document.getElementById('overlayTitle').textContent   = titles[type];
-    document.getElementById('overlayDesc').textContent    = descs[type];
-    document.getElementById('overlayCountdown').textContent = 10;
-    document.getElementById('cancelOverlay').classList.add('show');
-
-    cancelCountdown = 10;
-    cancelTimer = setInterval(() => {
-      cancelCountdown--;
-      document.getElementById('overlayCountdown').textContent = cancelCountdown;
-      if (cancelCountdown <= 0) {
-        clearInterval(cancelTimer);
-        document.getElementById('cancelOverlay').classList.remove('show');
-        sendAlert(type);
-      }
-    }, 1000);
-  } else {
-    sendAlert(type);
-  }
-}
-
-function cancelAlert() {
-  clearInterval(cancelTimer);
-  alertPending = false;
-  lastMotionTime = Date.now(); // reset inactivity
-  inactiveSeconds = 0;
-  document.getElementById('cancelOverlay').classList.remove('show');
-  updateStatus();
-  addLogEntry('safe', "✋ Alert cancelled — user confirmed OK");
-  showToast("✅ Alert cancelled. Glad you're OK!");
-}
-
-function sendNow() {
-  clearInterval(cancelTimer);
-  document.getElementById('cancelOverlay').classList.remove('show');
-  sendAlert(alertType);
-}
-
-function sendAlert(type) {
-  alertPending = false;
-  updateStatus();
-
-  const labels = { fall: 'Fall Detected', inactive: 'Inactivity Alert', manual: 'Manual SOS' };
-  addLogEntry(type, labels[type] || 'Emergency Alert');
-
-  if (!navigator.geolocation) {
-    sendToServer(null, null, type);
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    pos  => sendToServer(pos.coords.latitude, pos.coords.longitude, type),
-    _err => sendToServer(null, null, type)
-  );
-}
-
-function sendToServer(lat, lng, type) {
-  const token = localStorage.getItem('token');
-  const payload = { 
-    latitude: lat, 
-    longitude: lng, 
-    alertType: type 
-  };
-
-  fetch('/api/v1/emergency/trigger', {
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(() => showToast('🚨 Emergency alert sent to all contacts!', false, 5000))
-  .catch(() => showToast('⚠ Could not reach server — alert logged locally.', true, 5000));
-
-  // Reset inactivity after alert
-  lastMotionTime = Date.now();
-  inactiveSeconds = 0;
-}
-
-/* ════════════════════════════════════
-   ALERT LOG
-════════════════════════════════════ */
-function addLogEntry(type, label) {
-  const iconMap  = { fall: '⚠️', inactive: '⏱', manual: '🚨', safe: '✅' };
-  const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
-  alertLog.unshift({ type, label, time: now });
-  if (alertLog.length > 20) alertLog.pop();
-
-  const logEl = document.getElementById('alertLog');
-  logEl.innerHTML = alertLog.map(e => `
-    <div class="log-entry">
-      <div class="log-entry-icon ${e.type}">
-        ${iconMap[e.type] || '📋'}
-      </div>
-      <div class="log-entry-info">
-        <div class="log-entry-type">${e.label}</div>
-        <div class="log-entry-time">${e.time}</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-/* ════════════════════════════════════
-   SETTINGS TOGGLES
-════════════════════════════════════ */
-function toggleFall(el) {
-  fallEnabled = fallDetectionEnabled = el.checked;
-  showToast(el.checked ? '✅ Fall detection enabled' : '⚠ Fall detection disabled', !el.checked);
-}
-function toggleInactivity(el) {
-  inactivityEnabled = el.checked;
-  document.getElementById('inactivityRangeWrap').style.opacity = el.checked ? '1' : '0.4';
-  showToast(el.checked ? '✅ Inactivity monitoring enabled' : '⚠ Inactivity monitoring disabled', !el.checked);
-  if (el.checked) lastMotionTime = Date.now();
-}
-function updateThreshold(val) {
-  inactivityThresholdMins = parseInt(val);
-  document.getElementById('thresholdLabel').textContent = val + ' min';
-  lastMotionTime = Date.now();
-}
-
-/* ════════════════════════════════════
-   TOAST
-════════════════════════════════════ */
-function showToast(msg, isError = false, dur = 3000) {
-  const t = document.getElementById('toast');
-  t.style.background = isError ? '#FDEAEA' : '#EAF5EE';
-  t.style.color       = isError ? '#C0392B' : '#2E7D52';
-  t.style.border      = isError ? '1px solid #F5CECE' : '1px solid #BADDCA';
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(t._t);
-  t._t = setTimeout(() => { t.style.opacity = '0'; }, dur);
-}
-
-/* ════════════════════════════════════
-   BOOT
-════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
-  /*startFallDetection();*/
-
-  // Also listen for device shake via orientation (fallback)
-  let lastX, lastY, lastZ, lastShakeTime = 0;
-  window.addEventListener('devicemotion', e => {
-    const a = e.accelerationIncludingGravity;
-    if (!a) return;
-    const now = Date.now();
-    if (now - lastShakeTime < 500) return;
-
-    if (lastX !== undefined) {
-      const delta = Math.abs(a.x - lastX) + Math.abs(a.y - lastY) + Math.abs(a.z - lastZ);
-      if (delta > 30) {
-        lastShakeTime = now;
-        lastMotionTime = now;
-      }
-    }
-    lastX = a.x; lastY = a.y; lastZ = a.z;
-  });
-});
-</script>
+    });
+  </script>
 
 </body>
+
 </html>

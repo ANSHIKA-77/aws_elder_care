@@ -1,28 +1,39 @@
-// controllers/medication.controller.js
 const medicationService = require('../services/medication.service');
+const { resolveTargetUser, resolveGroupUserIds } = require('../middleware/resolveTargetUser');
 
 /**
  * @route   GET /api/v1/medications
- * @desc    Get all medications for logged-in user
- * @access  Private (requires JWT)
+ * @desc    Get all medications for user or family group.
+ *          Both caretaker and client see all group medications.
+ *          Pass ?clientId=xxx to filter to a specific client.
+ * @access  Private
  */
 exports.getAllMedications = async (req, res, next) => {
     try {
-        // req.user is set by auth middleware (contains { id, role })
-        const userId = req.user.id;
-        
-        // Optional query params for filtering
+        const userIds = await resolveGroupUserIds(req);
         const { activeOnly } = req.query;
-        
-        const medications = await medicationService.getUserMedications(userId, {
+
+        const medications = await medicationService.getUserMedications(userIds, {
             activeOnly: activeOnly === 'true'
         });
-        
-        res.json({
-            success: true,
-            count: medications.length,
-            data: medications
-        });
+
+        res.json({ success: true, count: medications.length, data: medications });
+    } catch (err) {
+        next(err);
+    }
+};
+
+/**
+ * @route   GET /api/v1/medications/stats/today
+ * @desc    Today's medication stats. Both caretaker and client see family group stats.
+ *          Pass ?clientId=xxx to filter to one client.
+ * @access  Private
+ */
+exports.getTodayStats = async (req, res, next) => {
+    try {
+        const userIds = await resolveGroupUserIds(req);
+        const stats = await medicationService.getTodayStats(userIds);
+        res.json({ success: true, data: stats });
     } catch (err) {
         next(err);
     }
@@ -30,27 +41,18 @@ exports.getAllMedications = async (req, res, next) => {
 
 /**
  * @route   GET /api/v1/medications/:id
- * @desc    Get single medication by ID
+ * @desc    Get single medication by ID (group-scoped)
  * @access  Private
  */
 exports.getMedicationById = async (req, res, next) => {
     try {
-        const userId = req.user.id;
-        const medId = req.params.id;
-        
-        const medication = await medicationService.getMedicationById(medId, userId);
-        
+        const userIds = await resolveGroupUserIds(req);
+        const medication = await medicationService.getMedicationById(req.params.id, userIds);
+
         if (!medication) {
-            return res.status(404).json({
-                success: false,
-                message: 'Medication not found'
-            });
+            return res.status(404).json({ success: false, message: 'Medication not found' });
         }
-        
-        res.json({
-            success: true,
-            data: medication
-        });
+        res.json({ success: true, data: medication });
     } catch (err) {
         next(err);
     }
@@ -58,26 +60,36 @@ exports.getMedicationById = async (req, res, next) => {
 
 /**
  * @route   POST /api/v1/medications
- * @desc    Create new medication
+ * @desc    Create new medication.
+ *          Both caretaker and client can add medications.
+ *          Caretakers default to group's primary client or can pass ?clientId=xxx.
  * @access  Private
  */
 exports.createMedication = async (req, res, next) => {
     try {
-        const userId = req.user.id;
-        
-        // Extract medication data from request body
+        const targetUserId = await resolveTargetUser(req);
+
         const medData = {
-            userId,
+            userId: targetUserId,
+            groupId: req.user.groupId || null,
             name: req.body.name,
-            dosage: req.body.dosage,
-            frequency: req.body.frequency,
-            timeOfDay: req.body.timeOfDay,
-            reminderTime: req.body.reminderTime,
-            notes: req.body.notes
+            dosage: req.body.dosage || '1 tablet',
+            frequency: req.body.frequency || 'once-daily',
+            timeOfDay: req.body.timeOfDay || 'morning',
+            date: req.body.date ? new Date(req.body.date) : new Date(),
+            startDate: req.body.startDate ? new Date(req.body.startDate) : (req.body.date ? new Date(req.body.date) : new Date()),
+            endDate: req.body.endDate ? new Date(req.body.endDate) : null,
+            time: req.body.time || '08:00',
+            reminder: req.body.reminder !== undefined ? req.body.reminder : true,
+            reminderTime: req.body.reminderTime || req.body.time || null,
+            instructions: req.body.instructions || req.body.notes || '',
+            notes: req.body.notes || req.body.instructions || '',
+            createdBy: req.user.id,
+            createdByRole: req.user.role || 'caretaker'
         };
-        
+
         const medication = await medicationService.createMedication(medData);
-        
+
         res.status(201).json({
             success: true,
             message: 'Medication added successfully',
@@ -90,28 +102,18 @@ exports.createMedication = async (req, res, next) => {
 
 /**
  * @route   PATCH /api/v1/medications/:id/mark-taken
- * @desc    Mark medication as taken for today
+ * @desc    Mark medication as taken. Both caretaker and client can mark.
  * @access  Private
  */
 exports.markAsTaken = async (req, res, next) => {
     try {
-        const userId = req.user.id;
-        const medId = req.params.id;
-        
-        const medication = await medicationService.markMedicationAsTaken(medId, userId);
-        
+        const userIds = await resolveGroupUserIds(req);
+        const medication = await medicationService.markMedicationAsTaken(req.params.id, userIds);
+
         if (!medication) {
-            return res.status(404).json({
-                success: false,
-                message: 'Medication not found'
-            });
+            return res.status(404).json({ success: false, message: 'Medication not found' });
         }
-        
-        res.json({
-            success: true,
-            message: 'Medication marked as taken',
-            data: medication
-        });
+        res.json({ success: true, message: 'Medication marked as taken', data: medication });
     } catch (err) {
         next(err);
     }
@@ -119,28 +121,18 @@ exports.markAsTaken = async (req, res, next) => {
 
 /**
  * @route   PATCH /api/v1/medications/:id/unmark
- * @desc    Unmark medication (undo taken status)
+ * @desc    Unmark medication. Both caretaker and client can unmark.
  * @access  Private
  */
 exports.unmarkAsTaken = async (req, res, next) => {
     try {
-        const userId = req.user.id;
-        const medId = req.params.id;
-        
-        const medication = await medicationService.unmarkMedication(medId, userId);
-        
+        const userIds = await resolveGroupUserIds(req);
+        const medication = await medicationService.unmarkMedication(req.params.id, userIds);
+
         if (!medication) {
-            return res.status(404).json({
-                success: false,
-                message: 'Medication not found'
-            });
+            return res.status(404).json({ success: false, message: 'Medication not found' });
         }
-        
-        res.json({
-            success: true,
-            message: 'Medication unmarked',
-            data: medication
-        });
+        res.json({ success: true, message: 'Medication unmarked', data: medication });
     } catch (err) {
         next(err);
     }
@@ -148,38 +140,25 @@ exports.unmarkAsTaken = async (req, res, next) => {
 
 /**
  * @route   PUT /api/v1/medications/:id
- * @desc    Update medication details
+ * @desc    Update medication details. Both caretaker and client can update.
  * @access  Private
  */
 exports.updateMedication = async (req, res, next) => {
     try {
-        const userId = req.user.id;
-        const medId = req.params.id;
-        
-        // Only update fields that are provided
+        const userIds = await resolveGroupUserIds(req);
+
         const updates = {};
-        const allowedFields = ['name', 'dosage', 'frequency', 'timeOfDay', 'reminderTime', 'notes', 'isActive'];
-        
+        const allowedFields = ['name', 'dosage', 'frequency', 'timeOfDay', 'date', 'startDate', 'endDate', 'time', 'reminder', 'reminderTime', 'instructions', 'notes', 'isActive'];
         allowedFields.forEach(field => {
-            if (req.body[field] !== undefined) {
-                updates[field] = req.body[field];
-            }
+            if (req.body[field] !== undefined) updates[field] = req.body[field];
         });
-        
-        const medication = await medicationService.updateMedication(medId, userId, updates);
-        
+
+        const medication = await medicationService.updateMedication(req.params.id, userIds, updates);
+
         if (!medication) {
-            return res.status(404).json({
-                success: false,
-                message: 'Medication not found'
-            });
+            return res.status(404).json({ success: false, message: 'Medication not found' });
         }
-        
-        res.json({
-            success: true,
-            message: 'Medication updated successfully',
-            data: medication
-        });
+        res.json({ success: true, message: 'Medication updated successfully', data: medication });
     } catch (err) {
         next(err);
     }
@@ -187,48 +166,18 @@ exports.updateMedication = async (req, res, next) => {
 
 /**
  * @route   DELETE /api/v1/medications/:id
- * @desc    Soft delete medication (set isActive to false)
+ * @desc    Soft delete (isActive = false). Both caretaker and client can remove.
  * @access  Private
  */
 exports.deleteMedication = async (req, res, next) => {
     try {
-        const userId = req.user.id;
-        const medId = req.params.id;
-        
-        // Soft delete - keeps record but marks as inactive
-        const medication = await medicationService.deleteMedication(medId, userId);
-        
-        if (!medication) {
-            return res.status(404).json({
-                success: false,
-                message: 'Medication not found'
-            });
-        }
-        
-        res.json({
-            success: true,
-            message: 'Medication removed'
-        });
-    } catch (err) {
-        next(err);
-    }
-};
+        const userIds = await resolveGroupUserIds(req);
+        const medication = await medicationService.deleteMedication(req.params.id, userIds);
 
-/**
- * @route   GET /api/v1/medications/stats/today
- * @desc    Get today's medication statistics (taken vs total)
- * @access  Private
- */
-exports.getTodayStats = async (req, res, next) => {
-    try {
-        const userId = req.user.id;
-        
-        const stats = await medicationService.getTodayStats(userId);
-        
-        res.json({
-            success: true,
-            data: stats
-        });
+        if (!medication) {
+            return res.status(404).json({ success: false, message: 'Medication not found' });
+        }
+        res.json({ success: true, message: 'Medication removed' });
     } catch (err) {
         next(err);
     }
@@ -236,26 +185,16 @@ exports.getTodayStats = async (req, res, next) => {
 
 /**
  * @route   POST /api/v1/medications/reset-daily
- * @desc    Reset all takenToday flags (called by cron job at midnight)
+ * @desc    Reset all takenToday flags (cron job at midnight)
  * @access  Admin only
  */
 exports.resetDailyStatus = async (req, res, next) => {
     try {
-        // Only allow admin users to call this
         if (req.user.role !== 'admin') {
-            return res.status(403).json({
-                success: false,
-                message: 'Admin access required'
-            });
+            return res.status(403).json({ success: false, message: 'Admin access required' });
         }
-        
         const result = await medicationService.resetAllDailyStatus();
-        
-        res.json({
-            success: true,
-            message: 'Daily status reset completed',
-            data: { modifiedCount: result.modifiedCount }
-        });
+        res.json({ success: true, message: 'Daily status reset completed', data: { modifiedCount: result.modifiedCount } });
     } catch (err) {
         next(err);
     }

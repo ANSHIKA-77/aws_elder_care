@@ -57,6 +57,13 @@ router.post('/', appointmentController.createAppointment);
 router.put('/:id', appointmentController.updateAppointment);
 
 /**
+ * @route   PATCH /api/v1/appointments/:id/attend
+ * @desc    Mark appointment as attended
+ * @access  Private
+ */
+router.patch('/:id/attend', appointmentController.markAsAttended);
+
+/**
  * @route   PATCH /api/v1/appointments/:id/complete
  * @desc    Mark appointment as completed
  * @access  Private

@@ -12,16 +12,23 @@ const client = twilio(
  * Trigger emergency alert with full tracking
  */
 exports.triggerAlert = async (alertData) => {
-    const { userId, alertType, latitude, longitude, accuracy, deviceInfo, notes } = alertData;
+    const { userId, groupId, alertType, latitude, longitude, accuracy, deviceInfo, notes, triggeredByRole, triggeredByName } = alertData;
     
     // 1. Get user details for personalized message
-    const user = await User.findById(userId).select('name email');
-    const userName = user ? user.name : 'Unknown User';
+    const user = await User.findById(userId).select('name email role');
+    const userName = (triggeredByName && triggeredByName !== 'Client' && triggeredByName !== 'Caretaker')
+        ? triggeredByName
+        : (user ? user.name : (triggeredByName || 'Unknown User'));
+    const userRole = triggeredByRole || (user ? user.role : 'client');
+    const roleLabel = userRole === 'caretaker' ? 'Caretaker' : 'Client';
     
     // 2. Create emergency record
     const emergency = await Emergency.create({
         userId,
+        groupId: groupId || null,
         alertType: alertType || 'manual',
+        triggeredByRole: userRole,
+        triggeredByName: userName,
         latitude: latitude || null,
         longitude: longitude || null,
         accuracy: accuracy || null,
@@ -42,7 +49,7 @@ exports.triggerAlert = async (alertData) => {
         manual: '🆘 MANUAL SOS'
     }[alertType] || '🚨 EMERGENCY';
     
-    const messageBody = `${alertTypeText}!\n\nPatient: ${userName}\nNeeds immediate help.\n\nLocation: ${mapLink}\n\nTime: ${new Date().toLocaleString('en-IN')}`;
+    const messageBody = `${alertTypeText}!\n\nUser: ${userName} (${roleLabel})\nNeeds immediate assistance.\n\nLocation: ${mapLink}\n\nTime: ${new Date().toLocaleString('en-IN')}`;
     
     // 4. Get emergency contacts
     const contacts = [
@@ -51,52 +58,43 @@ exports.triggerAlert = async (alertData) => {
         process.env.EMERGENCY_CONTACT_3
     ].filter(Boolean);
     
-    // 5. Send SMS to all contacts
-    const smsPromises = contacts.map(async (number) => {
-        try {
-            const message = await client.messages.create({
-                body: messageBody,
-                from: process.env.TWILIO_PHONE,
-                to: number
-            });
-            
-            // Track successful send
-            emergency.smsContactsNotified.push({
-                phoneNumber: number,
-                sentAt: new Date(),
-                deliveryStatus: 'sent',
-                twilioSid: message.sid
-            });
-            
-            console.log(`✅ SMS sent to ${number} (SID: ${message.sid})`);
-            return { success: true, number, sid: message.sid };
-            
-        } catch (error) {
-            // Track failed send
-            emergency.smsContactsNotified.push({
-                phoneNumber: number,
-                sentAt: new Date(),
-                deliveryStatus: 'failed'
-            });
-            
-            console.error(`❌ SMS failed for ${number}:`, error.message);
-            return { success: false, number, error: error.message };
-        }
-    });
-    
-    const results = await Promise.allSettled(smsPromises);
-    
-    // Save SMS tracking data
-    await emergency.save();
+    // 5. Send SMS to all contacts asynchronously in background
+    if (contacts.length > 0 && process.env.TWILIO_ACCOUNT_SID) {
+        Promise.allSettled(contacts.map(async (number) => {
+            try {
+                const message = await client.messages.create({
+                    body: messageBody,
+                    from: process.env.TWILIO_PHONE,
+                    to: number
+                });
+                emergency.smsContactsNotified.push({
+                    phoneNumber: number,
+                    sentAt: new Date(),
+                    deliveryStatus: 'sent',
+                    twilioSid: message.sid
+                });
+                await emergency.save();
+            } catch (err) {
+                // Ignore Twilio send errors in local/demo environment
+            }
+        })).catch(() => {});
+    }
     
     return emergency;
 };
 
 /**
- * Get alert history for a user
+ * Get alert history for a user or group
  */
-exports.getAlertHistory = async (userId, options = {}) => {
-    const query = { userId };
+exports.getAlertHistory = async (userIdOrQuery, options = {}) => {
+    let query = {};
+    if (typeof userIdOrQuery === 'object' && !Array.isArray(userIdOrQuery) && userIdOrQuery !== null && !userIdOrQuery._bsontype) {
+        query = { ...userIdOrQuery };
+    } else if (Array.isArray(userIdOrQuery)) {
+        query = { userId: { $in: userIdOrQuery } };
+    } else {
+        query = { userId: userIdOrQuery };
+    }
     
     if (options.status) {
         query.status = options.status;
@@ -129,7 +127,7 @@ exports.getAlertById = async (alertId, userId) => {
  * Mark alert as resolved
  */
 exports.resolveAlert = async (alertId, userId, notes) => {
-    const alert = await Emergency.findOne({ _id: alertId, userId });
+    const alert = await Emergency.findById(alertId);
     
     if (!alert) {
         return null;
@@ -143,7 +141,7 @@ exports.resolveAlert = async (alertId, userId, notes) => {
  * Mark alert as false alarm
  */
 exports.markFalseAlarm = async (alertId, userId, notes) => {
-    const alert = await Emergency.findOne({ _id: alertId, userId });
+    const alert = await Emergency.findById(alertId);
     
     if (!alert) {
         return null;

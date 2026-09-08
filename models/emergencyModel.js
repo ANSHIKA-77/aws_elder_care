@@ -10,12 +10,29 @@ const emergencySchema = new mongoose.Schema({
         index: true
     },
     
+    // Link to family group for cross-user visibility
+    groupId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group',
+        default: null,
+        index: true
+    },
+    
     // Alert type
     alertType: {
         type: String,
         enum: ['fall', 'inactive', 'manual', 'other'],
         required: true,
         default: 'manual'
+    },
+    triggeredByRole: {
+        type: String,
+        enum: ['caretaker', 'client'],
+        default: 'client'
+    },
+    triggeredByName: {
+        type: String,
+        default: ''
     },
     
     // Location data

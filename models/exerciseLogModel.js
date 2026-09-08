@@ -10,6 +10,14 @@ const exerciseLogSchema = new mongoose.Schema({
         index: true
     },
     
+    // Link to family group for cross-user visibility
+    groupId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group',
+        default: null,
+        index: true
+    },
+    
     // Date of exercise (one log per day per user)
     date: {
         type: Date,
@@ -44,6 +52,25 @@ const exerciseLogSchema = new mongoose.Schema({
             default: 0
         },
         notes: String,
+        comment: {
+            type: String,
+            trim: true,
+            default: ''
+        },
+        feedback: {
+            type: String,
+            trim: true,
+            default: ''
+        },
+        status: {
+            type: String,
+            enum: ['in-progress', 'completed'],
+            default: 'completed'
+        },
+        completedAt: {
+            type: Date,
+            default: Date.now
+        },
         startedAt: {
             type: Date,
             default: Date.now
@@ -81,7 +108,7 @@ const exerciseLogSchema = new mongoose.Schema({
 exerciseLogSchema.index({ userId: 1, date: 1 }, { unique: true });
 
 // Static method: Get or create today's log
-exerciseLogSchema.statics.getTodayLog = async function(userId) {
+exerciseLogSchema.statics.getTodayLog = async function(userId, groupId = null) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);  // Start of day
     
@@ -93,6 +120,7 @@ exerciseLogSchema.statics.getTodayLog = async function(userId) {
     if (!log) {
         log = await this.create({
             userId,
+            groupId,
             date: today,
             completed: new Map()
         });
@@ -102,13 +130,18 @@ exerciseLogSchema.statics.getTodayLog = async function(userId) {
 };
 
 // Instance method: Add completed exercise
-exerciseLogSchema.methods.addExercise = function(category, steps, duration = 0) {
+exerciseLogSchema.methods.addExercise = function(category, steps, duration = 0, comment = '', feedback = '') {
+    const now = new Date();
     // Add to sessions
     this.sessions.push({
         category,
-        steps: steps.map(stepName => ({ name: stepName })),
+        steps: (steps || []).map(stepName => ({ name: stepName, completedAt: now })),
         duration,
-        startedAt: new Date()
+        comment: comment || '',
+        feedback: feedback || '',
+        status: 'completed',
+        completedAt: now,
+        startedAt: now
     });
     
     // Update completed map

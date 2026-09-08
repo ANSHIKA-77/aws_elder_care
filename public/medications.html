@@ -1,398 +1,542 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Medications — Elder Care</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/shared.css">
-<style>
-  /* ─── MED CHECKBOX ─── */
-  .med-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: #F7FAF8;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 10px;
-    transition: border-color 0.2s;
-    position: relative;
-  }
-  
-  .med-item.done { 
-    background: var(--green-light); 
-    border-color: rgba(58,125,84,0.25); 
-  }
-  
-  .med-item.missed {
-    background: var(--red-light);
-    border-color: rgba(217,79,79,0.25);
-  }
-  
-  .med-item input[type="checkbox"] {
-    width: 18px; 
-    height: 18px;
-    accent-color: var(--sage-dark);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  
-  .med-item-content {
-    flex: 1;
-  }
-  
-  .med-item-name { 
-    font-size: 14px; 
-    font-weight: 600;
-    color: var(--text);
-    display: block;
-    margin-bottom: 4px;
-  }
-  
-  .med-item-details {
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  
-  .med-item-time {
-    font-weight: 600;
-    color: var(--sage-dark);
-  }
-  
-  /* ─── FILTER BUTTONS ─── */
-  .filter-btn {
-    padding: 6px 14px;
-    border: 1.5px solid var(--border);
-    background: var(--white);
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
-  }
-  
-  .filter-btn:hover {
-    border-color: var(--sage-light);
-    background: rgba(123,158,135,0.08);
-  }
-  
-  .filter-btn.active {
-    background: var(--sage-dark);
-    color: var(--white);
-    border-color: var(--sage-dark);
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medications — Elder Care</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/shared.css">
+  <style>
+    /* ─── MED CHECKBOX ─── */
+    .med-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #F7FAF8;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+      position: relative;
+    }
+
+    .med-item.done {
+      background: var(--green-light);
+      border-color: rgba(58, 125, 84, 0.25);
+    }
+
+    .med-item.missed {
+      background: var(--red-light);
+      border-color: rgba(217, 79, 79, 0.25);
+    }
+
+    .med-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--sage-dark);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .med-item-content {
+      flex: 1;
+    }
+
+    .med-item-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .med-item-details {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .med-item-time {
+      font-weight: 600;
+      color: var(--sage-dark);
+    }
+
+    /* ─── FILTER BUTTONS ─── */
+    .filter-btn {
+      padding: 6px 14px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--sage-light);
+      background: rgba(123, 158, 135, 0.08);
+    }
+
+    .filter-btn.active {
+      background: var(--sage-dark);
+      color: var(--white);
+      border-color: var(--sage-dark);
+    }
+
+    .badge-caretaker {
+      background: #EAF5EE;
+      color: #2D6A4F;
+      border: 1px solid #B7E4C7;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-client {
+      background: #EBF2FA;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .med-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .btn-delete-med {
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-delete-med:hover {
+      background: var(--red-light);
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-  <a href="/home.html" class="back-button">
-    ← Back to Dashboard
-  </a>
+  <div class="container">
+    <a href="/home.html" class="back-button">
+      ← Back to Dashboard
+    </a>
 
-  <div class="page-header">
-    <div>
-      <h1>💊 Medications</h1>
-      <p>Daily medication schedule and status</p>
+    <div class="page-header">
+      <div>
+        <h1>💊 Medications</h1>
+        <p>Daily medication schedule, reminders & tracking</p>
+      </div>
+    </div>
+
+    <!-- Add Medication Form (Always Visible) -->
+    <div id="addMedCard" class="section-card">
+      <h2>➕ Add Medication</h2>
+      <div class="form-row">
+        <div class="field">
+          <label>Medication Name *</label>
+          <input type="text" id="medName" placeholder="e.g. Amlodipine, Metformin">
+        </div>
+        <div class="field">
+          <label>Dosage</label>
+          <input type="text" id="medDosage" placeholder="e.g. 5 mg / 1 tablet">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Scheduled Date *</label>
+          <input type="date" id="medDate">
+        </div>
+        <div class="field">
+          <label>Exact Scheduled Time *</label>
+          <input type="time" id="medTime" value="08:00">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Time of Day</label>
+          <select id="medTimeOfDay">
+            <option value="morning">🌅 Morning</option>
+            <option value="afternoon">☀️ Afternoon</option>
+            <option value="evening">🌆 Evening</option>
+            <option value="night">🌙 Night</option>
+            <option value="anytime">🕒 Anytime</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Frequency</label>
+          <select id="medFrequency">
+            <option value="once-daily">Once Daily</option>
+            <option value="twice-daily">Twice Daily</option>
+            <option value="thrice-daily">Thrice Daily</option>
+            <option value="as-needed">As Needed</option>
+            <option value="custom">Custom Schedule</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field" style="flex:1;">
+          <label>Instructions & Doctor's Notes</label>
+          <input type="text" id="medInstructions" placeholder="e.g. Take after breakfast with warm water">
+        </div>
+        <div class="field" style="flex:0 0 auto; min-width:180px; justify-content:center;">
+          <label>Reminder Alert</label>
+          <div style="display:flex; align-items:center; gap:8px; height:42px;">
+            <input type="checkbox" id="medReminder" checked style="width:20px; height:20px; cursor:pointer;">
+            <span style="font-size:13.5px; font-weight:600; color:var(--text);">🔔 Enable Reminder</span>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveMedication()">Save Medication</button>
+      </div>
+    </div>
+
+    <!-- Medications List -->
+    <div class="section-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+        <h2 style="margin:0;">📅 Medication Schedule</h2>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <label style="font-size:13px;font-weight:600;color:var(--text-muted);">View Specific Date:</label>
+          <input type="date" id="filterDateInput" onchange="filterByDate(this.value)" style="padding:6px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;background:var(--white);">
+          <button class="btn btn-sm btn-ghost" onclick="clearDateFilter()">All Dates</button>
+        </div>
+      </div>
+
+      <!-- Status Filters -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="filter-btn active" data-filter="all" onclick="filterMeds('all')">All</button>
+        <button class="filter-btn" data-filter="upcoming" onclick="filterMeds('upcoming')">⏰ Upcoming</button>
+        <button class="filter-btn" data-filter="taken" onclick="filterMeds('taken')">✅ Taken</button>
+        <button class="filter-btn" data-filter="missed" onclick="filterMeds('missed')">❌ Missed</button>
+      </div>
+
+      <div id="medList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading medications...</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Add Medication Form (Always Visible) -->
-  <div id="addMedCard" class="section-card">
-    <h2>➕ Add New Medication</h2>
-    <div class="form-row">
-      <div class="field">
-        <label>Medication Name *</label>
-        <input type="text" id="medName" placeholder="e.g. BP Tablet">
-      </div>
-      <div class="field">
-        <label>Dosage</label>
-        <input type="text" id="medDosage" placeholder="e.g. 10mg">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="field">
-        <label>Frequency</label>
-        <select id="medFrequency">
-          <option value="once-daily">Once Daily</option>
-          <option value="twice-daily">Twice Daily</option>
-          <option value="thrice-daily">Thrice Daily</option>
-          <option value="as-needed">As Needed</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Time of Day</label>
-        <select id="medTimeOfDay">
-          <option value="morning">Morning</option>
-          <option value="afternoon">Afternoon</option>
-          <option value="evening">Evening</option>
-          <option value="night">Night</option>
-          <option value="anytime">Anytime</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="field">
-        <label>Reminder Time (Optional)</label>
-        <input type="time" id="medReminderTime">
-      </div>
-      <div class="field">
-        <label>Notes</label>
-        <input type="text" id="medNotes" placeholder="Special instructions">
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveMedication()">Save Medication</button>
-    </div>
-  </div>
+  <div id="toast"></div>
 
-  <!-- Medications List -->
-  <div class="section-card">
-    <h2>Today's Medications</h2>
-    
-    <!-- Status Filters -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-      <button class="filter-btn active" data-filter="all" onclick="filterMeds('all')">All</button>
-      <button class="filter-btn" data-filter="upcoming" onclick="filterMeds('upcoming')">⏰ Upcoming</button>
-      <button class="filter-btn" data-filter="taken" onclick="filterMeds('taken')">✅ Taken</button>
-      <button class="filter-btn" data-filter="missed" onclick="filterMeds('missed')">❌ Missed</button>
-    </div>
-    
-    <div id="medList">
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Loading medications...</p>
-      </div>
-    </div>
-  </div>
-</div>
+  <script src="/js/config.js"></script>
+  <script src="/js/shared.js"></script>
+  <script>
+    let meds = [];
+    let currentFilter = 'all';
+    let selectedDateFilter = '';
 
-<div id="toast"></div>
+    const role = getRole();
 
-<script src="/js/shared.js"></script>
-<script>
-let meds = [];
-let currentFilter = 'all';
+    function getMedicationStatus(med) {
+      if (med.takenToday) return 'taken';
 
-// Show add button for both caretaker and client (per requirements)
-const role = getRole();
+      const now = new Date();
+      const currentHour = now.getHours();
 
-function getMedicationStatus(med) {
-  if (med.takenToday) return 'taken';
-  
-  // Check if missed based on time of day
-  const now = new Date();
-  const currentHour = now.getHours();
-  
-  const timeRanges = {
-    morning: { start: 6, end: 12 },
-    afternoon: { start: 12, end: 17 },
-    evening: { start: 17, end: 21 },
-    night: { start: 21, end: 24 }
-  };
-  
-  const range = timeRanges[med.timeOfDay];
-  if (range && currentHour > range.end) {
-    return 'missed';
-  }
-  
-  return 'upcoming';
-}
+      const timeRanges = {
+        morning: { start: 6, end: 12 },
+        afternoon: { start: 12, end: 17 },
+        evening: { start: 17, end: 21 },
+        night: { start: 21, end: 24 }
+      };
 
-function filterMeds(filter) {
-  currentFilter = filter;
-  
-  // Update active button
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.filter === filter);
-  });
-  
-  renderMeds();
-}
+      const range = timeRanges[med.timeOfDay];
+      if (range && currentHour > range.end) {
+        return 'missed';
+      }
 
-function renderMeds() {
-  const list = document.getElementById('medList');
-  
-  if (meds.length === 0) {
-    list.innerHTML = `
+      return 'upcoming';
+    }
+
+    function filterMeds(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      renderMeds();
+    }
+
+    function filterByDate(dateVal) {
+      selectedDateFilter = dateVal || '';
+      renderMeds();
+    }
+
+    function clearDateFilter() {
+      selectedDateFilter = '';
+      const el = document.getElementById('filterDateInput');
+      if (el) el.value = '';
+      renderMeds();
+    }
+
+    function renderMeds() {
+      const list = document.getElementById('medList');
+
+      if (meds.length === 0) {
+        list.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">💊</div>
         <h3>No medications added yet</h3>
         <p>Add your first medication to get started</p>
       </div>
     `;
-    return;
-  }
-  
-  // Filter medications
-  let filteredMeds = meds;
-  if (currentFilter !== 'all') {
-    filteredMeds = meds.filter(m => getMedicationStatus(m) === currentFilter);
-  }
-  
-  if (filteredMeds.length === 0) {
-    list.innerHTML = `
+        return;
+      }
+
+      let filteredMeds = [...meds];
+
+      if (selectedDateFilter) {
+        filteredMeds = filteredMeds.filter(m => {
+          if (!m.date) return true;
+          const medD = new Date(m.date).toISOString().split('T')[0];
+          return medD === selectedDateFilter;
+        });
+      }
+
+      if (currentFilter !== 'all') {
+        filteredMeds = filteredMeds.filter(m => getMedicationStatus(m) === currentFilter);
+      }
+
+      // Sort chronologically by date and time
+      filteredMeds.sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        if (dateA !== dateB) return dateA - dateB;
+        return (a.time || '').localeCompare(b.time || '');
+      });
+
+      if (filteredMeds.length === 0) {
+        list.innerHTML = `
       <div class="empty-state">
-        <p>No ${currentFilter} medications</p>
+        <p>No medications found for selected criteria</p>
       </div>
     `;
-    return;
-  }
-  
-  list.innerHTML = filteredMeds.map((m) => {
-    const status = getMedicationStatus(m);
-    const statusClass = status === 'taken' ? 'done' : status === 'missed' ? 'missed' : '';
-    const statusBadge = status === 'taken' ? 'status-done' : status === 'missed' ? 'status-missed' : 'status-pending';
-    const statusText = status === 'taken' ? '✔ Taken' : status === 'missed' ? '❌ Missed' : '⏰ Upcoming';
-    
-    return `
+        return;
+      }
+
+      list.innerHTML = filteredMeds.map((m) => {
+        const status = getMedicationStatus(m);
+        const statusClass = status === 'taken' ? 'done' : status === 'missed' ? 'missed' : '';
+        const statusBadge = status === 'taken' ? 'status-done' : status === 'missed' ? 'status-missed' : 'status-pending';
+
+        let takenTimeText = '';
+        if (m.takenToday && m.lastTakenAt) {
+          const dt = new Date(m.lastTakenAt);
+          takenTimeText = '✅ Taken at ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else if (m.takenToday) {
+          takenTimeText = '✅ Taken today';
+        } else if (status === 'missed') {
+          takenTimeText = '❌ Missed';
+        } else {
+          takenTimeText = '⏰ Upcoming';
+        }
+
+        const isClientAdded = m.createdByRole === 'client';
+        const addedByBadge = isClientAdded
+          ? '<span class="badge-client">Added by: Client</span>'
+          : '<span class="badge-caretaker">Added by: Caretaker</span>';
+
+        const deleteBtn = (role === 'caretaker')
+          ? `<button class="btn-delete-med" title="Delete medication" onclick="deleteMed('${m._id}', event)">🗑️</button>`
+          : '';
+
+        const dateStr = m.date ? new Date(m.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        const exactTime = m.time || m.reminderTime || '';
+
+        return `
       <div class="med-item ${statusClass}" id="medItem${m._id}">
         <input type="checkbox" ${m.takenToday ? 'checked' : ''} onchange="toggleMed('${m._id}', this)">
         <div class="med-item-content">
-          <span class="med-item-name">${m.name}</span>
+          <div class="med-header-row">
+            <span class="med-item-name">💊 ${m.name} ${m.dosage ? `— ${m.dosage}` : ''}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${addedByBadge}
+              ${deleteBtn}
+            </div>
+          </div>
           <div class="med-item-details">
-            ${m.dosage ? `💊 ${m.dosage} • ` : ''}
-            <span class="med-item-time">⏰ ${formatTimeOfDay(m.timeOfDay)}</span>
-            ${m.reminderTime ? ` at ${m.reminderTime}` : ''}
+            ${dateStr ? `<strong>📅 ${dateStr}</strong> • ` : ''}
+            ${exactTime ? `⏰ <strong>${exactTime}</strong> (${formatTimeOfDay(m.timeOfDay)})` : `<span class="med-item-time">${formatTimeOfDay(m.timeOfDay)}</span>`}
+            — <strong>${takenTimeText}</strong>
+            ${m.reminder !== false ? ' • 🔔 Reminder active' : ''}
             ${m.frequency ? ` • ${formatFrequency(m.frequency)}` : ''}
           </div>
-          ${m.notes ? `<div class="med-item-details" style="margin-top:4px;">📝 ${m.notes}</div>` : ''}
+          ${m.instructions ? `<div class="med-item-details" style="margin-top:4px;color:var(--text);">📋 <strong>Instructions:</strong> ${m.instructions}</div>` : ''}
+          ${m.notes && m.notes !== m.instructions ? `<div class="med-item-details" style="margin-top:2px;">📝 ${m.notes}</div>` : ''}
         </div>
         <span class="status-badge ${statusBadge}">
-          ${statusText}
+          ${m.takenToday ? '✔ Taken' : status === 'missed' ? '❌ Missed' : '⏰ Upcoming'}
         </span>
       </div>
     `;
-  }).join('');
-}
+      }).join('');
+    }
 
-function formatTimeOfDay(time) {
-  const map = {
-    morning: 'Morning',
-    afternoon: 'Afternoon',
-    evening: 'Evening',
-    night: 'Night',
-    anytime: 'Anytime'
-  };
-  return map[time] || time;
-}
+    function formatTimeOfDay(time) {
+      const map = {
+        morning: 'Morning',
+        afternoon: 'Afternoon',
+        evening: 'Evening',
+        night: 'Night',
+        anytime: 'Anytime'
+      };
+      return map[time] || time;
+    }
 
-function formatFrequency(freq) {
-  const map = {
-    'once-daily': 'Once daily',
-    'twice-daily': 'Twice daily',
-    'thrice-daily': '3x daily',
-    'as-needed': 'As needed'
-  };
-  return map[freq] || freq;
-}
+    function formatFrequency(freq) {
+      const map = {
+        'once-daily': 'Once daily',
+        'twice-daily': 'Twice daily',
+        'thrice-daily': '3x daily',
+        'as-needed': 'As needed',
+        'custom': 'Custom schedule'
+      };
+      return map[freq] || freq;
+    }
 
-async function loadMeds() {
-  try {
-    const response = await apiCall('/medications?activeOnly=true');
-    meds = response.data || [];
-    renderMeds();
-    checkMissedMedications();
-  } catch (error) {
-    console.error('Error loading medications:', error);
-    document.getElementById('medList').innerHTML = `
+    async function loadMeds() {
+      try {
+        const response = await apiCall('/medications?activeOnly=true');
+        meds = response.data || [];
+        renderMeds();
+        checkMissedMedications();
+      } catch (error) {
+        console.error('Error loading medications:', error);
+        document.getElementById('medList').innerHTML = `
       <div class="empty-state">
-        <p style="color:var(--red);">Failed to load medications</p>
+        <p>Unable to load medications</p>
       </div>
     `;
-    showToast('⚠ Failed to load medications', true);
-  }
-}
-
-async function toggleMed(medId, el) {
-  try {
-    const endpoint = el.checked 
-      ? `/medications/${medId}/mark-taken`
-      : `/medications/${medId}/unmark`;
-    
-    await apiCall(endpoint, { method: 'PATCH' });
-    
-    // Update local state
-    const med = meds.find(m => m._id === medId);
-    if (med) {
-      med.takenToday = el.checked;
-      renderMeds();
+      }
     }
-    
-    showToast(el.checked ? '✅ Medication marked as taken' : 'ℹ Medication unmarked');
-  } catch (error) {
-    console.error('Error toggling medication:', error);
-    showToast('⚠ Failed to update medication', true);
-    el.checked = !el.checked;
-  }
-}
 
-async function saveMedication() {
-  const name = document.getElementById('medName').value.trim();
-  const dosage = document.getElementById('medDosage').value.trim() || '1 tablet';
-  const frequency = document.getElementById('medFrequency').value || 'once-daily';
-  const timeOfDay = document.getElementById('medTimeOfDay').value || 'morning';
-  const reminderTime = document.getElementById('medReminderTime').value || '';
-  const notes = document.getElementById('medNotes').value.trim() || '';
+    async function toggleMed(id, el) {
+      try {
+        const endpoint = el.checked ? `/medications/${id}/mark-taken` : `/medications/${id}/unmark`;
+        const res = await apiCall(endpoint, { method: 'PATCH' });
 
-  if (!name) {
-    showToast("⚠ Please enter medication name", true);
-    return;
-  }
+        const idx = meds.findIndex(m => m._id === id);
+        if (idx !== -1 && res.data) {
+          meds[idx] = res.data;
+          renderMeds();
+        }
 
-  try {
-    await apiCall('/medications', {
-      method: 'POST',
-      body: JSON.stringify({ 
-        name, 
-        dosage, 
-        frequency, 
-        timeOfDay, 
-        reminderTime: reminderTime || null, 
-        notes,
-        isActive: true 
-      })
+        showToast(el.checked ? '✅ Medication marked as taken' : 'ℹ Medication unmarked');
+      } catch (error) {
+        console.error('Error toggling medication:', error);
+        showToast('⚠ Failed to update medication', true);
+        el.checked = !el.checked;
+      }
+    }
+
+    async function deleteMed(id, ev) {
+      if (ev) ev.stopPropagation();
+      if (!confirm('Are you sure you want to delete this medication?')) return;
+      try {
+        await apiCall(`/medications/${id}`, { method: 'DELETE' });
+        showToast('🗑️ Medication deleted');
+        loadMeds();
+      } catch (err) {
+        showToast('⚠ Failed to delete medication', true);
+      }
+    }
+
+    async function saveMedication() {
+      const name = document.getElementById('medName').value.trim();
+      const dosage = document.getElementById('medDosage').value.trim() || '1 tablet';
+      const date = document.getElementById('medDate').value || new Date().toISOString().split('T')[0];
+      const time = document.getElementById('medTime').value || '08:00';
+      const timeOfDay = document.getElementById('medTimeOfDay').value || 'morning';
+      const frequency = document.getElementById('medFrequency').value || 'once-daily';
+      const instructions = document.getElementById('medInstructions').value.trim() || '';
+      const reminder = document.getElementById('medReminder').checked;
+
+      if (!name) {
+        showToast("⚠ Please enter medication name", true);
+        return;
+      }
+
+      try {
+        await apiCall('/medications', {
+          method: 'POST',
+          body: JSON.stringify({
+            name,
+            dosage,
+            date,
+            time,
+            timeOfDay,
+            frequency,
+            instructions,
+            notes: instructions,
+            reminder,
+            reminderTime: time,
+            isActive: true
+          })
+        });
+
+        // Clear form after successful save
+        document.getElementById('medName').value = '';
+        document.getElementById('medDosage').value = '';
+        document.getElementById('medInstructions').value = '';
+        document.getElementById('medDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('medTime').value = '08:00';
+
+        await loadMeds();
+        showToast("✅ Medication added successfully!");
+      } catch (error) {
+        console.error('Error adding medication:', error);
+        showToast('⚠ Failed to add medication: ' + (error.message || 'Unknown error'), true);
+      }
+    }
+
+    function checkMissedMedications() {
+      const missedMeds = meds.filter(m => getMedicationStatus(m) === 'missed');
+
+      if (missedMeds.length > 0) {
+        showToast(`⚠ ${missedMeds.length} medication(s) missed today`, true, 5000);
+      }
+    }
+
+    // Initialize date picker to today and load medications
+    window.addEventListener('DOMContentLoaded', () => {
+      const dateEl = document.getElementById('medDate');
+      if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
     });
 
-    // Clear form after successful save
-    document.getElementById('medName').value = '';
-    document.getElementById('medDosage').value = '';
-    document.getElementById('medFrequency').value = 'once-daily';
-    document.getElementById('medTimeOfDay').value = 'morning';
-    document.getElementById('medReminderTime').value = '';
-    document.getElementById('medNotes').value = '';
-    
-    await loadMeds();
-    showToast("✅ Medication added!");
-  } catch (error) {
-    console.error('Error adding medication:', error);
-    showToast('⚠ Failed to add medication: ' + (error.message || 'Unknown error'), true);
-  }
-}
+    loadMeds();
 
-// Check for missed medications and show notification
-function checkMissedMedications() {
-  const missedMeds = meds.filter(m => getMedicationStatus(m) === 'missed');
-  
-  if (missedMeds.length > 0) {
-    showToast(`⚠ ${missedMeds.length} medication(s) missed today`, true, 5000);
-  }
-}
-
-// Load on page ready
-loadMeds();
-
-// Check every 5 minutes for missed medications
-setInterval(() => {
-  if (meds.length > 0) {
-    renderMeds();
-    checkMissedMedications();
-  }
-}, 5 * 60 * 1000);
-</script>
+    // Check every 5 minutes for missed medications
+    setInterval(() => {
+      if (meds.length > 0) {
+        renderMeds();
+        checkMissedMedications();
+      }
+    }, 5 * 60 * 1000);
+  </script>
 
 </body>
+
 </html>

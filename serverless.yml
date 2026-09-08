@@ -1,0 +1,66 @@
+service: elder-care-api
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs22.x          # LTS — stable on Lambda
+  region: ap-south-1
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 29                  # API Gateway hard limit is 30s
+
+  # CORS handled inside Express (app.js), not at API Gateway level
+  httpApi:
+    cors:
+      allowedOrigins:
+        - '*'
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+
+  environment:
+    NODE_ENV: production
+    MONGODB_URI: ${env:MONGODB_URI}
+    JWT_SECRET: ${env:JWT_SECRET}
+    FRONTEND_URL: '*'
+    GOOGLE_MAPS_KEY: ${env:GOOGLE_MAPS_KEY, ''}
+    TWILIO_ACCOUNT_SID: ${env:TWILIO_ACCOUNT_SID, ''}
+    TWILIO_AUTH_TOKEN: ${env:TWILIO_AUTH_TOKEN, ''}
+    TWILIO_PHONE: ${env:TWILIO_PHONE, ''}
+    EMERGENCY_CONTACT_1: ${env:EMERGENCY_CONTACT_1, ''}
+    EMERGENCY_CONTACT_2: ${env:EMERGENCY_CONTACT_2, ''}
+    EMERGENCY_CONTACT_3: ${env:EMERGENCY_CONTACT_3, ''}
+
+functions:
+  api:
+    handler: lambda.handler
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+      - httpApi:
+          path: /
+          method: ANY
+
+package:
+  individually: false
+  patterns:
+    - '!.env'
+    - '!.env.example'
+    - '!.git/**'
+    - '!.gitignore'
+    - '!README.md'
+    - '!nodemon.json'
+    - '!public/**'
+    - '!template.yaml.backup'
+    - '!**/*.test.js'
+    - '!**/*.spec.js'
+    - '!deploy.ps1'

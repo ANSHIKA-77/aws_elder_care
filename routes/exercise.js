@@ -44,6 +44,27 @@ router.get('/stats/weekly', exerciseController.getWeeklyStats);
 router.get('/stats/monthly', exerciseController.getMonthlyStats);
 
 /**
+ * @route   GET /api/v1/exercises/custom
+ * @desc    Get custom / doctor-recommended exercises
+ * @access  Private
+ */
+router.get('/custom', exerciseController.getCustomExercises);
+
+/**
+ * @route   POST /api/v1/exercises/custom
+ * @desc    Add a doctor-recommended or custom exercise
+ * @access  Private
+ */
+router.post('/custom', exerciseController.addCustomExercise);
+
+/**
+ * @route   DELETE /api/v1/exercises/custom/:id
+ * @desc    Delete custom exercise
+ * @access  Private
+ */
+router.delete('/custom/:id', exerciseController.deleteCustomExercise);
+
+/**
  * @route   GET /api/v1/exercises/log/:date
  * @desc    Get exercise log for a specific date
  * @param   date - Format: YYYY-MM-DD
