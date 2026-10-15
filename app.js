@@ -83,9 +83,20 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 // API routes
 app.use('/api/v1', require('./routes'));
 
-// Serve frontend SPA root
+// Serve frontend SPA root (local dev: serves login.html; Lambda: returns API status)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+    const fs = require('fs');
+    const loginPath = path.join(__dirname, 'public', 'login.html');
+    if (fs.existsSync(loginPath)) {
+        return res.sendFile(loginPath);
+    }
+    res.json({
+        service: 'Elder Care API Gateway',
+        status: 'online',
+        message: 'Backend API is running on AWS Lambda. Frontend is hosted on AWS S3.',
+        health: '/api/health',
+        api: '/api/v1'
+    });
 });
 
 // Google Maps key (safe to expose — it's a public-facing key)
