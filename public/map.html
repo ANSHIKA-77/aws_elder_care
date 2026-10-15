@@ -269,16 +269,18 @@
 
     function renderLeafletMap(lat, lng, title) {
       const mapDiv = document.getElementById('map');
-      mapDiv.innerHTML = '';
 
       if (!leafletMap) {
+        mapDiv.innerHTML = '';
         leafletMap = L.map('map').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
           maxZoom: 19,
-          attribution: '© OpenStreetMap'
+          subdomains: 'abcd',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         }).addTo(leafletMap);
       } else {
         leafletMap.setView([lat, lng], 15);
+        leafletMap.invalidateSize();
       }
 
       if (mapMarker) {
