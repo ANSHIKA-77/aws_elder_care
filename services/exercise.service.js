@@ -74,7 +74,11 @@ exports.getHistory = async (userId, days = 7) => {
     
     const logs = await ExerciseLog.find({
         userId,
-        date: { $gte: startDate }
+        date: { $gte: startDate },
+        $or: [
+            { totalStepsCompleted: { $gt: 0 } },
+            { 'sessions.0': { $exists: true } }
+        ]
     }).sort({ date: -1 });  // Most recent first
     
     return logs;

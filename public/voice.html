@@ -6,52 +6,444 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Assistant — Elder Care</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/css/shared.css">
     <style>
         .voice-container {
-            max-width: 600px;
+            max-width: 640px;
             margin: 0 auto;
+            padding-bottom: 60px;
         }
 
-        select,
-        textarea {
+        .voice-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #F4F7F5;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            border: 1px solid var(--border);
+            transition: all 0.25s ease;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #9E9E9E;
+            transition: all 0.25s;
+        }
+
+        .status-bar.listening {
+            background: #FEECEC;
+            border-color: #F8B4B4;
+            color: #C53030;
+        }
+
+        .status-bar.listening .status-dot {
+            background: #E53E3E;
+            box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.3);
+            animation: pulse-dot 1.2s infinite;
+        }
+
+        .status-bar.processing {
+            background: #FEF3E2;
+            border-color: #FBD38D;
+            color: #C07A2A;
+        }
+
+        .status-bar.processing .status-dot {
+            background: #DD6B20;
+            animation: pulse-dot 0.8s infinite;
+        }
+
+        .status-bar.success {
+            background: #EAF5EE;
+            border-color: #A8D5B5;
+            color: #2F855A;
+        }
+
+        .status-bar.success .status-dot {
+            background: #38A169;
+        }
+
+        .status-bar.error {
+            background: #FFF5F5;
+            border-color: #FEB2B2;
+            color: #C53030;
+        }
+
+        .status-bar.error .status-dot {
+            background: #E53E3E;
+        }
+
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.25); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .sound-wave {
+            display: none;
+            align-items: center;
+            gap: 3px;
+            height: 16px;
+        }
+
+        .sound-wave.active {
+            display: flex;
+        }
+
+        .sound-wave span {
+            width: 3px;
+            height: 100%;
+            background: #E53E3E;
+            border-radius: 2px;
+            animation: wave 1s infinite ease-in-out;
+        }
+
+        .sound-wave span:nth-child(2) { animation-delay: 0.15s; }
+        .sound-wave span:nth-child(3) { animation-delay: 0.3s; }
+        .sound-wave span:nth-child(4) { animation-delay: 0.45s; }
+
+        @keyframes wave {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+
+        .lang-group {
+            margin-bottom: 18px;
+        }
+
+        .lang-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        select {
             width: 100%;
-            margin-top: 10px;
-            padding: 12px;
+            padding: 12px 14px;
             border-radius: 10px;
             border: 1.5px solid var(--border);
             font-family: 'DM Sans', sans-serif;
-            font-size: 14px;
+            font-size: 15px;
+            background: #FAF9F6;
+            color: var(--text);
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--sage);
+            background: #fff;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-group label span.hint {
+            text-transform: none;
+            letter-spacing: normal;
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-muted);
         }
 
         textarea {
-            min-height: 120px;
+            width: 100%;
+            min-height: 110px;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            background: #fff;
+            color: var(--text);
             resize: vertical;
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
-        .voice-button {
-            width: 100%;
-            padding: 16px;
-            margin-top: 16px;
-            background: linear-gradient(135deg, var(--sage-dark), var(--sage));
-            color: white;
-            border: none;
+        textarea:focus {
+            border-color: var(--sage);
+            box-shadow: 0 0 0 3px rgba(123, 158, 135, 0.18);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 22px;
             border-radius: 12px;
-            font-size: 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
         }
 
-        .voice-button:hover {
+        .btn-mic {
+            flex: 1;
+            min-width: 180px;
+            background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+            color: white;
+            box-shadow: 0 4px 14px rgba(74, 114, 89, 0.3);
+        }
+
+        .btn-mic:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(74, 114, 89, 0.4);
         }
 
-        .voice-button:active {
-            transform: translateY(0);
+        .btn-mic.listening {
+            background: linear-gradient(135deg, #C53030, #E53E3E);
+            box-shadow: 0 4px 16px rgba(229, 62, 62, 0.4);
+            animation: pulse-btn 1.4s infinite;
+        }
+
+        @keyframes pulse-btn {
+            0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); }
+        }
+
+        .btn-submit {
+            flex: 1;
+            min-width: 150px;
+            background: var(--text);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #1B241C;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #F1F4F2;
+            color: var(--text-muted);
+            padding: 14px 16px;
+        }
+
+        .btn-clear:hover {
+            background: #E2E8E3;
+            color: var(--text);
+        }
+
+        /* Quick Pills */
+        .quick-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .quick-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pill-btn {
+            background: #F7FAF8;
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill-btn:hover {
+            background: var(--sage);
+            color: white;
+            border-color: var(--sage);
+            transform: translateY(-1px);
+        }
+
+        /* Result Card */
+        .result-card {
+            display: none;
+            margin-top: 22px;
+            background: #F8FAF9;
+            border: 1.5px solid #C8DDD0;
+            border-radius: 14px;
+            padding: 18px 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .result-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--sage-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .result-body {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text);
+        }
+
+        .result-detail {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 13.5px;
+            color: #374151;
+        }
+
+        /* Permissions Notice */
+        .perm-banner {
+            display: none;
+            background: #FFFBEB;
+            border: 1px solid #FDE68A;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: #92400E;
+        }
+
+        .perm-banner strong {
+            color: #78350F;
+        }
+
+        /* Examples section */
+        .example-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .example-group {
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #F0F4F1;
+        }
+
+        .example-group:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .example-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--sage-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .example-item {
+            font-size: 14px;
+            color: var(--text);
+            margin-bottom: 4px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            transition: background 0.15s;
+        }
+
+        .example-item:hover {
+            background: #EAF5EE;
+            color: var(--sage-dark);
         }
     </style>
 </head>
@@ -59,44 +451,125 @@
 <body>
 
     <div class="container voice-container">
-        <a href="/home.html" class="back-button">
+        <a href="/home.html" class="back-button" id="backBtn">
             ← Back to Dashboard
         </a>
 
         <div class="page-header">
             <div>
                 <h1>🎤 Voice Assistant</h1>
-                <p>Speak commands to manage your care</p>
+                <p>Speak or type commands to manage medications, appointments, and care</p>
             </div>
         </div>
 
-        <div class="section-card">
-            <h2>Language Selection</h2>
-            <select id="lang">
-                <option value="en-US">English</option>
-                <option value="hi-IN">Hindi</option>
-                <option value="ta-IN">Tamil</option>
-            </select>
-
-            <h2 style="margin-top:24px;">Voice Input</h2>
-            <textarea id="text" placeholder="Tap 'Speak' and say your command..."></textarea>
-
-            <button class="voice-button" onclick="startListening()">🎙️ Start Speaking</button>
+        <!-- Permission / Setup Banner -->
+        <div id="permBanner" class="perm-banner">
+            <strong>💡 Microphone Permission Notice:</strong> If your browser blocks the microphone, click the 🔒 icon in the URL address bar, enable <strong>Microphone</strong>, and refresh. You can also type commands into the text box below anytime!
         </div>
 
-        <div class="section-card">
-            <h2>💡 Example Commands</h2>
-            <div class="item">
-                <strong>Medications:</strong><br>
-                "BP tablet taken" or "Diabetes medicine taken"
+        <div class="voice-card">
+            <!-- Dynamic Status Bar -->
+            <div id="statusBar" class="status-bar">
+                <div class="status-indicator">
+                    <span id="statusDot" class="status-dot"></span>
+                    <span id="statusText">Ready — tap 'Start Speaking' or type below</span>
+                </div>
+                <div id="soundWave" class="sound-wave">
+                    <span></span><span></span><span></span><span></span>
+                </div>
             </div>
-            <div class="item">
-                <strong>Appointments:</strong><br>
-                "Set appointment for doctor tomorrow at 3"
+
+            <!-- Language Selection -->
+            <div class="lang-group">
+                <label for="lang">Language</label>
+                <select id="lang">
+                    <option value="en-US">English (US / India)</option>
+                    <option value="hi-IN">Hindi (हिंदी)</option>
+                    <option value="ta-IN">Tamil (தமிழ்)</option>
+                </select>
             </div>
-            <div class="item">
-                <strong>Exercises:</strong><br>
-                "Mark exercise completed"
+
+            <!-- Voice / Text Input -->
+            <div class="input-group">
+                <label for="text">
+                    Command Input
+                    <span class="hint">Press Enter or click Process Command</span>
+                </label>
+                <textarea id="text" placeholder="Tap 'Start Speaking' and say your command, or type here (e.g. 'BP tablet taken', 'Doctor tomorrow at 10 am')..."></textarea>
+            </div>
+
+            <!-- Actions Row -->
+            <div class="action-row">
+                <button id="micBtn" class="btn btn-mic" onclick="toggleListening()">
+                    <span id="micIcon">🎙️</span>
+                    <span id="micBtnText">Start Speaking</span>
+                </button>
+                <button id="submitBtn" class="btn btn-submit" onclick="submitManualCommand()">
+                    <span>⚡ Process Command</span>
+                </button>
+                <button class="btn btn-clear" onclick="clearInput()" title="Clear text">
+                    <span>🗑️</span>
+                </button>
+            </div>
+
+            <!-- Result Card -->
+            <div id="resultCard" class="result-card">
+                <div class="result-header">
+                    <span id="resultTitle" class="result-title">⚡ Response</span>
+                    <span id="resultTime" class="result-time">Just now</span>
+                </div>
+                <div id="resultBody" class="result-body"></div>
+                <div id="resultDetail" class="result-detail" style="display:none;"></div>
+            </div>
+
+            <!-- Quick Action Pills -->
+            <div class="quick-section">
+                <div class="quick-title">⚡ Quick Commands (Click to Run)</div>
+                <div class="pills-grid">
+                    <button class="pill-btn" onclick="runQuick('BP tablet taken')">💊 BP tablet taken</button>
+                    <button class="pill-btn" onclick="runQuick('Diabetes medicine taken')">💊 Diabetes medicine taken</button>
+                    <button class="pill-btn" onclick="runQuick('All morning medicines taken')">💊 All morning medicines taken</button>
+                    <button class="pill-btn" onclick="runQuick('Mark exercise completed')">🏃 Mark exercise completed</button>
+                    <button class="pill-btn" onclick="runQuick('Set appointment for doctor tomorrow at 10')">📅 Doctor tomorrow at 10</button>
+                    <button class="pill-btn" onclick="runQuick('What medicines do I take today?')">❓ What medicines today?</button>
+                    <button class="pill-btn" onclick="runQuick('When is my next appointment?')">❓ Next appointment?</button>
+                    <button class="pill-btn" onclick="runQuick('Did I complete my exercise?')">❓ Exercise status?</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples Card -->
+        <div class="example-card">
+            <h2 style="font-size:18px; margin-bottom:14px; font-family:'DM Serif Display', serif;">💡 Example Commands You Can Say</h2>
+
+            <div class="example-group">
+                <div class="example-label">💊 Medications</div>
+                <div class="example-item" onclick="runQuick('BP tablet taken')">"BP tablet taken"</div><br>
+                <div class="example-item" onclick="runQuick('Diabetes medicine taken')">"Diabetes medicine taken"</div><br>
+                <div class="example-item" onclick="runQuick('Metformin taken')">"Metformin taken" or "Aspirin taken"</div><br>
+                <div class="example-item" onclick="runQuick('All medicines taken')">"All morning medicines taken"</div><br>
+                <div class="example-item" onclick="runQuick('What medicine do I have today?')">"What medicine do I have today?"</div>
+            </div>
+
+            <div class="example-group">
+                <div class="example-label">📅 Appointments</div>
+                <div class="example-item" onclick="runQuick('Set appointment for doctor tomorrow at 3')">"Set appointment for doctor tomorrow at 3"</div><br>
+                <div class="example-item" onclick="runQuick('Book appointment with Dr. Sharma tomorrow at 10 am')">"Book appointment with Dr. Sharma tomorrow at 10 am"</div><br>
+                <div class="example-item" onclick="runQuick('When is my next appointment?')">"When is my next appointment?"</div>
+            </div>
+
+            <div class="example-group">
+                <div class="example-label">🏃 Exercises & Wellness</div>
+                <div class="example-item" onclick="runQuick('Mark exercise completed')">"Mark exercise completed"</div><br>
+                <div class="example-item" onclick="runQuick('Completed morning stretching')">"Completed morning stretching"</div><br>
+                <div class="example-item" onclick="runQuick('Finished walking routine')">"Finished walking routine"</div><br>
+                <div class="example-item" onclick="runQuick('Did I complete my exercise?')">"Did I complete my exercise?"</div>
+            </div>
+
+            <div class="example-group">
+                <div class="example-label">📹 Shortcuts</div>
+                <div class="example-item" onclick="runQuick('Call caretaker')">"Call caretaker" or "Video call"</div><br>
+                <div class="example-item" onclick="runQuick('Show my photos')">"Show my family photos"</div>
             </div>
         </div>
     </div>
@@ -106,258 +579,603 @@
     <script src="/js/config.js"></script>
     <script src="/js/shared.js"></script>
     <script>
+        // 🔒 Enforce Authentication & Role-based Dashboard Link
+        if (!requireAuth()) {
+            // requireAuth automatically redirects to /login.html
+        }
 
-        // 🎙️ SPEECH TO TEXT
+        const currentRole = getRole();
+        const backBtn = document.getElementById("backBtn");
+        if (backBtn && currentRole === 'caretaker') {
+            backBtn.href = '/dashboard.html';
+        }
+
+        // Check if protocol is HTTP outside localhost where Web Speech is restricted
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+            const permBanner = document.getElementById("permBanner");
+            if (permBanner) {
+                permBanner.style.display = 'block';
+                permBanner.innerHTML = '<strong>⚠️ Browser Security Notice:</strong> Browser speech recognition requires HTTPS or localhost. If speech fails, you can type any command in the box and tap <strong>Process Command</strong>!';
+            }
+        }
+
+        // 🎙️ Speech Recognition Engine State
+        let recognition = null;
+        let isListening = false;
+
+        function setStatus(text, type = 'ready') {
+            const bar = document.getElementById("statusBar");
+            const statusText = document.getElementById("statusText");
+            const wave = document.getElementById("soundWave");
+
+            bar.className = 'status-bar ' + type;
+            statusText.textContent = text;
+
+            if (type === 'listening') {
+                wave.classList.add('active');
+            } else {
+                wave.classList.remove('active');
+            }
+        }
+
+        function updateMicButton(listening) {
+            const btn = document.getElementById("micBtn");
+            const text = document.getElementById("micBtnText");
+            const icon = document.getElementById("micIcon");
+
+            if (listening) {
+                btn.classList.add('listening');
+                icon.textContent = '⏹️';
+                text.textContent = 'Stop Listening';
+            } else {
+                btn.classList.remove('listening');
+                icon.textContent = '🎙️';
+                text.textContent = 'Start Speaking';
+            }
+        }
+
+        function toggleListening() {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
         function startListening() {
-            let lang = document.getElementById("lang").value;
-
-            let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
             if (!SpeechRecognition) {
-                showToast("Speech Recognition not supported in this browser", true);
+                setStatus("⚠️ Speech recognition is not supported in this browser. Please type below.", "error");
+                showToast("Voice recognition is not supported in this browser. You can type commands below.", true);
+                document.getElementById("permBanner").style.display = 'block';
                 return;
             }
 
-            let recognition = new SpeechRecognition();
-            recognition.lang = lang;
+            // Cleanup previous instance if still hanging
+            if (recognition) {
+                try { recognition.abort(); } catch (e) {}
+                recognition = null;
+            }
 
-            recognition.start();
+            try {
+                recognition = new SpeechRecognition();
+            } catch (err) {
+                console.error("Failed to construct SpeechRecognition:", err);
+                setStatus("⚠️ Could not initialize voice recognition. Please type below.", "error");
+                showToast("Failed to initialize microphone service.", true);
+                return;
+            }
+
+            const lang = document.getElementById("lang").value || 'en-US';
+            recognition.lang = lang;
+            recognition.continuous = false;
+            recognition.interimResults = true; // Stream live spoken words to textarea
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function () {
+                isListening = true;
+                updateMicButton(true);
+                setStatus("🎙️ Listening... Speak your command clearly", "listening");
+            };
 
             recognition.onresult = function (event) {
-                let transcript = event.results[0][0].transcript.toLowerCase();
+                let interimTranscript = '';
+                let finalTranscript = '';
 
-                console.log("VOICE:", transcript);
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const transcriptPiece = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcriptPiece;
+                    } else {
+                        interimTranscript += transcriptPiece;
+                    }
+                }
 
-                document.getElementById("text").value = transcript;
+                const currentText = (finalTranscript || interimTranscript).trim();
+                if (currentText) {
+                    document.getElementById("text").value = currentText;
+                }
 
-                processCommand(transcript, lang);
+                if (finalTranscript && finalTranscript.trim().length > 0) {
+                    console.log("VOICE TRANSCRIPT:", finalTranscript);
+                    stopListening();
+                    processCommand(finalTranscript, lang);
+                }
             };
 
-            recognition.onerror = function () {
-                showToast("Error recognizing speech", true);
+            recognition.onerror = function (event) {
+                console.error("SpeechRecognition error:", event.error, event);
+                isListening = false;
+                updateMicButton(false);
+
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    setStatus("🔒 Microphone blocked. Check browser address bar to allow mic.", "error");
+                    showToast("Microphone access blocked. Click the lock/camera icon in your address bar to allow.", true);
+                    document.getElementById("permBanner").style.display = 'block';
+                } else if (event.error === 'no-speech') {
+                    setStatus("🔇 No speech detected. Tap 'Start Speaking' again or type below.", "ready");
+                    showToast("No speech detected. Please speak closer to your mic.", true);
+                } else if (event.error === 'network') {
+                    setStatus("🌐 Speech network service error. You can type commands below.", "error");
+                    showToast("Speech service network error. You can type your command.", true);
+                } else if (event.error === 'audio-capture') {
+                    setStatus("🎤 No microphone detected. Please check your mic connection.", "error");
+                    showToast("No microphone device detected.", true);
+                } else if (event.error === 'aborted') {
+                    setStatus("Stopped listening.", "ready");
+                } else {
+                    setStatus("⚠️ Recognition error (" + event.error + "). You can type commands below.", "error");
+                    showToast("Error recognizing speech: " + event.error, true);
+                }
             };
+
+            recognition.onend = function () {
+                isListening = false;
+                updateMicButton(false);
+            };
+
+            try {
+                recognition.start();
+            } catch (err) {
+                console.error("Error starting SpeechRecognition:", err);
+                isListening = false;
+                updateMicButton(false);
+                setStatus("⚠️ Could not start microphone. You can type commands below.", "error");
+                showToast("Could not start microphone: " + (err.message || err), true);
+            }
+        }
+
+        function stopListening() {
+            if (recognition) {
+                try { recognition.stop(); } catch (e) {}
+            }
+            isListening = false;
+            updateMicButton(false);
+        }
+
+        // ⌨️ Manual Command Submission
+        function submitManualCommand() {
+            const input = document.getElementById("text").value.trim();
+            if (!input) {
+                showToast("Please speak or type a command first", true);
+                document.getElementById("text").focus();
+                return;
+            }
+            const lang = document.getElementById("lang").value || 'en-US';
+            processCommand(input, lang);
+        }
+
+        function clearInput() {
+            document.getElementById("text").value = "";
+            document.getElementById("resultCard").style.display = 'none';
+            setStatus("Ready — tap 'Start Speaking' or type below", "ready");
+            document.getElementById("text").focus();
+        }
+
+        function runQuick(cmdText) {
+            document.getElementById("text").value = cmdText;
+            const lang = document.getElementById("lang").value || 'en-US';
+            processCommand(cmdText, lang);
+        }
+
+        // Support Enter key in textarea
+        document.getElementById("text").addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submitManualCommand();
+            }
+        });
+
+        // 📋 Display Rich Result Card
+        function showResult(title, responseText, detailHtml = '') {
+            const card = document.getElementById("resultCard");
+            const titleEl = document.getElementById("resultTitle");
+            const bodyEl = document.getElementById("resultBody");
+            const detailEl = document.getElementById("resultDetail");
+            const timeEl = document.getElementById("resultTime");
+
+            titleEl.innerHTML = title;
+            bodyEl.innerHTML = responseText;
+            timeEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (detailHtml) {
+                detailEl.innerHTML = detailHtml;
+                detailEl.style.display = 'block';
+            } else {
+                detailEl.style.display = 'none';
+            }
+
+            card.style.display = 'block';
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
 
-        // 🧠 MAIN COMMAND PROCESSOR
+        // 🧠 MAIN COMMAND PROCESSOR & DATABASE UPDATER
         async function processCommand(command, lang) {
-            console.log("PROCESSING:", command);
+            console.log("PROCESSING COMMAND:", command);
             command = command.toLowerCase().trim();
-            const currentRole = getRole();
+            setStatus("⏳ Processing command...", "processing");
 
-            // 1. Action shortcuts
-            if (command.includes("call caretaker") || command.includes("call client") || command.includes("call my child") || command.includes("call child") || command.includes("call mom") || command.includes("call parent") || command.includes("video call")) {
+            // 1. Navigation / Action shortcuts
+            if (command.includes("call caretaker") || command.includes("call client") ||
+                command.includes("call my child") || command.includes("call child") ||
+                command.includes("call mom") || command.includes("call parent") ||
+                command.includes("video call") || command.includes("start call")) {
                 speakResponse("Starting video call now", lang);
                 showToast("📹 Opening video call...");
+                setStatus("Opening video call...", "success");
+                showResult("📹 Video Call", "Connecting to video call room...");
                 setTimeout(() => { window.location.href = "video.html"; }, 1500);
                 return;
             }
 
-            if (command.includes("show my photos") || command.includes("show photos") || command.includes("open gallery") || command.includes("photos")) {
+            if (command.includes("show my photos") || command.includes("show photos") ||
+                command.includes("open gallery") || command.includes("family photo") ||
+                command.includes("family photos") || command.includes("photos")) {
                 speakResponse("Opening your family photo gallery", lang);
                 showToast("🖼️ Opening gallery...");
+                setStatus("Opening gallery...", "success");
+                showResult("🖼️ Family Gallery", "Opening family photo memories...");
                 setTimeout(() => { window.location.href = "gallery.html"; }, 1500);
                 return;
             }
 
             // 2. Questions about medications
-            if (command.includes("what medicine") || command.includes("what medicines") || command.includes("what medication") || command.includes("did caretaker take") || command.includes("did mom take")) {
+            if (command.includes("what medicine") || command.includes("what medicines") ||
+                command.includes("what medication") || command.includes("did caretaker take") ||
+                command.includes("did mom take") || command.includes("dawa batao") ||
+                command.includes("show medicines") || command.includes("my medicines")) {
                 try {
                     const res = await apiCall('/medications?activeOnly=true');
-                    const meds = res.data || [];
+                    const meds = (res && res.data) || [];
                     if (meds.length === 0) {
-                        speakResponse("There are no medications scheduled for today.", lang);
+                        const msg = "There are no active medications scheduled for today.";
+                        speakResponse(msg, lang);
+                        showResult("💊 Medications", msg);
+                        setStatus("Completed query.", "success");
                         return;
                     }
 
                     if (command.includes("morning")) {
                         const morningMeds = meds.filter(m => m.timeOfDay === 'morning');
                         if (morningMeds.length === 0) {
-                            speakResponse("You have no medications scheduled for this morning.", lang);
+                            const msg = "You have no medications scheduled for this morning.";
+                            speakResponse(msg, lang);
+                            showResult("💊 Morning Medications", msg);
+                            setStatus("Completed query.", "success");
                             return;
                         }
-                        const details = morningMeds.map(m => `${m.name}, ${m.takenToday ? 'already taken' : 'not taken yet'}`).join(". ");
-                        speakResponse(`This morning you have ${morningMeds.length} medications: ${details}`, lang);
+                        const details = morningMeds.map(m => `${m.name} (${m.takenToday ? '✅ Taken' : '⏳ Pending'})`).join("<br>");
+                        const speechText = `This morning you have ${morningMeds.length} medications. ` +
+                            morningMeds.map(m => `${m.name}, ${m.takenToday ? 'already taken' : 'not taken yet'}`).join(". ");
+                        speakResponse(speechText, lang);
+                        showResult("💊 Morning Medications", `Scheduled for morning:`, details);
+                        setStatus("Completed query.", "success");
                         return;
                     }
 
                     // General status query
                     const taken = meds.filter(m => m.takenToday);
                     const pending = meds.filter(m => !m.takenToday);
-                    const subject = currentRole === 'client' ? 'Caretaker' : 'You';
-                    let answer = `${subject} have ${meds.length} medications today. ${taken.length} completed.`;
-                    if (pending.length > 0) {
-                        answer += ` Pending: ${pending.map(m => m.name).join(', ')}.`;
-                    }
+                    const subject = currentRole === 'client' ? 'You' : 'Client';
+                    let answer = `${subject} have ${meds.length} total medications scheduled today. ${taken.length} taken, ${pending.length} pending.`;
+
+                    let detailHtml = `<strong>Pending (${pending.length}):</strong> ${pending.map(m => m.name).join(', ') || 'None'}<br>` +
+                        `<strong>Completed (${taken.length}):</strong> ${taken.map(m => m.name).join(', ') || 'None'}`;
+
                     speakResponse(answer, lang);
+                    showResult("💊 Today's Medication Status", answer, detailHtml);
+                    setStatus("Completed query.", "success");
                     return;
                 } catch (e) {
+                    console.error("Medication query error:", e);
                     speakResponse("Sorry, could not fetch medication details.", lang);
+                    showToast("⚠ Could not fetch medications", true);
+                    setStatus("Could not fetch medications.", "error");
                     return;
                 }
             }
 
             // 3. Questions about next appointment
-            if (command.includes("when is my next appointment") || command.includes("next appointment") || command.includes("caretaker's appointment") || command.includes("when is mom's next appointment")) {
+            if (command.includes("when is my next appointment") || command.includes("next appointment") ||
+                command.includes("upcoming appointment") || command.includes("doctor appointment?") ||
+                command.includes("caretaker's appointment") || command.includes("when is mom's next appointment")) {
                 try {
                     const res = await apiCall('/appointments');
-                    const upcoming = (res.data || []).filter(a => a.status === 'upcoming');
+                    const upcoming = ((res && res.data) || []).filter(a => a.status === 'upcoming');
                     if (upcoming.length === 0) {
-                        speakResponse("There are no upcoming appointments scheduled.", lang);
+                        const msg = "There are no upcoming appointments scheduled.";
+                        speakResponse(msg, lang);
+                        showResult("📅 Next Appointment", msg);
+                        setStatus("No upcoming appointments.", "success");
                         return;
                     }
                     const next = upcoming[0];
                     const doc = next.doctor ? `Dr. ${next.doctor}` : next.title;
-                    const dateStr = formatDate(next.date);
-                    speakResponse(`The next appointment is with ${doc} on ${dateStr} at ${next.time} at ${next.hospital || next.location || 'the clinic'}.`, lang);
+                    const dateFormatted = formatDate(next.date);
+                    const answer = `Your next appointment is with ${doc} on ${dateFormatted} at ${next.time || '10:00 AM'}.`;
+                    speakResponse(answer, lang);
+                    showResult("📅 Upcoming Appointment", answer, `<strong>Details:</strong> ${next.title} — ${dateFormatted} at ${next.time || '10:00 AM'}<br><strong>Location:</strong> ${next.location || next.hospital || 'Clinic'}`);
+                    setStatus("Completed query.", "success");
                     return;
                 } catch (e) {
+                    console.error("Appointment query error:", e);
                     speakResponse("Could not retrieve appointments.", lang);
+                    showToast("⚠ Could not retrieve appointments", true);
+                    setStatus("Could not retrieve appointments.", "error");
                     return;
                 }
             }
 
             // 4. Questions about exercise completion
-            if (command.includes("did i complete my exercise") || command.includes("did caretaker complete") || command.includes("did mom complete her exercise") || command.includes("exercise completed?")) {
+            if (command.includes("did i complete my exercise") || command.includes("did caretaker complete") ||
+                command.includes("did mom complete her exercise") || command.includes("exercise completed?") ||
+                command.includes("exercise status") || command.includes("today's exercise")) {
                 try {
                     const res = await apiCall('/exercises/log/today');
-                    const log = res.data;
-                    const sessions = log?.sessions || [];
+                    const log = res && res.data;
+                    const sessions = (log && log.sessions) || [];
                     if (sessions.length > 0) {
                         const lastSession = sessions[sessions.length - 1];
                         const timeStr = lastSession.completedAt ? new Date(lastSession.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'today';
-                        let answer = `Yes, ${lastSession.category} of ${lastSession.duration || 20} minutes was completed at ${timeStr}.`;
-                        if (lastSession.comment) answer += ` Note: ${lastSession.comment}`;
+                        const answer = `Yes, ${lastSession.category} (${lastSession.duration || 10} minutes) was completed today at ${timeStr}.`;
                         speakResponse(answer, lang);
+                        showResult("🏃 Exercise Status", answer, `<strong>Total Sessions:</strong> ${sessions.length}<br><strong>Latest Routine:</strong> ${lastSession.category} (${lastSession.duration || 10} min)`);
+                        setStatus("Exercise completed today.", "success");
                     } else {
-                        const subject = currentRole === 'client' ? "Caretaker has not" : "You have not";
-                        speakResponse(`${subject} completed today's exercise routine yet.`, lang);
+                        const subject = currentRole === 'client' ? "You have not" : "Client has not";
+                        const answer = `${subject} completed today's exercise routine yet.`;
+                        speakResponse(answer, lang);
+                        showResult("🏃 Exercise Status", answer, "<em>Tip: Say 'Mark exercise completed' once done!</em>");
+                        setStatus("No exercises logged today yet.", "ready");
                     }
                     return;
                 } catch (e) {
+                    console.error("Exercise query error:", e);
                     speakResponse("Could not check exercise progress.", lang);
+                    showToast("⚠ Could not check exercise progress", true);
+                    setStatus("Could not check exercise progress.", "error");
                     return;
                 }
             }
 
-            // Medication keywords — check FIRST before appointments
-            let medKeywords = ["taken", "tablet", "tablets", "medicine", "medication", "दवा", "bp", "diabetes", "vitamin"];
-            let isMedCommand = medKeywords.some(k => command.includes(k));
+            // Check if Medication Command vs Appointment Command
+            const medKeywords = ["taken", "tablet", "tablets", "medicine", "medication", "pill", "pills", "dose", "dawa", "दवा", "गोली", "bp", "diabetes", "vitamin", "sugar", "insulin", "metformin", "aspirin", "seridon", "atorvastatin"];
+            const isMedCommand = medKeywords.some(k => command.includes(k));
 
-            // Appointment keywords
-            let isApptCommand = (command.includes("appointment") || command.includes("अपॉइंटमेंट"))
-                && !isMedCommand; // never treat med command as appointment
+            const isApptCommand = (command.includes("appointment") || command.includes("अपॉइंटमेंट") ||
+                command.includes("doctor visit") || command.includes("book doctor") ||
+                command.includes("set doctor")) && !isMedCommand;
 
             // =========================
-            // 💊 MEDICATION
+            // 💊 5. MEDICATION UPDATE
             // =========================
             if (isMedCommand) {
                 try {
-                    // Get medications from backend
                     const response = await apiCall('/medications?activeOnly=true');
-                    const meds = response.data || [];
+                    const meds = (response && response.data) || [];
 
                     if (meds.length === 0) {
-                        speakResponse("No medications found", lang);
+                        const msg = "No active medications found in your schedule.";
+                        speakResponse(msg, lang);
+                        showToast(msg, true);
+                        showResult("💊 Medications", msg);
+                        setStatus("No medications found.", "ready");
                         return;
                     }
 
-                    let updated = false;
-                    const toUpdate = [];
+                    // Synonyms / Category mapping
+                    const medSynonyms = {
+                        bp: ['bp', 'b p', 'blood pressure', 'hypertension', 'amlodipine', 'telmisartan', 'atenolol', 'losartan', 'enalapril'],
+                        diabetes: ['diabetes', 'diabetic', 'sugar', 'diabet', 'metformin', 'insulin', 'glimepiride', 'glycomet', 'januvia', 'galvus'],
+                        vitamin: ['vitamin', 'vit', 'calcium', 'd3', 'b12', 'multivitamin', 'zinc', 'iron'],
+                        pain: ['aspirin', 'seridon', 'paracetamol', 'crocin', 'dolo', 'tylenol', 'painkiller'],
+                        cholesterol: ['atorvastatin', 'rosuvastatin', 'statin', 'ecosprin', 'cholesterol']
+                    };
 
+                    let toUpdate = [];
+
+                    // Stage 1: Specific medication / drug name match
+                    const specificMatches = [];
                     meds.forEach(m => {
-                        let medName = m.name.toLowerCase();
-                        let matchFound = false;
+                        const medName = (m.name || '').toLowerCase();
+                        const nameParts = medName.split(/[\s-]+/).filter(p => p.length >= 3);
+                        let directMatch = false;
 
-                        console.log("CHECKING MED:", medName, "| COMMAND:", command);
-
-                        if (medName.includes("bp")) {
-                            if (command.includes("bp") || command.includes("b p") ||
-                                command.includes("blood pressure")) matchFound = true;
+                        for (const part of nameParts) {
+                            if (command.includes(part)) {
+                                directMatch = true;
+                                break;
+                            }
                         }
-                        if (medName.includes("diabetes")) {
-                            if (command.includes("diabetes") || command.includes("diabetic") ||
-                                command.includes("sugar") || command.includes("diabet")) matchFound = true;
-                        }
-                        if (medName.includes("vitamin")) {
-                            if (command.includes("vitamin") || command.includes("vitamins") ||
-                                command.includes("vit ")) matchFound = true;
-                        }
+                        if (command.includes(medName)) directMatch = true;
 
-                        if (command.includes("morning") && medName.includes("morning")) matchFound = true;
-                        if (command.includes("evening") && medName.includes("evening")) matchFound = true;
-                        if (command.includes("all") || command.includes("every")) matchFound = true;
-
-                        console.log("MATCH RESULT for", m.name, ":", matchFound);
-
-                        if (matchFound && !m.takenToday) {
-                            toUpdate.push(m._id);
-                            updated = true;
+                        if (directMatch && !m.takenToday) {
+                            specificMatches.push(m);
                         }
                     });
 
-                    // Update medications via API
-                    if (updated) {
-                        for (const medId of toUpdate) {
-                            await apiCall(`/medications/${medId}/mark-taken`, { method: 'PATCH' });
-                        }
-                        speakResponse("Medication marked as taken", lang);
-                        showToast("✅ Medication updated successfully");
+                    if (specificMatches.length > 0) {
+                        toUpdate = specificMatches;
                     } else {
-                        speakResponse("Please say bp tablet, diabetes tablet, or vitamin", lang);
+                        // Stage 2: Time of Day, Categories, or All
+                        meds.forEach(m => {
+                            const medName = (m.name || '').toLowerCase();
+                            const medNotes = (m.notes || '').toLowerCase();
+                            const timeOfDay = (m.timeOfDay || '').toLowerCase();
+                            let matchFound = false;
+
+                            // Categories
+                            for (const [cat, keywords] of Object.entries(medSynonyms)) {
+                                const cmdHasCat = keywords.some(k => command.includes(k));
+                                if (cmdHasCat) {
+                                    const medHasCat = keywords.some(k => medName.includes(k) || medNotes.includes(k));
+                                    if (medHasCat) {
+                                        matchFound = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // Time of day
+                            if (command.includes('morning') && timeOfDay === 'morning') matchFound = true;
+                            if (command.includes('afternoon') && timeOfDay === 'afternoon') matchFound = true;
+                            if (command.includes('evening') && timeOfDay === 'evening') matchFound = true;
+                            if (command.includes('night') && timeOfDay === 'night') matchFound = true;
+
+                            // All
+                            if (command.includes('all') || command.includes('every') || command.includes('everything') || command.includes('sab')) {
+                                matchFound = true;
+                            }
+
+                            if (matchFound && !m.takenToday) {
+                                toUpdate.push(m);
+                            }
+                        });
                     }
+
+                    // Stage 3: General "medicine taken" fallback
+                    if (toUpdate.length === 0) {
+                        const pendingMeds = meds.filter(m => !m.takenToday);
+                        if (pendingMeds.length === 1) {
+                            toUpdate.push(pendingMeds[0]);
+                        } else if (pendingMeds.length > 1) {
+                            // Slot by current hour: morning (6-12), afternoon (12-17), evening (17-21), night (21+)
+                            const hour = new Date().getHours();
+                            let slot = 'morning';
+                            if (hour >= 12 && hour < 17) slot = 'afternoon';
+                            else if (hour >= 17 && hour < 21) slot = 'evening';
+                            else if (hour >= 21 || hour < 6) slot = 'night';
+
+                            const slotMeds = pendingMeds.filter(m => m.timeOfDay === slot);
+                            if (slotMeds.length > 0) {
+                                slotMeds.forEach(m => toUpdate.push(m));
+                            } else {
+                                toUpdate.push(pendingMeds[0]);
+                            }
+                        }
+                    }
+
+                    // Update via API
+                    if (toUpdate.length > 0) {
+                        const updatedNames = [];
+                        for (const med of toUpdate) {
+                            await apiCall(`/medications/${med._id}/mark-taken`, { method: 'PATCH' });
+                            updatedNames.push(med.name);
+                        }
+
+                        const successMsg = `Marked ${updatedNames.join(", ")} as taken.`;
+                        speakResponse(successMsg, lang);
+                        showToast(`✅ ${successMsg}`);
+                        showResult(
+                            "💊 Medication Marked Taken",
+                            successMsg,
+                            updatedNames.map(name => `✅ <strong>${name}</strong> — Completed for today`).join("<br>")
+                        );
+                        setStatus("Medication updated successfully.", "success");
+                    } else {
+                        // All matching were already taken or no pending
+                        const pendingMeds = meds.filter(m => !m.takenToday);
+                        if (pendingMeds.length === 0) {
+                            const allDoneMsg = "All scheduled medications for today are already marked as taken!";
+                            speakResponse(allDoneMsg, lang);
+                            showToast("✅ All medications already taken");
+                            showResult("💊 All Medications Taken", allDoneMsg);
+                            setStatus("All medications already taken.", "success");
+                        } else {
+                            const pendingNames = pendingMeds.map(m => m.name).join(", ");
+                            const speechMsg = `Could not match that medication. Pending today: ${pendingNames}`;
+                            speakResponse(speechMsg, lang);
+                            showToast("⚠ Please specify medication name", true);
+                            showResult("💊 Medication Match Notice", `Could not match your specific medication.`, `<strong>Pending today:</strong> ${pendingNames}`);
+                            setStatus("Specify medication name.", "ready");
+                        }
+                    }
+                    return;
                 } catch (error) {
                     console.error("Error updating medication:", error);
-                    speakResponse("Failed to update medication", lang);
+                    speakResponse("Failed to update medication. Please try again.", lang);
                     showToast("⚠ Failed to update medication", true);
+                    setStatus("Failed to update medication.", "error");
+                    return;
                 }
             }
 
             // =========================
-            // 📅 APPOINTMENT
+            // 📅 6. APPOINTMENT CREATION
             // =========================
             else if (isApptCommand) {
-                let title = extractTitle(command);
-                let time = extractTime(command);
-                let date = extractDate(command);
-
-                if (!title || !time || !date) {
-                    speakResponse("Could not understand appointment details", lang);
-                    showToast("⚠ Please provide appointment title, date and time", true);
-                    return;
-                }
+                const parsed = parseAppointment(command);
 
                 try {
                     await apiCall('/appointments', {
                         method: 'POST',
                         body: JSON.stringify({
-                            title: title,
-                            date: date,
-                            time: time,
-                            location: "Voice Added",
-                            notes: "Added via voice assistant"
+                            title: parsed.title,
+                            doctor: parsed.title.toLowerCase().includes("dr") ? parsed.title : "",
+                            date: parsed.date,
+                            time: parsed.time,
+                            location: "Voice Assistant Booking",
+                            notes: "Created via Voice Assistant"
                         })
                     });
 
-                    speakResponse("Appointment added successfully", lang);
-                    showToast("✅ Appointment created");
+                    const successMsg = `Appointment scheduled with ${parsed.title} on ${parsed.date} at ${parsed.time}.`;
+                    speakResponse(successMsg, lang);
+                    showToast("✅ Appointment created successfully");
+                    showResult(
+                        "📅 Appointment Created",
+                        successMsg,
+                        `<strong>Title:</strong> ${parsed.title}<br><strong>Date:</strong> ${parsed.date}<br><strong>Time:</strong> ${parsed.time}`
+                    );
+                    setStatus("Appointment created successfully.", "success");
+                    return;
                 } catch (error) {
                     console.error("Error adding appointment:", error);
-                    speakResponse("Failed to add appointment", lang);
+                    speakResponse("Failed to schedule appointment. Please try again.", lang);
                     showToast("⚠ Failed to add appointment", true);
+                    setStatus("Failed to add appointment.", "error");
+                    return;
                 }
             }
 
             // =========================
-            // 🏃 EXERCISE
+            // 🏃 7. EXERCISE LOGGING
             // =========================
             else if (
                 command.includes("exercise") ||
                 command.includes("workout") ||
+                command.includes("stretching") ||
+                command.includes("walk") ||
+                command.includes("walking") ||
+                command.includes("breathing") ||
+                command.includes("physio") ||
+                command.includes("therapy") ||
+                command.includes("balance") ||
                 command.includes("व्यायाम")
             ) {
-                // Determine which exercise based on keywords
-                let category = "Morning Stretching";  // default
+                let category = "Morning Stretching";
                 let steps = [
                     "Raise arms slowly 10 times",
                     "Neck rotation clockwise 5 times",
@@ -365,43 +1183,25 @@
                 ];
                 let duration = 10;
 
-                // Check for specific exercise types
                 if (command.includes("breathing") || command.includes("breath")) {
                     category = "Breathing Exercises";
-                    steps = [
-                        "Deep belly breathing 10 times",
-                        "Alternate nostril breathing 5 rounds"
-                    ];
+                    steps = ["Deep belly breathing 10 times", "Alternate nostril breathing 5 rounds"];
                     duration = 5;
-                }
-                else if (command.includes("walk") || command.includes("walking")) {
+                } else if (command.includes("walk") || command.includes("walking")) {
                     category = "Walking Routine";
-                    steps = [
-                        "Light walking for 10 minutes"
-                    ];
-                    duration = 10;
-                }
-                else if (command.includes("balance")) {
-                    category = "Balance Exercises";
-                    steps = [
-                        "Single leg stand 30 seconds"
-                    ];
-                    duration = 5;
-                }
-                else if (command.includes("physio") || command.includes("therapy")) {
-                    category = "Physiotherapy";
-                    steps = [
-                        "Prescribed exercises completed"
-                    ];
+                    steps = ["Light walking for 15 minutes"];
                     duration = 15;
-                }
-                else if (command.includes("stretch") || command.includes("morning")) {
+                } else if (command.includes("balance")) {
+                    category = "Balance Exercises";
+                    steps = ["Single leg stand 30 seconds each side", "Heel-to-toe walk"];
+                    duration = 10;
+                } else if (command.includes("physio") || command.includes("therapy")) {
+                    category = "Physiotherapy";
+                    steps = ["Prescribed physical therapy exercises completed"];
+                    duration = 15;
+                } else if (command.includes("stretch") || command.includes("morning")) {
                     category = "Morning Stretching";
-                    steps = [
-                        "Raise arms slowly 10 times",
-                        "Neck rotation clockwise 5 times",
-                        "Shoulder rolls 10 times"
-                    ];
+                    steps = ["Raise arms slowly 10 times", "Neck rotation clockwise 5 times", "Shoulder rolls 10 times"];
                     duration = 10;
                 }
 
@@ -415,59 +1215,105 @@
                         })
                     });
 
-                    speakResponse(`${category} logged successfully`, lang);
-                    showToast(`✅ ${category} logged`);
+                    const successMsg = `${category} logged as completed for today. Great job!`;
+                    speakResponse(successMsg, lang);
+                    showToast(`✅ ${category} logged successfully`);
+                    showResult(
+                        "🏃 Exercise Logged",
+                        successMsg,
+                        `<strong>Routine:</strong> ${category}<br><strong>Duration:</strong> ${duration} minutes<br><strong>Status:</strong> Completed for today`
+                    );
+                    setStatus("Exercise logged successfully.", "success");
+                    return;
                 } catch (error) {
                     console.error("Error logging exercise:", error);
-                    speakResponse("Failed to log exercise", lang);
+                    speakResponse("Failed to log exercise. Please try again.", lang);
                     showToast("⚠ Failed to log exercise", true);
+                    setStatus("Failed to log exercise.", "error");
+                    return;
                 }
             }
 
             // =========================
-            // ❌ UNKNOWN
+            // ❌ 8. UNKNOWN COMMAND
             // =========================
             else {
-                speakResponse("Command not recognized. Try saying bp tablet taken or set appointment for doctor tomorrow at 3", lang);
-                showToast("⚠ Command not understood", true);
+                const unknownMsg = "Command not recognized. Try saying 'BP tablet taken', 'Mark exercise completed', or 'Doctor tomorrow at 10'.";
+                speakResponse(unknownMsg, lang);
+                showToast("⚠ Command not understood. See examples below.", true);
+                showResult(
+                    "❓ Command Not Understood",
+                    `We couldn't recognize <em>"${command}"</em>.`,
+                    `<strong>Try saying:</strong><br>` +
+                    `• "BP tablet taken" or "Diabetes medicine taken"<br>` +
+                    `• "Set appointment for doctor tomorrow at 10"<br>` +
+                    `• "Mark exercise completed"<br>` +
+                    `• "What medicine do I have today?"`
+                );
+                setStatus("Command not recognized. Tap a quick command below.", "ready");
             }
         }
 
-        // 🔍 HELPERS
-        function extractTitle(cmd) {
-            let words = cmd.split("for");
-            if (words.length > 1) {
-                return words[1].split("at")[0].trim();
+        // 🔍 SMART HELPERS
+        function parseAppointment(cmd) {
+            let clean = cmd.toLowerCase().trim();
+
+            // 1. Date
+            let dateObj = new Date();
+            if (clean.includes('tomorrow') || clean.includes('कल')) {
+                dateObj.setDate(dateObj.getDate() + 1);
+            } else if (clean.includes('day after tomorrow') || clean.includes('परसों')) {
+                dateObj.setDate(dateObj.getDate() + 2);
             }
-            return "Voice Appointment";
+            const dateStr = dateObj.toISOString().split('T')[0];
+
+            // 2. Time
+            let timeStr = '10:00';
+            const timeMatch = clean.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+            if (timeMatch) {
+                let hour = parseInt(timeMatch[1], 10);
+                let min = timeMatch[2] ? timeMatch[2] : '00';
+                let meridian = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
+
+                if (meridian === 'pm' && hour < 12) hour += 12;
+                if (meridian === 'am' && hour === 12) hour = 0;
+                if (!meridian && hour >= 1 && hour <= 6) hour += 12; // 3 -> 15:00
+
+                timeStr = hour.toString().padStart(2, '0') + ':' + min;
+            }
+
+            // 3. Title
+            let title = clean;
+            title = title.replace(/^(set|book|schedule|make|create|add)\s+(an\s+)?appointment\s+(for|with)?\s*/i, '');
+            title = title.replace(/^appointment\s+(for|with)?\s*/i, '');
+            title = title.replace(/\b(tomorrow|today|day after tomorrow|yesterday|कल|आज)\b/gi, '');
+            title = title.replace(/\bat\s+\d{1,2}(?::\d{2})?\s*(am|pm)?\b/gi, '');
+            title = title.replace(/\b\d{1,2}(?::\d{2})?\s*(am|pm)\b/gi, '');
+            title = title.trim();
+
+            if (title.length > 0) {
+                title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            } else {
+                title = 'Doctor Appointment';
+            }
+
+            return { title, date: dateStr, time: timeStr };
         }
 
-        function extractTime(cmd) {
-            let match = cmd.match(/(\d{1,2})/);
-            if (match) {
-                return match[0].padStart(2, '0') + ":00";
-            }
-            return "10:00";
-        }
-
-        function extractDate(cmd) {
-            let today = new Date();
-
-            if (cmd.includes("tomorrow") || cmd.includes("कल")) {
-                today.setDate(today.getDate() + 1);
-            }
-
-            return today.toISOString().split("T")[0];
-        }
-
-
-        // 🔊 RESPONSE
+        // 🔊 TEXT TO SPEECH
         function speakResponse(text, lang) {
-            let speech = new SpeechSynthesisUtterance(text);
-            speech.lang = lang;
-            window.speechSynthesis.speak(speech);
+            if (!('speechSynthesis' in window)) return;
+            try {
+                window.speechSynthesis.cancel(); // Stop pending utterances to avoid freeze
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang || 'en-US';
+                utterance.rate = 0.95; // Gentle pace for elders
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.error("SpeechSynthesis error:", e);
+            }
         }
-
     </script>
 
 </body>
