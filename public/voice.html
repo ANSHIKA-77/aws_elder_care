@@ -36,14 +36,14 @@
             font-size: 14px;
             font-weight: 500;
             color: var(--text);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             transition: all 0.25s ease;
         }
 
         .status-indicator {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .status-dot {
@@ -52,8 +52,21 @@
             border-radius: 50%;
             background: #9E9E9E;
             transition: all 0.25s;
+            flex-shrink: 0;
         }
 
+        /* State: Ready (Default) */
+        .status-bar.ready {
+            background: #F4F7F5;
+            border-color: #DDE5DF;
+            color: var(--text);
+        }
+
+        .status-bar.ready .status-dot {
+            background: var(--sage);
+        }
+
+        /* State: Listening (Active voice capture) */
         .status-bar.listening {
             background: #FEECEC;
             border-color: #F8B4B4;
@@ -66,6 +79,7 @@
             animation: pulse-dot 1.2s infinite;
         }
 
+        /* State: Processing */
         .status-bar.processing {
             background: #FEF3E2;
             border-color: #FBD38D;
@@ -77,6 +91,7 @@
             animation: pulse-dot 0.8s infinite;
         }
 
+        /* State: Success */
         .status-bar.success {
             background: #EAF5EE;
             border-color: #A8D5B5;
@@ -87,6 +102,7 @@
             background: #38A169;
         }
 
+        /* State: Error */
         .status-bar.error {
             background: #FFF5F5;
             border-color: #FEB2B2;
@@ -260,7 +276,7 @@
 
         .btn-submit {
             flex: 1;
-            min-width: 150px;
+            min-width: 160px;
             background: var(--text);
             color: white;
         }
@@ -375,12 +391,13 @@
 
         .result-detail {
             margin-top: 8px;
-            padding: 8px 12px;
+            padding: 10px 14px;
             background: white;
             border-radius: 8px;
             border: 1px solid var(--border);
             font-size: 13.5px;
             color: #374151;
+            line-height: 1.5;
         }
 
         /* Permissions Notice */
@@ -468,8 +485,8 @@
         </div>
 
         <div class="voice-card">
-            <!-- Dynamic Status Bar -->
-            <div id="statusBar" class="status-bar">
+            <!-- Dynamic Status Bar (Defaults to clean neutral 'ready') -->
+            <div id="statusBar" class="status-bar ready">
                 <div class="status-indicator">
                     <span id="statusDot" class="status-dot"></span>
                     <span id="statusText">Ready — tap 'Start Speaking' or type below</span>
@@ -547,7 +564,7 @@
                 <div class="example-item" onclick="runQuick('BP tablet taken')">"BP tablet taken"</div><br>
                 <div class="example-item" onclick="runQuick('Diabetes medicine taken')">"Diabetes medicine taken"</div><br>
                 <div class="example-item" onclick="runQuick('Metformin taken')">"Metformin taken" or "Aspirin taken"</div><br>
-                <div class="example-item" onclick="runQuick('All medicines taken')">"All morning medicines taken"</div><br>
+                <div class="example-item" onclick="runQuick('All morning medicines taken')">"All morning medicines taken"</div><br>
                 <div class="example-item" onclick="runQuick('What medicine do I have today?')">"What medicine do I have today?"</div>
             </div>
 
@@ -599,40 +616,65 @@
             }
         }
 
-        // 🎙️ Speech Recognition Engine State
+        // 🎙️ Unified Voice State Machine
         let recognition = null;
         let isListening = false;
+        let statusResetTimer = null;
 
-        function setStatus(text, type = 'ready') {
+        /**
+         * Single source of truth for the voice UI state.
+         * States: 'ready' | 'listening' | 'processing' | 'success' | 'error'
+         */
+        function setVoiceState(state, message = '') {
+            if (statusResetTimer) {
+                clearTimeout(statusResetTimer);
+                statusResetTimer = null;
+            }
+
             const bar = document.getElementById("statusBar");
             const statusText = document.getElementById("statusText");
             const wave = document.getElementById("soundWave");
+            const micBtn = document.getElementById("micBtn");
+            const micBtnText = document.getElementById("micBtnText");
+            const micIcon = document.getElementById("micIcon");
 
-            bar.className = 'status-bar ' + type;
-            statusText.textContent = text;
+            bar.className = 'status-bar ' + state;
 
-            if (type === 'listening') {
+            if (state === 'listening') {
+                isListening = true;
+                micBtn.classList.add('listening');
+                micIcon.textContent = '⏹️';
+                micBtnText.textContent = 'Stop Listening';
                 wave.classList.add('active');
+                statusText.textContent = message || "🎙️ Listening... Speak your command clearly";
             } else {
+                isListening = false;
+                micBtn.classList.remove('listening');
+                micIcon.textContent = '🎙️';
+                micBtnText.textContent = 'Start Speaking';
                 wave.classList.remove('active');
+
+                if (state === 'processing') {
+                    statusText.textContent = message || "⏳ Processing command...";
+                } else if (state === 'success') {
+                    statusText.textContent = message || "✅ Command completed successfully";
+                    statusResetTimer = setTimeout(() => {
+                        setVoiceState('ready');
+                    }, 4000);
+                } else if (state === 'error') {
+                    statusText.textContent = message || "⚠️ Error recognizing speech";
+                    statusResetTimer = setTimeout(() => {
+                        setVoiceState('ready');
+                    }, 4500);
+                } else {
+                    // 'ready'
+                    statusText.textContent = message || "Ready — tap 'Start Speaking' or type below";
+                }
             }
         }
 
-        function updateMicButton(listening) {
-            const btn = document.getElementById("micBtn");
-            const text = document.getElementById("micBtnText");
-            const icon = document.getElementById("micIcon");
-
-            if (listening) {
-                btn.classList.add('listening');
-                icon.textContent = '⏹️';
-                text.textContent = 'Stop Listening';
-            } else {
-                btn.classList.remove('listening');
-                icon.textContent = '🎙️';
-                text.textContent = 'Start Speaking';
-            }
-        }
+        // Initialize strictly in neutral 'ready' state on load
+        setVoiceState('ready');
 
         function toggleListening() {
             if (isListening) {
@@ -642,11 +684,11 @@
             }
         }
 
-        function startListening() {
+        async function startListening() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
             if (!SpeechRecognition) {
-                setStatus("⚠️ Speech recognition is not supported in this browser. Please type below.", "error");
+                setVoiceState('error', "⚠️ Speech recognition is not supported in this browser. Please type below.");
                 showToast("Voice recognition is not supported in this browser. You can type commands below.", true);
                 document.getElementById("permBanner").style.display = 'block';
                 return;
@@ -658,11 +700,26 @@
                 recognition = null;
             }
 
+            // Pre-flight check: explicitly request microphone access via getUserMedia
+            // This displays the native browser permission dialog if not yet granted
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop()); // release immediately
+                } catch (permErr) {
+                    console.warn("Microphone permission check failed:", permErr);
+                    setVoiceState('error', "🔒 Microphone blocked. Click the lock/camera icon in address bar to allow.");
+                    showToast("Microphone access blocked. Click the lock icon in address bar to allow.", true);
+                    document.getElementById("permBanner").style.display = 'block';
+                    return;
+                }
+            }
+
             try {
                 recognition = new SpeechRecognition();
             } catch (err) {
                 console.error("Failed to construct SpeechRecognition:", err);
-                setStatus("⚠️ Could not initialize voice recognition. Please type below.", "error");
+                setVoiceState('error', "⚠️ Could not initialize voice service. Please type below.");
                 showToast("Failed to initialize microphone service.", true);
                 return;
             }
@@ -674,9 +731,7 @@
             recognition.maxAlternatives = 1;
 
             recognition.onstart = function () {
-                isListening = true;
-                updateMicButton(true);
-                setStatus("🎙️ Listening... Speak your command clearly", "listening");
+                setVoiceState('listening', "🎙️ Listening... Speak your command clearly");
             };
 
             recognition.onresult = function (event) {
@@ -706,42 +761,41 @@
 
             recognition.onerror = function (event) {
                 console.error("SpeechRecognition error:", event.error, event);
-                isListening = false;
-                updateMicButton(false);
 
                 if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-                    setStatus("🔒 Microphone blocked. Check browser address bar to allow mic.", "error");
-                    showToast("Microphone access blocked. Click the lock/camera icon in your address bar to allow.", true);
+                    setVoiceState('error', "🔒 Microphone blocked. Check browser address bar to allow mic.");
+                    showToast("Microphone access blocked. Click the lock icon in address bar to allow.", true);
                     document.getElementById("permBanner").style.display = 'block';
                 } else if (event.error === 'no-speech') {
-                    setStatus("🔇 No speech detected. Tap 'Start Speaking' again or type below.", "ready");
+                    setVoiceState('ready', "🔇 No speech heard. Tap 'Start Speaking' again or type below.");
                     showToast("No speech detected. Please speak closer to your mic.", true);
                 } else if (event.error === 'network') {
-                    setStatus("🌐 Speech network service error. You can type commands below.", "error");
+                    setVoiceState('error', "🌐 Speech network error. You can type commands below.");
                     showToast("Speech service network error. You can type your command.", true);
                 } else if (event.error === 'audio-capture') {
-                    setStatus("🎤 No microphone detected. Please check your mic connection.", "error");
+                    setVoiceState('error', "🎤 No microphone detected. Please check your mic connection.");
                     showToast("No microphone device detected.", true);
                 } else if (event.error === 'aborted') {
-                    setStatus("Stopped listening.", "ready");
+                    setVoiceState('ready');
                 } else {
-                    setStatus("⚠️ Recognition error (" + event.error + "). You can type commands below.", "error");
+                    setVoiceState('error', "⚠️ Recognition error (" + event.error + "). You can type commands below.");
                     showToast("Error recognizing speech: " + event.error, true);
                 }
             };
 
             recognition.onend = function () {
-                isListening = false;
-                updateMicButton(false);
+                // If it ended without already transitioning to processing or success, revert to ready
+                const bar = document.getElementById("statusBar");
+                if (bar.classList.contains('listening')) {
+                    setVoiceState('ready');
+                }
             };
 
             try {
                 recognition.start();
             } catch (err) {
                 console.error("Error starting SpeechRecognition:", err);
-                isListening = false;
-                updateMicButton(false);
-                setStatus("⚠️ Could not start microphone. You can type commands below.", "error");
+                setVoiceState('error', "⚠️ Could not start microphone. You can type commands below.");
                 showToast("Could not start microphone: " + (err.message || err), true);
             }
         }
@@ -750,8 +804,10 @@
             if (recognition) {
                 try { recognition.stop(); } catch (e) {}
             }
-            isListening = false;
-            updateMicButton(false);
+            const bar = document.getElementById("statusBar");
+            if (!bar.classList.contains('processing') && !bar.classList.contains('success')) {
+                setVoiceState('ready');
+            }
         }
 
         // ⌨️ Manual Command Submission
@@ -769,7 +825,7 @@
         function clearInput() {
             document.getElementById("text").value = "";
             document.getElementById("resultCard").style.display = 'none';
-            setStatus("Ready — tap 'Start Speaking' or type below", "ready");
+            setVoiceState('ready');
             document.getElementById("text").focus();
         }
 
@@ -815,7 +871,7 @@
         async function processCommand(command, lang) {
             console.log("PROCESSING COMMAND:", command);
             command = command.toLowerCase().trim();
-            setStatus("⏳ Processing command...", "processing");
+            setVoiceState('processing', "⏳ Processing command...");
 
             // 1. Navigation / Action shortcuts
             if (command.includes("call caretaker") || command.includes("call client") ||
@@ -824,7 +880,7 @@
                 command.includes("video call") || command.includes("start call")) {
                 speakResponse("Starting video call now", lang);
                 showToast("📹 Opening video call...");
-                setStatus("Opening video call...", "success");
+                setVoiceState('success', "Opening video call...");
                 showResult("📹 Video Call", "Connecting to video call room...");
                 setTimeout(() => { window.location.href = "video.html"; }, 1500);
                 return;
@@ -835,7 +891,7 @@
                 command.includes("family photos") || command.includes("photos")) {
                 speakResponse("Opening your family photo gallery", lang);
                 showToast("🖼️ Opening gallery...");
-                setStatus("Opening gallery...", "success");
+                setVoiceState('success', "Opening gallery...");
                 showResult("🖼️ Family Gallery", "Opening family photo memories...");
                 setTimeout(() => { window.location.href = "gallery.html"; }, 1500);
                 return;
@@ -853,7 +909,7 @@
                         const msg = "There are no active medications scheduled for today.";
                         speakResponse(msg, lang);
                         showResult("💊 Medications", msg);
-                        setStatus("Completed query.", "success");
+                        setVoiceState('success', "Completed query.");
                         return;
                     }
 
@@ -863,7 +919,7 @@
                             const msg = "You have no medications scheduled for this morning.";
                             speakResponse(msg, lang);
                             showResult("💊 Morning Medications", msg);
-                            setStatus("Completed query.", "success");
+                            setVoiceState('success', "Completed query.");
                             return;
                         }
                         const details = morningMeds.map(m => `${m.name} (${m.takenToday ? '✅ Taken' : '⏳ Pending'})`).join("<br>");
@@ -871,7 +927,7 @@
                             morningMeds.map(m => `${m.name}, ${m.takenToday ? 'already taken' : 'not taken yet'}`).join(". ");
                         speakResponse(speechText, lang);
                         showResult("💊 Morning Medications", `Scheduled for morning:`, details);
-                        setStatus("Completed query.", "success");
+                        setVoiceState('success', "Completed query.");
                         return;
                     }
 
@@ -886,13 +942,13 @@
 
                     speakResponse(answer, lang);
                     showResult("💊 Today's Medication Status", answer, detailHtml);
-                    setStatus("Completed query.", "success");
+                    setVoiceState('success', "Completed query.");
                     return;
                 } catch (e) {
                     console.error("Medication query error:", e);
                     speakResponse("Sorry, could not fetch medication details.", lang);
                     showToast("⚠ Could not fetch medications", true);
-                    setStatus("Could not fetch medications.", "error");
+                    setVoiceState('error', "Could not fetch medications.");
                     return;
                 }
             }
@@ -908,7 +964,7 @@
                         const msg = "There are no upcoming appointments scheduled.";
                         speakResponse(msg, lang);
                         showResult("📅 Next Appointment", msg);
-                        setStatus("No upcoming appointments.", "success");
+                        setVoiceState('success', "No upcoming appointments.");
                         return;
                     }
                     const next = upcoming[0];
@@ -917,13 +973,13 @@
                     const answer = `Your next appointment is with ${doc} on ${dateFormatted} at ${next.time || '10:00 AM'}.`;
                     speakResponse(answer, lang);
                     showResult("📅 Upcoming Appointment", answer, `<strong>Details:</strong> ${next.title} — ${dateFormatted} at ${next.time || '10:00 AM'}<br><strong>Location:</strong> ${next.location || next.hospital || 'Clinic'}`);
-                    setStatus("Completed query.", "success");
+                    setVoiceState('success', "Completed query.");
                     return;
                 } catch (e) {
                     console.error("Appointment query error:", e);
                     speakResponse("Could not retrieve appointments.", lang);
                     showToast("⚠ Could not retrieve appointments", true);
-                    setStatus("Could not retrieve appointments.", "error");
+                    setVoiceState('error', "Could not retrieve appointments.");
                     return;
                 }
             }
@@ -942,20 +998,20 @@
                         const answer = `Yes, ${lastSession.category} (${lastSession.duration || 10} minutes) was completed today at ${timeStr}.`;
                         speakResponse(answer, lang);
                         showResult("🏃 Exercise Status", answer, `<strong>Total Sessions:</strong> ${sessions.length}<br><strong>Latest Routine:</strong> ${lastSession.category} (${lastSession.duration || 10} min)`);
-                        setStatus("Exercise completed today.", "success");
+                        setVoiceState('success', "Exercise completed today.");
                     } else {
                         const subject = currentRole === 'client' ? "You have not" : "Client has not";
                         const answer = `${subject} completed today's exercise routine yet.`;
                         speakResponse(answer, lang);
                         showResult("🏃 Exercise Status", answer, "<em>Tip: Say 'Mark exercise completed' once done!</em>");
-                        setStatus("No exercises logged today yet.", "ready");
+                        setVoiceState('ready', "No exercises logged today yet.");
                     }
                     return;
                 } catch (e) {
                     console.error("Exercise query error:", e);
                     speakResponse("Could not check exercise progress.", lang);
                     showToast("⚠ Could not check exercise progress", true);
-                    setStatus("Could not check exercise progress.", "error");
+                    setVoiceState('error', "Could not check exercise progress.");
                     return;
                 }
             }
@@ -981,7 +1037,7 @@
                         speakResponse(msg, lang);
                         showToast(msg, true);
                         showResult("💊 Medications", msg);
-                        setStatus("No medications found.", "ready");
+                        setVoiceState('ready', "No active medications found.");
                         return;
                     }
 
@@ -1061,7 +1117,6 @@
                         if (pendingMeds.length === 1) {
                             toUpdate.push(pendingMeds[0]);
                         } else if (pendingMeds.length > 1) {
-                            // Slot by current hour: morning (6-12), afternoon (12-17), evening (17-21), night (21+)
                             const hour = new Date().getHours();
                             let slot = 'morning';
                             if (hour >= 12 && hour < 17) slot = 'afternoon';
@@ -1093,7 +1148,7 @@
                             successMsg,
                             updatedNames.map(name => `✅ <strong>${name}</strong> — Completed for today`).join("<br>")
                         );
-                        setStatus("Medication updated successfully.", "success");
+                        setVoiceState('success', "✅ Marked " + updatedNames.join(", ") + " as taken");
                     } else {
                         // All matching were already taken or no pending
                         const pendingMeds = meds.filter(m => !m.takenToday);
@@ -1102,14 +1157,14 @@
                             speakResponse(allDoneMsg, lang);
                             showToast("✅ All medications already taken");
                             showResult("💊 All Medications Taken", allDoneMsg);
-                            setStatus("All medications already taken.", "success");
+                            setVoiceState('success', "All medications already taken.");
                         } else {
                             const pendingNames = pendingMeds.map(m => m.name).join(", ");
                             const speechMsg = `Could not match that medication. Pending today: ${pendingNames}`;
                             speakResponse(speechMsg, lang);
                             showToast("⚠ Please specify medication name", true);
                             showResult("💊 Medication Match Notice", `Could not match your specific medication.`, `<strong>Pending today:</strong> ${pendingNames}`);
-                            setStatus("Specify medication name.", "ready");
+                            setVoiceState('ready', "Specify medication name.");
                         }
                     }
                     return;
@@ -1117,7 +1172,7 @@
                     console.error("Error updating medication:", error);
                     speakResponse("Failed to update medication. Please try again.", lang);
                     showToast("⚠ Failed to update medication", true);
-                    setStatus("Failed to update medication.", "error");
+                    setVoiceState('error', "Failed to update medication.");
                     return;
                 }
             }
@@ -1149,13 +1204,13 @@
                         successMsg,
                         `<strong>Title:</strong> ${parsed.title}<br><strong>Date:</strong> ${parsed.date}<br><strong>Time:</strong> ${parsed.time}`
                     );
-                    setStatus("Appointment created successfully.", "success");
+                    setVoiceState('success', "✅ Appointment scheduled with " + parsed.title);
                     return;
                 } catch (error) {
                     console.error("Error adding appointment:", error);
                     speakResponse("Failed to schedule appointment. Please try again.", lang);
                     showToast("⚠ Failed to add appointment", true);
-                    setStatus("Failed to add appointment.", "error");
+                    setVoiceState('error', "Failed to add appointment.");
                     return;
                 }
             }
@@ -1223,13 +1278,13 @@
                         successMsg,
                         `<strong>Routine:</strong> ${category}<br><strong>Duration:</strong> ${duration} minutes<br><strong>Status:</strong> Completed for today`
                     );
-                    setStatus("Exercise logged successfully.", "success");
+                    setVoiceState('success', "✅ " + category + " logged");
                     return;
                 } catch (error) {
                     console.error("Error logging exercise:", error);
                     speakResponse("Failed to log exercise. Please try again.", lang);
                     showToast("⚠ Failed to log exercise", true);
-                    setStatus("Failed to log exercise.", "error");
+                    setVoiceState('error', "Failed to log exercise.");
                     return;
                 }
             }
@@ -1250,7 +1305,7 @@
                     `• "Mark exercise completed"<br>` +
                     `• "What medicine do I have today?"`
                 );
-                setStatus("Command not recognized. Tap a quick command below.", "ready");
+                setVoiceState('ready', "Command not recognized. Tap a quick command below.");
             }
         }
 
