@@ -638,19 +638,33 @@
             });
           });
 
-        // Recent exercises
-        if (exercises.data && exercises.data.length > 0) {
-          const recentEx = exercises.data[0];
+        // Recent exercises (only show if steps or sessions were actually completed)
+        const completedExerciseLogs = (exercises.data || []).filter(ex => 
+          (ex.totalStepsCompleted && ex.totalStepsCompleted > 0) ||
+          (ex.totalMinutes && ex.totalMinutes > 0) ||
+          (ex.sessions && ex.sessions.length > 0) ||
+          (ex.completed && typeof ex.completed === 'object' && Object.keys(ex.completed).some(k => Array.isArray(ex.completed[k]) && ex.completed[k].length > 0))
+        );
+
+        if (completedExerciseLogs.length > 0) {
+          const recentEx = completedExerciseLogs[0];
           let exComment = '';
           if (recentEx.comment) {
             exComment = ` — "${recentEx.comment}"`;
+          } else if (recentEx.sessions && recentEx.sessions.length > 0) {
+            const withComment = recentEx.sessions.find(s => s.comment);
+            if (withComment) exComment = ` — "${withComment.comment}"`;
           } else if (recentEx.exercises && recentEx.exercises.length > 0) {
             const withComment = recentEx.exercises.find(e => e.comment);
             if (withComment) exComment = ` — "${withComment.comment}"`;
           }
+
+          const stepsCount = recentEx.totalStepsCompleted || (recentEx.sessions ? recentEx.sessions.reduce((acc, s) => acc + (s.steps ? s.steps.length : 0), 0) : 0);
+          const stepsText = stepsCount > 0 ? ` (${stepsCount} step${stepsCount > 1 ? 's' : ''})` : '';
+
           activities.push({
             icon: '🏃',
-            title: (userRole === 'client' ? "Caretaker completed exercise" : "Completed exercise routine") + exComment,
+            title: (userRole === 'client' ? "Caretaker completed exercise" : "Completed exercise routine") + stepsText + exComment,
             time: formatDate(recentEx.date),
             bg: '#FEF3E2'
           });
